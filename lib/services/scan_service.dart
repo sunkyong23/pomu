@@ -57,7 +57,7 @@ class ScanService {
 
     final categorizedPhotos = await _aiService.analyzePhotos(photos);
 
-    await _albumService.createAlbums();
+    await _albumService.createAlbumsForCategories(categorizedPhotos);
 
     await saveLastScan();
 

@@ -1,10 +1,12 @@
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../models/photo_category.dart';
+import 'category_mapper.dart';
 import 'vision_service.dart';
 
 class AIService {
   final VisionService _visionService = VisionService();
+  final CategoryMapper _categoryMapper = CategoryMapper();
 
   Future<Map<PhotoCategory, List<AssetEntity>>> analyzePhotos(
     List<AssetEntity> photos,
@@ -19,10 +21,9 @@ class AIService {
 
         debugPrintLabels(photo.id, labels);
 
-        result[PhotoCategory.other]!.add(photo);
+        final category = _categoryMapper.mapLabels(labels);
+        result[category]!.add(photo);
       } catch (e) {
-        // Vision이 특정 사진에서 실패해도 전체 정리는 계속 진행
-        // ignore: avoid_print
         print('⚠️ Vision failed for ${photo.id}: $e');
         result[PhotoCategory.other]!.add(photo);
       }
@@ -33,10 +34,8 @@ class AIService {
   }
 
   void debugPrintLabels(String id, List<VisionLabel> labels) {
-    // ignore: avoid_print
     print('📷 Photo $id');
     for (final label in labels) {
-      // ignore: avoid_print
       print(' - ${label.identifier}: ${label.confidence}');
     }
   }
