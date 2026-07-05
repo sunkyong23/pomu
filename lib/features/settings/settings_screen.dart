@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
+import '../duplicates/duplicate_candidates_screen.dart';
 import '../travel/create_travel_album_screen.dart';
 import 'album_name_settings_screen.dart';
 
@@ -18,6 +19,12 @@ class SettingsScreen extends StatelessWidget {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const CreateTravelAlbumScreen()));
+  }
+
+  void _openDuplicatePhotoScreen(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const DuplicateCandidatesScreen()),
+    );
   }
 
   @override
@@ -63,6 +70,14 @@ class SettingsScreen extends StatelessWidget {
             title: '여행 앨범 만들기',
             subtitle: '날짜를 선택해서 여행 사진을 앨범으로 묶어요.',
             onTap: () => _openCreateTravelAlbum(context),
+          ),
+          const SizedBox(height: PomuSpacing.md),
+
+          _SettingsCard(
+            icon: Icons.content_copy_rounded,
+            title: '중복 사진 정리',
+            subtitle: '비슷하거나 중복된 사진 후보를 확인해요.',
+            onTap: () => _openDuplicatePhotoScreen(context),
           ),
           const SizedBox(height: PomuSpacing.md),
 

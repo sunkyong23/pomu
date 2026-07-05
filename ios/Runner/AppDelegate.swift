@@ -13,7 +13,7 @@ import Photos
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
-
+PomuDuplicateHashPlugin.register(with: registrar(forPlugin: "PomuDuplicateHashPlugin")!)
     let didFinish = super.application(
       application,
       didFinishLaunchingWithOptions: launchOptions
