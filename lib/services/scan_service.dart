@@ -55,11 +55,20 @@ class ScanService {
   Future<ScanResult> startOrganizing() async {
     final photos = await loadNewPhotos();
 
+    print('🚀 정리 시작: ${photos.length}장');
+
     final categorizedPhotos = await _aiService.analyzePhotos(photos);
+
+    print('📦 분류 완료: ${categorizedPhotos.length}개 카테고리');
 
     await _albumService.createAlbumsForCategories(categorizedPhotos);
 
-    await saveLastScan();
+    if (!PhotoLibraryService.debugMode) {
+      await saveLastScan();
+      print('💾 마지막 스캔 시간 저장 완료');
+    } else {
+      print('🧪 Debug mode: 마지막 스캔 시간 저장 생략');
+    }
 
     return ScanResult(photos: photos, categorizedPhotos: categorizedPhotos);
   }

@@ -26,8 +26,11 @@ class VisionService {
     );
 
     if (bytes == null) {
+      print('⚠️ Thumbnail bytes null: ${photo.id}');
       return [];
     }
+
+    print('🖼️ Thumbnail ready: ${photo.id}, ${bytes.length} bytes');
 
     final result = await _channel.invokeMethod<List<dynamic>>(
       'analyzeImage',
@@ -35,11 +38,16 @@ class VisionService {
     );
 
     if (result == null) {
+      print('⚠️ Vision result null: ${photo.id}');
       return [];
     }
 
-    return result
+    final labels = result
         .map((item) => VisionLabel.fromMap(item as Map<dynamic, dynamic>))
         .toList();
+
+    print('🏷️ Vision returned ${labels.length} labels: ${photo.id}');
+
+    return labels;
   }
 }

@@ -15,26 +15,46 @@ class AIService {
       for (final category in PhotoCategory.values) category: [],
     };
 
-    for (final photo in photos) {
+    for (int i = 0; i < photos.length; i++) {
+      final photo = photos[i];
+
       try {
+        print('🔍 분석 시작 ${i + 1}/${photos.length}: ${photo.id}');
+
         final labels = await _visionService.analyzePhoto(photo);
 
         debugPrintLabels(photo.id, labels);
 
         final category = _categoryMapper.mapLabels(labels);
+
+        print('📁 최종 카테고리 ${i + 1}/${photos.length}: ${category.name}');
+
         result[category]!.add(photo);
       } catch (e) {
-        print('⚠️ Vision failed for ${photo.id}: $e');
+        print('⚠️ Vision failed ${i + 1}/${photos.length} for ${photo.id}: $e');
+
         result[PhotoCategory.other]!.add(photo);
       }
     }
 
     result.removeWhere((key, value) => value.isEmpty);
+
+    print('✅ AI 분석 완료');
+    for (final entry in result.entries) {
+      print(' - ${entry.key.name}: ${entry.value.length}장');
+    }
+
     return result;
   }
 
   void debugPrintLabels(String id, List<VisionLabel> labels) {
     print('📷 Photo $id');
+
+    if (labels.isEmpty) {
+      print(' - 라벨 없음');
+      return;
+    }
+
     for (final label in labels) {
       print(' - ${label.identifier}: ${label.confidence}');
     }

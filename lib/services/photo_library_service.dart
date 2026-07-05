@@ -1,8 +1,24 @@
 import 'package:photo_manager/photo_manager.dart';
 
 class PhotoLibraryService {
+  static const bool debugMode = true;
+  static const int debugLimit = 30;
+
   Future<List<AssetEntity>> loadRecentPhotos({int limit = 500}) async {
-    final albums = await PhotoManager.getAssetPathList(type: RequestType.image);
+    final filterOption = FilterOptionGroup(
+      orders: [
+        const OrderOption(
+          type: OrderOptionType.createDate,
+          asc: false, // 최신순
+        ),
+      ],
+    );
+
+    final albums = await PhotoManager.getAssetPathList(
+      type: RequestType.image,
+      onlyAll: true,
+      filterOption: filterOption,
+    );
 
     if (albums.isEmpty) {
       return [];
@@ -10,10 +26,24 @@ class PhotoLibraryService {
 
     final recentAlbum = albums.first;
 
-    return recentAlbum.getAssetListPaged(page: 0, size: limit);
+    final actualLimit = debugMode ? debugLimit : limit;
+
+    final photos = await recentAlbum.getAssetListPaged(
+      page: 0,
+      size: actualLimit,
+    );
+
+    print('📸 최근 사진 ${photos.length}장 불러옴');
+
+    return photos;
   }
 
   Future<List<AssetEntity>> loadPhotosAfter(DateTime? date) async {
+    if (debugMode) {
+      // 실기기 테스트용: lastScanAt 무시하고 항상 최근 30장
+      return loadRecentPhotos();
+    }
+
     final photos = await loadRecentPhotos(limit: 5000);
 
     if (date == null) {
