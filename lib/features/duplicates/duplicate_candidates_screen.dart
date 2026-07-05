@@ -259,6 +259,232 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
     });
   }
 
+  void _showPhotoPreview(AssetEntity asset) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black,
+      builder: (dialogContext) {
+        return GestureDetector(
+          onTap: () => Navigator.of(dialogContext).pop(),
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  Center(
+                    child: FutureBuilder(
+                      future: asset.thumbnailDataWithSize(
+                        const ThumbnailSize(1600, 1600),
+                        quality: 95,
+                      ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData || snapshot.data == null) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          );
+                        }
+
+                        return GestureDetector(
+                          onTap: () {},
+                          child: InteractiveViewer(
+                            minScale: 1,
+                            maxScale: 5,
+                            child: Image.memory(
+                              snapshot.data!,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Positioned(
+                    right: 12,
+                    top: 12,
+                    child: IconButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showDeletePreviewSheet(List<AssetEntity> deleteAssets) async {
+    final totalBytes = await _calculateTotalFileSize(deleteAssets);
+    final readableSize = _formatBytes(totalBytes);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          padding: const EdgeInsets.all(PomuSpacing.lg),
+          decoration: const BoxDecoration(
+            color: PomuColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '삭제 준비',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: PomuColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '삭제 후보 ${deleteAssets.length}장을 다시 확인해주세요.',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: PomuColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: PomuSpacing.md),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(PomuSpacing.md),
+                  decoration: BoxDecoration(
+                    color: PomuColors.primaryLight,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Text(
+                    '예상 확보 공간 $readableSize',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: PomuColors.textPrimary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: PomuSpacing.md),
+                SizedBox(
+                  height: 88,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: deleteAssets.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final asset = deleteAssets[index];
+
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: FutureBuilder(
+                          future: asset.thumbnailDataWithSize(
+                            const ThumbnailSize(180, 180),
+                          ),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData || snapshot.data == null) {
+                              return Container(
+                                width: 88,
+                                height: 88,
+                                color: PomuColors.primaryLight,
+                              );
+                            }
+
+                            return Image.memory(
+                              snapshot.data!,
+                              width: 88,
+                              height: 88,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: PomuSpacing.lg),
+                const Text(
+                  '지금은 실제 삭제하지 않고 로그만 남겨요.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: PomuColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: PomuSpacing.md),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        child: const Text('취소'),
+                      ),
+                    ),
+                    const SizedBox(width: PomuSpacing.sm),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          final ids = deleteAssets.map((e) => e.id).toList();
+
+                          debugPrint('🧪 삭제 준비 후보 로그: ${ids.join(', ')}');
+
+                          Navigator.of(sheetContext).pop();
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '삭제 후보 ${ids.length}장을 확인했어요. 아직 실제 삭제는 하지 않아요.',
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.delete_outline_rounded),
+                        label: Text('${deleteAssets.length}장 삭제 준비'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<int> _calculateTotalFileSize(List<AssetEntity> assets) async {
+    var total = 0;
+
+    for (final asset in assets) {
+      final file = await asset.file;
+      if (file == null) continue;
+
+      total += await file.length();
+    }
+
+    return total;
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes <= 0) return '계산 중';
+
+    final mb = bytes / (1024 * 1024);
+    if (mb < 1024) {
+      return '${mb.toStringAsFixed(1)}MB';
+    }
+
+    final gb = mb / 1024;
+    return '${gb.toStringAsFixed(2)}GB';
+  }
+
   @override
   Widget build(BuildContext context) {
     final keeperCount = _keeperAssetIds.length;
@@ -293,7 +519,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
           ),
           const SizedBox(height: PomuSpacing.md),
           SizedBox(
-            height: 96,
+            height: 106,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: widget.group.assets.length,
@@ -306,6 +532,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
 
                 return GestureDetector(
                   onTap: () => _toggleKeeper(asset),
+                  onLongPress: () => _showPhotoPreview(asset),
                   child: _SelectableThumbnailTile(
                     asset: asset,
                     isKeeper: isKeeper,
@@ -317,26 +544,18 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
           ),
           const SizedBox(height: PomuSpacing.md),
           OutlinedButton.icon(
-            onPressed: widget.group.assets.length <= 1
+            onPressed: selectedCount == 0
                 ? null
                 : () {
-                    final deleteIds = widget.group.assets
+                    final deleteAssets = widget.group.assets
                         .where((asset) => !_keeperAssetIds.contains(asset.id))
-                        .map((asset) => asset.id)
                         .toList();
-                    debugPrint('🧪 선택된 삭제 후보 로그: ${deleteIds.join(', ')}');
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '삭제 후보 ${deleteIds.length}장을 확인했어요. 아직 실제 삭제는 하지 않아요.',
-                        ),
-                      ),
-                    );
+                    _showDeletePreviewSheet(deleteAssets);
                   },
             icon: const Icon(Icons.delete_outline_rounded),
             label: Text(
-              selectedCount == 0 ? '삭제할 사진 없음' : '삭제 후보 $selectedCount장 확인',
+              selectedCount == 0 ? '삭제할 사진 없음' : '삭제 준비 ($selectedCount장)',
             ),
           ),
         ],
@@ -358,94 +577,77 @@ class _SelectableThumbnailTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedScale(
-      scale: isKeeper ? 1.04 : 1.0,
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
-      child: AnimatedOpacity(
-        opacity: isKeeper || isSelected ? 1 : 0.55,
-        duration: const Duration(milliseconds: 180),
-        child: Stack(
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOut,
-              padding: EdgeInsets.all(isKeeper ? 3 : 0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isKeeper ? PomuColors.primary : Colors.transparent,
-                  width: 2,
-                ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      width: 96,
+      height: 96,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: FutureBuilder(
+              future: asset.thumbnailDataWithSize(
+                const ThumbnailSize(220, 220),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: FutureBuilder(
-                  future: asset.thumbnailDataWithSize(
-                    const ThumbnailSize(220, 220),
-                  ),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data == null) {
-                      return Container(
-                        width: 96,
-                        height: 96,
-                        color: PomuColors.primaryLight,
-                      );
-                    }
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.data == null) {
+                  return Container(
+                    width: 96,
+                    height: 96,
+                    color: PomuColors.primaryLight,
+                  );
+                }
 
-                    return Image.memory(
-                      snapshot.data!,
-                      width: 96,
-                      height: 96,
-                      fit: BoxFit.cover,
-                    );
-                  },
+                return Image.memory(
+                  snapshot.data!,
+                  width: 96,
+                  height: 96,
+                  fit: BoxFit.cover,
+                );
+              },
+            ),
+          ),
+
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              color: isKeeper
+                  ? Colors.transparent
+                  : Colors.black.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isKeeper ? Colors.white : Colors.transparent,
+                width: isKeeper ? 3 : 0,
+              ),
+            ),
+          ),
+
+          Positioned(
+            left: 7,
+            top: 7,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+              decoration: BoxDecoration(
+                color: isKeeper
+                    ? PomuColors.primary
+                    : Colors.black.withValues(alpha: 0.52),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                isKeeper ? '✓ 보관' : '삭제 후보',
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
                 ),
               ),
             ),
-            Positioned(
-              left: 7,
-              top: 7,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isKeeper ? PomuColors.primary : Colors.black54,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  isKeeper ? '⭐ 보관' : '삭제 후보',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              right: 7,
-              bottom: 7,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: isKeeper ? PomuColors.primary : Colors.white70,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isKeeper ? PomuColors.primary : PomuColors.divider,
-                  ),
-                ),
-                child: Icon(
-                  isKeeper ? Icons.star_rounded : Icons.delete_outline_rounded,
-                  size: 16,
-                  color: isKeeper ? Colors.white : PomuColors.textSecondary,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
