@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
 import '../../core/widgets/buttons/pomu_primary_button.dart';
+import '../../services/album_service.dart';
 import '../../services/travel_album_builder.dart';
 
 class CreateTravelAlbumScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class CreateTravelAlbumScreen extends StatefulWidget {
 
 class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
   final TravelAlbumBuilder _builder = TravelAlbumBuilder();
+  final AlbumService _albumService = AlbumService();
   final TextEditingController _albumNameController = TextEditingController();
 
   DateTime? _startDate;
@@ -93,16 +95,12 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
         return;
       }
 
-      await _builder.createTravelAlbum(
-        albumName: albumName,
-        startDate: _startDate!,
-        endDate: _endDate!,
-      );
+      await _albumService.createAlbums([album]);
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${album.photos.length}장의 사진으로 앨범을 만들었어요')),
+        SnackBar(content: Text('${album.photos.length}개의 항목으로 앨범을 만들었어요')),
       );
 
       Navigator.of(context).pop();
@@ -143,7 +141,7 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
         padding: const EdgeInsets.all(PomuSpacing.lg),
         children: [
           const Text(
-            '여행 기간을 선택하면\n그날의 사진을 앨범으로 묶어드릴게요.',
+            '여행 기간을 선택하면\n그날의 사진과 영상을 앨범으로 묶어드릴게요.',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,

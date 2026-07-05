@@ -8,14 +8,7 @@ class PhotoLibraryService {
     int limit = 500,
     bool ignoreDebugLimit = false,
   }) async {
-    final filterOption = FilterOptionGroup(
-      orders: [
-        const OrderOption(
-          type: OrderOptionType.createDate,
-          asc: false, // 최신순
-        ),
-      ],
-    );
+    final filterOption = _createNewestFirstFilter();
 
     final albums = await PhotoManager.getAssetPathList(
       type: RequestType.image,
@@ -27,11 +20,9 @@ class PhotoLibraryService {
       return [];
     }
 
-    final recentAlbum = albums.first;
-
     final actualLimit = debugMode && !ignoreDebugLimit ? debugLimit : limit;
 
-    final photos = await recentAlbum.getAssetListPaged(
+    final photos = await albums.first.getAssetListPaged(
       page: 0,
       size: actualLimit,
     );
@@ -41,8 +32,58 @@ class PhotoLibraryService {
     return photos;
   }
 
-  Future<List<AssetEntity>> loadPhotosForDateRange({int limit = 5000}) async {
-    return loadRecentPhotos(limit: limit, ignoreDebugLimit: true);
+  Future<List<AssetEntity>> loadAssetsForDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+    int limit = 5000,
+  }) async {
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+
+    final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+
+    final filterOption = FilterOptionGroup(
+      createTimeCond: DateTimeCond(min: start, max: end),
+      orders: [
+        const OrderOption(
+          type: OrderOptionType.createDate,
+          asc: true, // 여행 앨범은 오래된 순
+        ),
+      ],
+    );
+
+    final albums = await PhotoManager.getAssetPathList(
+      type: RequestType.common,
+      onlyAll: true,
+      filterOption: filterOption,
+    );
+
+    if (albums.isEmpty) {
+      return [];
+    }
+
+    final assets = await albums.first.getAssetListPaged(page: 0, size: limit);
+
+    print(
+      '📷+🎥 기간 Asset ${assets.length}개 불러옴 / '
+      '${start.year}.${start.month}.${start.day} ~ '
+      '${end.year}.${end.month}.${end.day} / limit: $limit',
+    );
+
+    return assets;
+  }
+
+  Future<List<AssetEntity>> loadPhotosForDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+    int limit = 5000,
+  }) async {
+    final assets = await loadAssetsForDateRange(
+      startDate: startDate,
+      endDate: endDate,
+      limit: limit,
+    );
+
+    return assets.where((asset) => asset.type == AssetType.image).toList();
   }
 
   Future<List<AssetEntity>> loadPhotosAfter(DateTime? date) async {
@@ -65,5 +106,11 @@ class PhotoLibraryService {
   Future<int> getRecentPhotoCount() async {
     final photos = await loadRecentPhotos();
     return photos.length;
+  }
+
+  FilterOptionGroup _createNewestFirstFilter() {
+    return FilterOptionGroup(
+      orders: [const OrderOption(type: OrderOptionType.createDate, asc: false)],
+    );
   }
 }

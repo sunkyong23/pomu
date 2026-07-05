@@ -13,7 +13,7 @@ class TravelAlbumBuilder {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    final photos = await _loadPhotosInDateRange(
+    final assets = await _loadAssetsInDateRange(
       startDate: startDate,
       endDate: endDate,
     );
@@ -21,7 +21,7 @@ class TravelAlbumBuilder {
     return AlbumDefinition(
       id: _buildId(albumName, startDate, endDate),
       albumName: albumName,
-      photos: photos,
+      photos: assets,
       type: AlbumDefinitionType.travel,
     );
   }
@@ -40,25 +40,29 @@ class TravelAlbumBuilder {
     await _albumService.createAlbums([album]);
   }
 
-  Future<List<AssetEntity>> _loadPhotosInDateRange({
+  Future<List<AssetEntity>> _loadAssetsInDateRange({
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    final photos = await _photoLibraryService.loadPhotosForDateRange(
+    final assets = await _photoLibraryService.loadAssetsForDateRange(
+      startDate: startDate,
+      endDate: endDate,
       limit: 5000,
     );
 
-    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    assets.sort((a, b) {
+      final dateCompare = a.createDateTime.compareTo(b.createDateTime);
 
-    final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+      if (dateCompare != 0) {
+        return dateCompare;
+      }
 
-    return photos.where((photo) {
-      final createdAt = photo.createDateTime;
+      return a.id.compareTo(b.id);
+    });
 
-      return createdAt.isAtSameMomentAs(start) ||
-          createdAt.isAtSameMomentAs(end) ||
-          (createdAt.isAfter(start) && createdAt.isBefore(end));
-    }).toList();
+    print('🧭 여행 앨범 시간순 정렬 완료: ${assets.length}개');
+
+    return assets;
   }
 
   String _buildId(String albumName, DateTime startDate, DateTime endDate) {
