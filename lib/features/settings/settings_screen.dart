@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
+import '../travel/create_travel_album_screen.dart';
 import 'album_name_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -11,6 +12,12 @@ class SettingsScreen extends StatelessWidget {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const AlbumNameSettingsScreen()));
+  }
+
+  void _openCreateTravelAlbum(BuildContext context) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const CreateTravelAlbumScreen()));
   }
 
   @override
@@ -42,6 +49,7 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: PomuSpacing.xl),
+
           _SettingsCard(
             icon: Icons.photo_album_rounded,
             title: '앨범 이름 설정',
@@ -49,12 +57,22 @@ class SettingsScreen extends StatelessWidget {
             onTap: () => _openAlbumNameSettings(context),
           ),
           const SizedBox(height: PomuSpacing.md),
+
+          _SettingsCard(
+            icon: Icons.flight_takeoff_rounded,
+            title: '여행 앨범 만들기',
+            subtitle: '날짜를 선택해서 여행 사진을 앨범으로 묶어요.',
+            onTap: () => _openCreateTravelAlbum(context),
+          ),
+          const SizedBox(height: PomuSpacing.md),
+
           const _SettingsCard(
             icon: Icons.auto_awesome_rounded,
             title: 'AI 분류 설정',
             subtitle: '준비 중이에요.',
           ),
           const SizedBox(height: PomuSpacing.md),
+
           const _SettingsCard(
             icon: Icons.language_rounded,
             title: '언어',

@@ -4,7 +4,10 @@ class PhotoLibraryService {
   static const bool debugMode = true;
   static const int debugLimit = 30;
 
-  Future<List<AssetEntity>> loadRecentPhotos({int limit = 500}) async {
+  Future<List<AssetEntity>> loadRecentPhotos({
+    int limit = 500,
+    bool ignoreDebugLimit = false,
+  }) async {
     final filterOption = FilterOptionGroup(
       orders: [
         const OrderOption(
@@ -26,16 +29,20 @@ class PhotoLibraryService {
 
     final recentAlbum = albums.first;
 
-    final actualLimit = debugMode ? debugLimit : limit;
+    final actualLimit = debugMode && !ignoreDebugLimit ? debugLimit : limit;
 
     final photos = await recentAlbum.getAssetListPaged(
       page: 0,
       size: actualLimit,
     );
 
-    print('📸 최근 사진 ${photos.length}장 불러옴');
+    print('📸 사진 ${photos.length}장 불러옴 / limit: $actualLimit');
 
     return photos;
+  }
+
+  Future<List<AssetEntity>> loadPhotosForDateRange({int limit = 5000}) async {
+    return loadRecentPhotos(limit: limit, ignoreDebugLimit: true);
   }
 
   Future<List<AssetEntity>> loadPhotosAfter(DateTime? date) async {
