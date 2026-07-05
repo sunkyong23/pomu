@@ -1,12 +1,44 @@
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../models/album_definition.dart';
 import '../../models/photo_category.dart';
+import '../album_settings_service.dart';
 import 'category_mapper.dart';
 import 'vision_service.dart';
 
 class AIService {
   final VisionService _visionService = VisionService();
   final CategoryMapper _categoryMapper = CategoryMapper();
+  final AlbumSettingsService _albumSettingsService = AlbumSettingsService();
+
+  Future<List<AlbumDefinition>> analyzePhotosToAlbums(
+    List<AssetEntity> photos,
+  ) async {
+    final categorizedPhotos = await analyzePhotos(photos);
+
+    final albums = <AlbumDefinition>[];
+
+    for (final entry in categorizedPhotos.entries) {
+      final category = entry.key;
+      final categoryPhotos = entry.value;
+
+      if (categoryPhotos.isEmpty) continue;
+
+      final albumName = await _albumSettingsService.getAlbumName(category);
+
+      albums.add(
+        AlbumDefinition(
+          id: category.name,
+          albumName: albumName,
+          photos: categoryPhotos,
+          type: AlbumDefinitionType.aiCategory,
+          category: category,
+        ),
+      );
+    }
+
+    return albums;
+  }
 
   Future<Map<PhotoCategory, List<AssetEntity>>> analyzePhotos(
     List<AssetEntity> photos,

@@ -8,6 +8,8 @@ import '../../core/widgets/logo/pomu_logo.dart';
 import '../../services/scan_service.dart';
 import '../scan/scan_progress_screen.dart';
 
+import '../settings/settings_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -66,11 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  PomuLogo(size: 32),
-                  SizedBox(width: PomuSpacing.sm),
-                  Text(
+                  const PomuLogo(size: 32),
+                  const SizedBox(width: PomuSpacing.sm),
+
+                  const Text(
                     'Pomu',
                     style: TextStyle(
                       fontSize: 28,
@@ -78,6 +81,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: PomuColors.textPrimary,
                       letterSpacing: -0.5,
                     ),
+                  ),
+
+                  const Spacer(),
+
+                  IconButton(
+                    icon: const Icon(
+                      Icons.settings_rounded,
+                      color: PomuColors.textPrimary,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

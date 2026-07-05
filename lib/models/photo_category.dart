@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum PhotoCategory {
   pets,
   people,
@@ -49,6 +51,29 @@ extension PhotoCategoryLabel on PhotoCategory {
         return '영수증';
       case PhotoCategory.other:
         return '기타';
+    }
+  }
+}
+
+extension PhotoCategoryIcon on PhotoCategory {
+  IconData get icon {
+    switch (this) {
+      case PhotoCategory.pets:
+        return Icons.pets_rounded;
+      case PhotoCategory.people:
+        return Icons.people_alt_rounded;
+      case PhotoCategory.food:
+        return Icons.restaurant_rounded;
+      case PhotoCategory.landscape:
+        return Icons.landscape_rounded;
+      case PhotoCategory.documents:
+        return Icons.description_rounded;
+      case PhotoCategory.screenshots:
+        return Icons.screenshot_monitor_rounded;
+      case PhotoCategory.receipts:
+        return Icons.receipt_long_rounded;
+      case PhotoCategory.other:
+        return Icons.folder_rounded;
     }
   }
 }
