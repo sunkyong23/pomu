@@ -6,6 +6,8 @@ import '../duplicates/duplicate_candidates_screen.dart';
 import '../travel/create_travel_album_screen.dart';
 import 'album_name_settings_screen.dart';
 
+import '../../services/duplicate_history_service.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -25,6 +27,16 @@ class SettingsScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const DuplicateCandidatesScreen()),
     );
+  }
+
+  Future<void> _clearDuplicateHistory(BuildContext context) async {
+    await DuplicateHistoryService().clearResolvedGroups();
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('중복 정리 기록을 초기화했어요.')));
   }
 
   @override
@@ -78,6 +90,15 @@ class SettingsScreen extends StatelessWidget {
             title: '중복 사진 정리',
             subtitle: '비슷하거나 중복된 사진 후보를 확인해요.',
             onTap: () => _openDuplicatePhotoScreen(context),
+          ),
+
+          const SizedBox(height: PomuSpacing.md),
+
+          _SettingsCard(
+            icon: Icons.restart_alt_rounded,
+            title: '중복 정리 기록 초기화',
+            subtitle: '이미 정리한 중복 후보를 다시 볼 수 있어요.',
+            onTap: () => _clearDuplicateHistory(context),
           ),
           const SizedBox(height: PomuSpacing.md),
 

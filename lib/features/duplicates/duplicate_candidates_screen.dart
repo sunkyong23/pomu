@@ -7,6 +7,8 @@ import '../../core/widgets/buttons/pomu_primary_button.dart';
 import '../../models/duplicate_photo_group.dart';
 import '../../services/duplicate_detector_service.dart';
 
+import '../../services/duplicate_history_service.dart';
+
 class DuplicateCandidatesScreen extends StatefulWidget {
   const DuplicateCandidatesScreen({super.key});
 
@@ -17,16 +19,37 @@ class DuplicateCandidatesScreen extends StatefulWidget {
 
 class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
   final DuplicateDetectorService _service = DuplicateDetectorService();
+  final DuplicateHistoryService _historyService = DuplicateHistoryService();
 
   bool _isLoading = false;
   int _progressCurrent = 0;
   int _progressTotal = 0;
   List<DuplicatePhotoGroup> _groups = [];
 
+  final Set<String> _resolvedGroupKeys = {};
+
+  String _buildGroupKeyFromIds(List<String> ids) {
+    final sorted = [...ids]..sort();
+    return sorted.join('|');
+  }
+
+  Future<void> _resolveGroup(
+    String groupId,
+    List<String> remainingAssetIds,
+  ) async {
+    final key = _buildGroupKeyFromIds(remainingAssetIds);
+
+    setState(() {
+      _resolvedGroupKeys.add(key);
+      _groups = _groups.where((group) => group.id != groupId).toList();
+    });
+
+    await _historyService.saveResolvedGroup(key);
+  }
+
   Future<void> _scan() async {
     setState(() {
       _isLoading = true;
-      _groups = [];
       _progressCurrent = 0;
       _progressTotal = 0;
     });
@@ -44,15 +67,39 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
     );
 
     if (!mounted) return;
+    final filteredGroups = groups.where((group) {
+      final key = _buildGroupKeyFromIds(
+        group.assets.map((asset) => asset.id).toList(),
+      );
 
+      return !_resolvedGroupKeys.contains(key);
+    }).toList();
     setState(() {
-      _groups = groups;
+      _groups = filteredGroups;
       _isLoading = false;
     });
   }
 
   int get _deleteCandidateCount {
     return _groups.fold(0, (sum, group) => sum + group.deleteCandidateCount);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadResolvedGroups();
+  }
+
+  Future<void> _loadResolvedGroups() async {
+    final resolvedGroups = await _historyService.loadResolvedGroups();
+
+    if (!mounted) return;
+
+    setState(() {
+      _resolvedGroupKeys
+        ..clear()
+        ..addAll(resolvedGroups);
+    });
   }
 
   @override
@@ -99,17 +146,28 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
             onPressed: _isLoading ? null : _scan,
           ),
           const SizedBox(height: PomuSpacing.xl),
-          if (_isLoading)
-            _ProgressCard(current: _progressCurrent, total: _progressTotal)
-          else if (_groups.isNotEmpty) ...[
+
+          if (_isLoading) ...[
+            _ProgressCard(current: _progressCurrent, total: _progressTotal),
+            const SizedBox(height: PomuSpacing.lg),
+          ],
+
+          if (_groups.isNotEmpty) ...[
             _SummaryCard(
               groupCount: _groups.length,
               deleteCandidateCount: _deleteCandidateCount,
             ),
             const SizedBox(height: PomuSpacing.lg),
-            ..._groups.map((group) => _DuplicateGroupCard(group: group)),
-          ] else
-            const _EmptyCard(),
+            ..._groups.map(
+              (group) => _DuplicateGroupCard(
+                group: group,
+                onDeleted: (remainingAssetIds) =>
+                    _resolveGroup(group.id, remainingAssetIds),
+              ),
+            ),
+          ],
+
+          if (!_isLoading && _groups.isEmpty) const _EmptyCard(),
         ],
       ),
     );
@@ -139,7 +197,7 @@ class _ProgressCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '중복 사진 분석 중...',
+            '중복 사진 다시 분석 중...',
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
@@ -225,8 +283,9 @@ class _SummaryCard extends StatelessWidget {
 
 class _DuplicateGroupCard extends StatefulWidget {
   final DuplicatePhotoGroup group;
+  final void Function(List<String> remainingAssetIds) onDeleted;
 
-  const _DuplicateGroupCard({required this.group});
+  const _DuplicateGroupCard({required this.group, required this.onDeleted});
 
   @override
   State<_DuplicateGroupCard> createState() => _DuplicateGroupCardState();
@@ -321,6 +380,38 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
     );
   }
 
+  Future<void> _deleteAssets(List<AssetEntity> deleteAssets) async {
+    final ids = deleteAssets.map((asset) => asset.id).toList();
+
+    if (ids.isEmpty) return;
+
+    final deletedIds = await PhotoManager.editor.deleteWithIds(ids);
+
+    if (!mounted) return;
+
+    if (deletedIds.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('삭제가 취소되었거나 실패했어요.')));
+      return;
+    }
+
+    final remainingAssetIds = widget.group.assets
+        .where((asset) => !ids.contains(asset.id))
+        .map((asset) => asset.id)
+        .toList();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${deletedIds.length}장의 사진을 최근 삭제된 항목으로 이동했어요.')),
+    );
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (!mounted) return;
+
+    widget.onDeleted(remainingAssetIds);
+  }
+
   Future<void> _showDeletePreviewSheet(List<AssetEntity> deleteAssets) async {
     final totalBytes = await _calculateTotalFileSize(deleteAssets);
     final readableSize = _formatBytes(totalBytes);
@@ -413,7 +504,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                 ),
                 const SizedBox(height: PomuSpacing.lg),
                 const Text(
-                  '지금은 실제 삭제하지 않고 로그만 남겨요.',
+                  '삭제한 사진은 최근 삭제된 항목으로 이동해요.',
                   style: TextStyle(
                     fontSize: 13,
                     color: PomuColors.textSecondary,
@@ -431,23 +522,12 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                     const SizedBox(width: PomuSpacing.sm),
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: () {
-                          final ids = deleteAssets.map((e) => e.id).toList();
-
-                          debugPrint('🧪 삭제 준비 후보 로그: ${ids.join(', ')}');
-
+                        onPressed: () async {
                           Navigator.of(sheetContext).pop();
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '삭제 후보 ${ids.length}장을 확인했어요. 아직 실제 삭제는 하지 않아요.',
-                              ),
-                            ),
-                          );
+                          await _deleteAssets(deleteAssets);
                         },
                         icon: const Icon(Icons.delete_outline_rounded),
-                        label: Text('${deleteAssets.length}장 삭제 준비'),
+                        label: Text('${deleteAssets.length}장 삭제'),
                       ),
                     ),
                   ],
