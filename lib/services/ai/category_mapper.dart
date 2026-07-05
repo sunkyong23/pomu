@@ -4,9 +4,9 @@ import 'vision_service.dart';
 class CategoryMapper {
   static const double minConfidence = 0.15;
 
-  PhotoCategory mapLabels(List<VisionLabel> labels) {
+  List<PhotoCategory> mapLabels(List<VisionLabel> labels) {
     if (labels.isEmpty) {
-      return PhotoCategory.other;
+      return [PhotoCategory.other];
     }
 
     final normalizedLabels = labels
@@ -18,19 +18,33 @@ class CategoryMapper {
         )
         .toList();
 
-    // 1순위: 스크린샷
-    if (_hasKeyword(
+    final isScreenshot = _hasKeyword(
       normalizedLabels,
       _screenshotKeywords,
       minConfidence: 0.3,
-    )) {
-      return PhotoCategory.screenshots;
+    );
+
+    final isReceipt = _hasKeyword(
+      normalizedLabels,
+      _receiptKeywords,
+      minConfidence: 0.25,
+    );
+
+    // 스크린샷은 화면 캡처 자체가 핵심 카테고리.
+    // 캡처 안에 사람/음식이 보여도 People/Food로 오염시키지 않는다.
+    if (isScreenshot) {
+      if (isReceipt) {
+        return [PhotoCategory.screenshots, PhotoCategory.receipts];
+      }
+
+      return [PhotoCategory.screenshots];
     }
 
-    // 2순위: 영수증/청구서
-    if (_hasKeyword(normalizedLabels, _receiptKeywords, minConfidence: 0.25)) {
-      return PhotoCategory.receipts;
+    if (isReceipt) {
+      return [PhotoCategory.receipts];
     }
+
+    final categories = <PhotoCategory>{};
 
     final scores = <PhotoCategory, double>{
       PhotoCategory.pets: 0,
@@ -38,7 +52,6 @@ class CategoryMapper {
       PhotoCategory.food: 0,
       PhotoCategory.landscape: 0,
       PhotoCategory.documents: 0,
-      PhotoCategory.other: 0,
     };
 
     for (final label in normalizedLabels) {
@@ -66,17 +79,38 @@ class CategoryMapper {
       );
     }
 
-    final bestEntry = scores.entries.reduce(
-      (a, b) => a.value >= b.value ? a : b,
-    );
-
     print('🧮 Category scores: ${scores.map((k, v) => MapEntry(k.name, v))}');
 
-    if (bestEntry.value <= 0) {
-      return PhotoCategory.other;
+    for (final entry in scores.entries) {
+      if (entry.value >= _thresholdFor(entry.key)) {
+        categories.add(entry.key);
+      }
     }
 
-    return bestEntry.key;
+    if (categories.isEmpty) {
+      return [PhotoCategory.other];
+    }
+
+    return categories.toList();
+  }
+
+  double _thresholdFor(PhotoCategory category) {
+    switch (category) {
+      case PhotoCategory.pets:
+        return 0.3;
+      case PhotoCategory.people:
+        return 0.8;
+      case PhotoCategory.food:
+        return 0.45;
+      case PhotoCategory.landscape:
+        return 0.45;
+      case PhotoCategory.documents:
+        return 0.5;
+      case PhotoCategory.screenshots:
+      case PhotoCategory.receipts:
+      case PhotoCategory.other:
+        return minConfidence;
+    }
   }
 
   void _addScore(

@@ -25,14 +25,18 @@ class AIService {
 
         debugPrintLabels(photo.id, labels);
 
-        final category = _categoryMapper.mapLabels(labels);
+        final categories = _categoryMapper.mapLabels(labels);
 
-        print('📁 최종 카테고리 ${i + 1}/${photos.length}: ${category.name}');
+        print(
+          '📁 최종 카테고리 ${i + 1}/${photos.length}: '
+          '${categories.map((category) => category.name).join(', ')}',
+        );
 
-        result[category]!.add(photo);
+        for (final category in categories) {
+          result[category]!.add(photo);
+        }
       } catch (e) {
         print('⚠️ Vision failed ${i + 1}/${photos.length} for ${photo.id}: $e');
-
         result[PhotoCategory.other]!.add(photo);
       }
     }
