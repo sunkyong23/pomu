@@ -17,6 +17,7 @@ class DuplicateDetectorService {
 
   Future<List<DuplicatePhotoGroup>> findDuplicateCandidates({
     int limit = 1000,
+    void Function(int current, int total)? onProgress,
   }) async {
     final assets = await _photoLibraryService.loadRecentPhotos(
       limit: limit,
@@ -48,11 +49,18 @@ class DuplicateDetectorService {
     }
 
     final duplicateGroups = <DuplicatePhotoGroup>[];
+    final totalGroupCount = timeCandidateGroups.length;
+    var completedGroupCount = 0;
+
+    onProgress?.call(completedGroupCount, totalGroupCount);
 
     for (final candidateGroup in timeCandidateGroups) {
       final visuallySimilarGroups = await _filterVisuallySimilarGroups(
         candidateGroup,
       );
+
+      completedGroupCount++;
+      onProgress?.call(completedGroupCount, totalGroupCount);
 
       for (final group in visuallySimilarGroups) {
         if (group.length <= 1) continue;
@@ -76,7 +84,7 @@ class DuplicateDetectorService {
 
     debugPrint(
       '🧹 중복 후보 그룹 ${duplicateGroups.length}개 발견 '
-      '/ 시간 후보 ${timeCandidateGroups.length}개',
+      '/ 시간 후보 $totalGroupCount개',
     );
 
     return duplicateGroups;
