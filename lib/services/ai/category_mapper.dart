@@ -1,4 +1,5 @@
 import '../../models/photo_category.dart';
+import '../../models/photo_tag.dart';
 import 'vision_service.dart';
 
 class CategoryMapper {
@@ -9,19 +10,12 @@ class CategoryMapper {
       return [PhotoCategory.other];
     }
 
-    final normalizedLabels = labels
-        .map(
-          (label) => VisionLabel(
-            identifier: label.identifier.toLowerCase(),
-            confidence: label.confidence,
-          ),
-        )
-        .toList();
+    final normalizedLabels = _normalizeLabels(labels);
 
     final isScreenshot = _hasKeyword(
       normalizedLabels,
       _screenshotKeywords,
-      minConfidence: 0.3,
+      minConfidence: 0.9,
     );
 
     final isReceipt = _hasKeyword(
@@ -30,8 +24,6 @@ class CategoryMapper {
       minConfidence: 0.25,
     );
 
-    // 스크린샷은 화면 캡처 자체가 핵심 카테고리.
-    // 캡처 안에 사람/음식이 보여도 People/Food로 오염시키지 않는다.
     if (isScreenshot) {
       if (isReceipt) {
         return [PhotoCategory.screenshots, PhotoCategory.receipts];
@@ -94,6 +86,59 @@ class CategoryMapper {
     return categories.toList();
   }
 
+  List<PhotoTag> mapTags(List<VisionLabel> labels) {
+    if (labels.isEmpty) {
+      return [];
+    }
+
+    final normalizedLabels = _normalizeLabels(labels);
+    final tags = <PhotoTag>{};
+
+    void addIfMatched(PhotoTag tag, List<String> keywords, {double min = 0.2}) {
+      if (_hasKeyword(normalizedLabels, keywords, minConfidence: min)) {
+        tags.add(tag);
+      }
+    }
+
+    addIfMatched(PhotoTag.cat, ['cat', 'kitten', 'feline']);
+    addIfMatched(PhotoTag.dog, ['dog', 'puppy', 'canine']);
+    addIfMatched(PhotoTag.pet, ['pet', 'animal']);
+
+    addIfMatched(PhotoTag.selfie, ['selfie']);
+    addIfMatched(PhotoTag.groupPhoto, ['group', 'crowd', 'people']);
+    addIfMatched(PhotoTag.child, ['child', 'baby', 'kid']);
+
+    addIfMatched(PhotoTag.cafe, ['cafe', 'coffee shop', 'restaurant']);
+    addIfMatched(PhotoTag.dessert, ['dessert', 'cake', 'ice cream', 'pastry']);
+    addIfMatched(PhotoTag.coffee, ['coffee', 'latte', 'espresso']);
+
+    addIfMatched(PhotoTag.sea, ['sea', 'ocean', 'beach']);
+    addIfMatched(PhotoTag.mountain, ['mountain']);
+    addIfMatched(PhotoTag.sky, ['sky', 'cloud', 'sunset', 'sunrise']);
+    addIfMatched(PhotoTag.flower, ['flower', 'blossom']);
+
+    addIfMatched(PhotoTag.indoor, ['indoor', 'room', 'interior']);
+    addIfMatched(PhotoTag.bed, ['bed', 'bedroom']);
+
+    addIfMatched(PhotoTag.receipt, ['receipt', 'invoice', 'bill']);
+    addIfMatched(PhotoTag.document, ['document', 'paper', 'text', 'form']);
+
+    print('🏷️ Photo tags: ${tags.map((e) => e.name).toList()}');
+
+    return tags.toList();
+  }
+
+  List<VisionLabel> _normalizeLabels(List<VisionLabel> labels) {
+    return labels
+        .map(
+          (label) => VisionLabel(
+            identifier: label.identifier.toLowerCase(),
+            confidence: label.confidence,
+          ),
+        )
+        .toList();
+  }
+
   double _thresholdFor(PhotoCategory category) {
     switch (category) {
       case PhotoCategory.pets:
@@ -138,7 +183,12 @@ class CategoryMapper {
   }
 
   bool _matches(String label, List<String> keywords) {
-    return keywords.any(label.contains);
+    return keywords.any((keyword) {
+      return label == keyword ||
+          label.startsWith('${keyword}_') ||
+          label.endsWith('_$keyword') ||
+          label.contains('_${keyword}_');
+    });
   }
 
   static const List<String> _screenshotKeywords = ['screenshot', 'screen'];
@@ -181,7 +231,6 @@ class CategoryMapper {
     'woman',
     'child',
     'baby',
-    'adult',
     'teen',
   ];
 

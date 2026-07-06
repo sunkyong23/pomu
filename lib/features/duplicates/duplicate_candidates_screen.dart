@@ -699,7 +699,7 @@ class _SelectableThumbnailTile extends StatelessWidget {
                   : Colors.black.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isKeeper ? Colors.white : Colors.transparent,
+                color: isKeeper ? PomuColors.primary : Colors.transparent,
                 width: isKeeper ? 3 : 0,
               ),
             ),

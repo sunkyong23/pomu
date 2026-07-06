@@ -2,6 +2,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../models/album_definition.dart';
 import '../../models/photo_category.dart';
+import '../../models/photo_tag.dart';
 import '../album_settings_service.dart';
 import 'category_mapper.dart';
 import 'vision_service.dart';
@@ -58,11 +59,14 @@ class AIService {
         debugPrintLabels(photo.id, labels);
 
         final categories = _categoryMapper.mapLabels(labels);
+        final tags = _categoryMapper.mapTags(labels);
 
         print(
           '📁 최종 카테고리 ${i + 1}/${photos.length}: '
           '${categories.map((category) => category.name).join(', ')}',
         );
+
+        _debugPrintTags(photo.id, tags);
 
         for (final category in categories) {
           result[category]!.add(photo);
@@ -94,5 +98,17 @@ class AIService {
     for (final label in labels) {
       print(' - ${label.identifier}: ${label.confidence}');
     }
+  }
+
+  void _debugPrintTags(String id, List<PhotoTag> tags) {
+    if (tags.isEmpty) {
+      print('🏷️ 세부 태그 없음: $id');
+      return;
+    }
+
+    print(
+      '🏷️ 세부 태그 $id: '
+      '${tags.map((tag) => tag.koreanName).join(', ')}',
+    );
   }
 }

@@ -2,7 +2,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 class PhotoLibraryService {
   static const bool debugMode = true;
-  static const int debugLimit = 30;
+  static const int debugLimit = 1000;
 
   Future<List<AssetEntity>> loadRecentPhotos({
     int limit = 500,
@@ -88,7 +88,7 @@ class PhotoLibraryService {
 
   Future<List<AssetEntity>> loadPhotosAfter(DateTime? date) async {
     if (debugMode) {
-      // 실기기 테스트용: lastScanAt 무시하고 항상 최근 30장
+      // 실기기 테스트용: lastScanAt 무시하고 debugLimit 만큼 분석
       return loadRecentPhotos();
     }
 
