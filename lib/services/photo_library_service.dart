@@ -32,6 +32,62 @@ class PhotoLibraryService {
     return photos;
   }
 
+  Future<List<AssetEntity>> loadAllPhotos({
+    int pageSize = 500,
+    void Function(int loaded, int total)? onProgress,
+  }) async {
+    final filterOption = _createNewestFirstFilter();
+
+    final albums = await PhotoManager.getAssetPathList(
+      type: RequestType.image,
+      onlyAll: true,
+      filterOption: filterOption,
+    );
+
+    if (albums.isEmpty) {
+      return [];
+    }
+
+    final album = albums.first;
+    final totalCount = await album.assetCountAsync;
+
+    final photos = <AssetEntity>[];
+    var page = 0;
+
+    onProgress?.call(0, totalCount);
+
+    while (photos.length < totalCount) {
+      final pageAssets = await album.getAssetListPaged(
+        page: page,
+        size: pageSize,
+      );
+
+      if (pageAssets.isEmpty) {
+        break;
+      }
+
+      photos.addAll(pageAssets);
+
+      final loadedCount = photos.length > totalCount
+          ? totalCount
+          : photos.length;
+
+      onProgress?.call(loadedCount, totalCount);
+
+      print(
+        '📸 전체 사진 불러오는 중 '
+        '$loadedCount / $totalCount '
+        '(page: $page)',
+      );
+
+      page++;
+    }
+
+    print('✅ 전체 사진 ${photos.length}장 불러오기 완료');
+
+    return photos;
+  }
+
   Future<List<AssetEntity>> loadAssetsForDateRange({
     required DateTime startDate,
     required DateTime endDate,

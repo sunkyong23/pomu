@@ -8,6 +8,8 @@ import '../duplicates/duplicate_candidates_screen.dart';
 import '../scan/scan_progress_screen.dart';
 import '../settings/settings_screen.dart';
 import '../travel/create_travel_album_screen.dart';
+import '../screenshots/screenshot_cleanup_screen.dart';
+import '../videos/large_video_cleanup_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,6 +51,18 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadSummary();
   }
 
+  Future<void> _openScreenshotCleanup(BuildContext context) async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ScreenshotCleanupScreen()));
+  }
+
+  Future<void> _openLargeVideoCleanup(BuildContext context) async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const LargeVideoCleanupScreen()));
+  }
+
   Future<void> _openCreateAlbum(BuildContext context) async {
     await Navigator.of(
       context,
@@ -69,21 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
 
     await _loadSummary();
-  }
-
-  void _showComingSoon(BuildContext context, String featureName) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('$featureName 기능은 준비 중이에요.'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: PomuColors.textPrimary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-      );
   }
 
   String _formatBytes(int bytes) {
@@ -165,8 +164,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.screenshot_rounded,
                 title: '스크린샷 정리',
                 description: '오래된 스크린샷을 한곳에서 확인하고 정리해요.',
-                statusText: '준비 중',
-                onTap: () => _showComingSoon(context, '스크린샷 정리'),
+                statusText: '사용 가능',
+                onTap: () => _openScreenshotCleanup(context),
               ),
 
               const SizedBox(height: PomuSpacing.sm),
@@ -175,8 +174,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.video_library_outlined,
                 title: '큰 동영상 정리',
                 description: '저장공간을 많이 차지하는 동영상을 용량순으로 확인해요.',
-                statusText: '준비 중',
-                onTap: () => _showComingSoon(context, '큰 동영상 정리'),
+                statusText: '사용 가능',
+                onTap: () => _openLargeVideoCleanup(context),
               ),
 
               const SizedBox(height: PomuSpacing.xxl),

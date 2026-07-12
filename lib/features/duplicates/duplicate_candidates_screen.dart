@@ -64,7 +64,6 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
     });
 
     final groups = await _service.findDuplicateCandidates(
-      limit: 1000,
       onProgress: (current, total) {
         if (!mounted) return;
 

@@ -16,13 +16,9 @@ class DuplicateDetectorService {
   static const double _visionDistanceThreshold = 0.4;
 
   Future<List<DuplicatePhotoGroup>> findDuplicateCandidates({
-    int limit = 1000,
     void Function(int current, int total)? onProgress,
   }) async {
-    final assets = await _photoLibraryService.loadRecentPhotos(
-      limit: limit,
-      ignoreDebugLimit: true,
-    );
+    final assets = await _photoLibraryService.loadAllPhotos();
 
     final imageAssets = assets.where((asset) {
       return asset.type == AssetType.image;
