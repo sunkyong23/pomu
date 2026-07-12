@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
-import '../../core/widgets/buttons/pomu_primary_button.dart';
 import '../../core/widgets/logo/pomu_logo.dart';
-import '../../services/scan_service.dart';
-import '../scan/scan_progress_screen.dart';
-
+import '../duplicates/duplicate_candidates_screen.dart';
 import '../settings/settings_screen.dart';
+
+import '../../services/duplicate_summary_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,125 +16,177 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ScanService _scanService = ScanService();
+  final DuplicateSummaryService _summaryService = DuplicateSummaryService();
 
-  bool _isLoading = true;
-  int _photoCount = 0;
-  DateTime? _lastScan;
-  List<AssetEntity> _newPhotos = [];
+  DuplicateSummary _summary = const DuplicateSummary.empty();
+  bool _isLoadingSummary = true;
 
   @override
   void initState() {
     super.initState();
-    _loadPhotoCount();
+    _loadSummary();
   }
 
-  Future<void> _loadPhotoCount() async {
-    setState(() => _isLoading = true);
-
-    final newPhotos = await _scanService.loadNewPhotos();
-    final lastScan = await _scanService.getLastScan();
+  Future<void> _loadSummary() async {
+    final summary = await _summaryService.loadSummary();
 
     if (!mounted) return;
 
     setState(() {
-      _newPhotos = newPhotos;
-      _photoCount = newPhotos.length;
-      _lastScan = lastScan;
-      _isLoading = false;
+      _summary = summary;
+      _isLoadingSummary = false;
     });
   }
 
-  Future<void> _openScanProgress() async {
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const ScanProgressScreen()));
+  Future<void> _openDuplicateCleanup(BuildContext context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const DuplicateCandidatesScreen()),
+    );
 
     if (!mounted) return;
-    _loadPhotoCount();
+    await _loadSummary();
+  }
+
+  Future<void> _openSettings(BuildContext context) async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+
+    if (!mounted) return;
+
+    await _loadSummary();
+  }
+
+  void _showComingSoon(BuildContext context, String featureName) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('$featureName 기능은 준비 중이에요.'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: PomuColors.textPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      );
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes <= 0) return '0MB';
+
+    final mb = bytes / (1024 * 1024);
+
+    if (mb < 1024) {
+      return '${mb.toStringAsFixed(1)}MB';
+    }
+
+    final gb = mb / 1024;
+    return '${gb.toStringAsFixed(2)}GB';
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasNewPhotos = _photoCount > 0;
-
     return Scaffold(
       backgroundColor: PomuColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(PomuSpacing.lg),
+          padding: const EdgeInsets.fromLTRB(
+            PomuSpacing.lg,
+            PomuSpacing.md,
+            PomuSpacing.lg,
+            PomuSpacing.xxl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  const PomuLogo(size: 32),
-                  const SizedBox(width: PomuSpacing.sm),
-
-                  const Text(
-                    'Pomu',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: PomuColors.textPrimary,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  IconButton(
-                    icon: const Icon(
-                      Icons.settings_rounded,
-                      color: PomuColors.textPrimary,
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const SettingsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
+              _HomeHeader(onSettingsPressed: () => _openSettings(context)),
               const SizedBox(height: PomuSpacing.xxl),
+
               const Text(
-                '사진 정리를\n시작해볼까요?',
+                '아이폰 사진을 정리하고\n저장공간을 되찾아보세요',
                 style: TextStyle(
-                  fontSize: 34,
+                  fontSize: 32,
                   fontWeight: FontWeight.w800,
                   color: PomuColors.textPrimary,
-                  height: 1.12,
+                  height: 1.16,
                   letterSpacing: -1,
                 ),
               ),
               const SizedBox(height: PomuSpacing.md),
+
               const Text(
-                '새로 추가된 사진을 찾고,\nAI가 자동으로 분류해드릴게요.',
+                '비슷하거나 필요 없는 사진을 찾아\n안전하게 정리할 수 있어요.',
                 style: TextStyle(
                   fontSize: 16,
-                  height: 1.45,
+                  height: 1.5,
                   color: PomuColors.textSecondary,
                 ),
               ),
               const SizedBox(height: PomuSpacing.xl),
-              _StatusCard(
-                isLoading: _isLoading,
-                photoCount: _photoCount,
-                lastScan: _lastScan,
-                photos: _newPhotos,
-                onRefresh: _loadPhotoCount,
+
+              _MainCleanupCard(
+                isLoading: _isLoadingSummary,
+                summary: _summary,
+                readableSize: _formatBytes(_summary.reclaimableBytes),
+                onTap: () => _openDuplicateCleanup(context),
               ),
-              const SizedBox(height: PomuSpacing.xl),
-              PomuPrimaryButton(
-                text: hasNewPhotos ? '사진 정리 시작' : '정리할 새 사진이 없어요',
-                icon: hasNewPhotos
-                    ? Icons.auto_awesome_rounded
-                    : Icons.check_rounded,
-                onPressed: hasNewPhotos ? _openScanProgress : null,
+              const SizedBox(height: PomuSpacing.xxl),
+
+              const Text(
+                '정리 도구',
+                style: TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.w800,
+                  color: PomuColors.textPrimary,
+                  letterSpacing: -0.4,
+                ),
               ),
-              const SizedBox(height: PomuSpacing.lg),
+              const SizedBox(height: PomuSpacing.md),
+
+              _CleanupToolCard(
+                icon: Icons.blur_on_rounded,
+                title: '흐릿한 사진',
+                description: '초점이 흐리거나 흔들린 사진을 찾아요',
+                statusText: '준비 중',
+                onTap: () => _showComingSoon(context, '흐릿한 사진 정리'),
+              ),
+              const SizedBox(height: PomuSpacing.sm),
+
+              _CleanupToolCard(
+                icon: Icons.photo_camera_back_outlined,
+                title: '비슷한 사진',
+                description: '연속으로 찍은 사진 중 좋은 사진을 골라요',
+                statusText: '준비 중',
+                onTap: () => _showComingSoon(context, '비슷한 사진 정리'),
+              ),
+              const SizedBox(height: PomuSpacing.sm),
+
+              _CleanupToolCard(
+                icon: Icons.screenshot_rounded,
+                title: '오래된 스크린샷',
+                description: '오랫동안 보지 않은 스크린샷을 모아봐요',
+                statusText: '준비 중',
+                onTap: () => _showComingSoon(context, '스크린샷 정리'),
+              ),
+              const SizedBox(height: PomuSpacing.sm),
+
+              _CleanupToolCard(
+                icon: Icons.video_library_outlined,
+                title: '대용량 동영상',
+                description: '저장공간을 많이 차지하는 영상을 찾아요',
+                statusText: '준비 중',
+                onTap: () => _showComingSoon(context, '대용량 동영상 정리'),
+              ),
+              const SizedBox(height: PomuSpacing.sm),
+
+              _CleanupToolCard(
+                icon: Icons.motion_photos_on_outlined,
+                title: 'Live Photo',
+                description: '용량이 큰 Live Photo를 한곳에서 확인해요',
+                statusText: '준비 중',
+                onTap: () => _showComingSoon(context, 'Live Photo 정리'),
+              ),
             ],
           ),
         ),
@@ -145,196 +195,303 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _StatusCard extends StatelessWidget {
-  final bool isLoading;
-  final int photoCount;
-  final DateTime? lastScan;
-  final List<AssetEntity> photos;
-  final VoidCallback onRefresh;
+class _HomeHeader extends StatelessWidget {
+  final VoidCallback onSettingsPressed;
 
-  const _StatusCard({
-    required this.isLoading,
-    required this.photoCount,
-    required this.lastScan,
-    required this.photos,
-    required this.onRefresh,
-  });
-
-  String _formatDate(DateTime date) {
-    return '${date.year}.${date.month}.${date.day} '
-        '${date.hour.toString().padLeft(2, '0')}:'
-        '${date.minute.toString().padLeft(2, '0')}';
-  }
+  const _HomeHeader({required this.onSettingsPressed});
 
   @override
   Widget build(BuildContext context) {
-    final hasNewPhotos = photoCount > 0;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(PomuSpacing.lg),
-      decoration: BoxDecoration(
-        color: PomuColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: PomuColors.divider),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.045),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+    return Row(
+      children: [
+        const PomuLogo(size: 32),
+        const SizedBox(width: PomuSpacing.sm),
+        const Text(
+          'Pomu',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            color: PomuColors.textPrimary,
+            letterSpacing: -0.5,
           ),
-        ],
-      ),
-      child: isLoading
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: PomuSpacing.xl),
-                child: CircularProgressIndicator(color: PomuColors.primary),
-              ),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  hasNewPhotos
-                      ? Icons.photo_library_outlined
-                      : Icons.check_circle_rounded,
-                  color: hasNewPhotos ? PomuColors.primary : PomuColors.mint,
-                  size: 30,
-                ),
-                const SizedBox(height: PomuSpacing.md),
-                Text(
-                  hasNewPhotos ? '새 사진' : '모든 사진이 정리되어 있어요',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: PomuColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: PomuSpacing.xs),
-                Text(
-                  '$photoCount장',
-                  style: const TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.w800,
-                    color: PomuColors.textPrimary,
-                    letterSpacing: -1,
-                  ),
-                ),
-                if (photos.isNotEmpty) ...[
-                  const SizedBox(height: PomuSpacing.lg),
-                  _PhotoPreviewStrip(photos: photos),
-                ],
-                const SizedBox(height: PomuSpacing.lg),
-                const Divider(height: 1),
-                const SizedBox(height: PomuSpacing.lg),
-                const Text(
-                  '마지막 정리',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: PomuColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: PomuSpacing.xs),
-                Text(
-                  lastScan == null ? '아직 없음' : _formatDate(lastScan!),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: PomuColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: PomuSpacing.md),
-                GestureDetector(
-                  onTap: onRefresh,
-                  child: const Text(
-                    '다시 확인하기',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: PomuColors.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: PomuSpacing.xs),
-                GestureDetector(
-                  onTap: () async {
-                    await ScanService().resetLastScan();
-                    onRefresh();
-                  },
-                  child: const Text(
-                    '테스트용 초기화',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: PomuColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        ),
+        const Spacer(),
+        IconButton(
+          tooltip: '설정',
+          onPressed: onSettingsPressed,
+          icon: const Icon(
+            Icons.settings_rounded,
+            color: PomuColors.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _PhotoPreviewStrip extends StatelessWidget {
-  final List<AssetEntity> photos;
+class _MainCleanupCard extends StatelessWidget {
+  final bool isLoading;
+  final DuplicateSummary summary;
+  final String readableSize;
+  final VoidCallback onTap;
 
-  const _PhotoPreviewStrip({required this.photos});
-
+  const _MainCleanupCard({
+    required this.isLoading,
+    required this.summary,
+    required this.readableSize,
+    required this.onTap,
+  });
   @override
   Widget build(BuildContext context) {
-    final previewPhotos = photos.take(4).toList();
-    final remainingCount = photos.length - previewPhotos.length;
-
-    return SizedBox(
-      height: 72,
-      child: Row(
-        children: List.generate(previewPhotos.length, (index) {
-          final photo = previewPhotos[index];
-          final isLast = index == previewPhotos.length - 1;
-          final showRemaining = isLast && remainingCount > 0;
-
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(
-                right: index == previewPhotos.length - 1 ? 0 : 8,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(28),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.all(PomuSpacing.lg),
+          decoration: BoxDecoration(
+            color: PomuColors.primary,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: PomuColors.primary.withValues(alpha: 0.24),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    FutureBuilder(
-                      future: photo.thumbnailDataWithSize(
-                        const ThumbnailSize(220, 220),
-                      ),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == null) {
-                          return Container(color: PomuColors.primaryLight);
-                        }
-
-                        return Image.memory(snapshot.data!, fit: BoxFit.cover);
-                      },
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 54,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(18),
                     ),
-                    if (showRemaining)
-                      Container(
-                        color: Colors.black.withOpacity(0.45),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '+$remainingCount',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                        ),
+                    child: const Icon(
+                      Icons.content_copy_rounded,
+                      size: 28,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 11,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: const Text(
+                      '지금 사용 가능',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: PomuSpacing.xl),
+              const Text(
+                '중복 사진 정리',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: -0.7,
+                ),
+              ),
+              const SizedBox(height: PomuSpacing.sm),
+              if (isLoading)
+                Text(
+                  '중복 사진 정보를 불러오고 있어요.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.5,
+                    color: Colors.white.withValues(alpha: 0.86),
+                  ),
+                )
+              else if (!summary.hasScanned)
+                Text(
+                  '아직 중복 사진을 확인하지 않았어요.\n첫 검사를 시작해보세요.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.5,
+                    color: Colors.white.withValues(alpha: 0.86),
+                  ),
+                )
+              else if (summary.deleteCandidateCount == 0)
+                Text(
+                  '현재 정리할 중복 사진이 없어요.\n사진 보관함이 깔끔해요.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.5,
+                    color: Colors.white.withValues(alpha: 0.86),
+                  ),
+                )
+              else
+                Text(
+                  '중복 후보 ${summary.groupCount}개 그룹 · '
+                  '${summary.deleteCandidateCount}장\n'
+                  '약 $readableSize의 공간을 확보할 수 있어요.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 1.5,
+                    color: Colors.white.withValues(alpha: 0.86),
+                  ),
+                ),
+              const SizedBox(height: PomuSpacing.xl),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: PomuSpacing.md,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(17),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      summary.hasScanned ? '다시 분석하기' : '중복 사진 찾아보기',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: PomuColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 20,
+                      color: PomuColors.primary,
+                    ),
                   ],
                 ),
               ),
-            ),
-          );
-        }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CleanupToolCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final String statusText;
+  final VoidCallback onTap;
+
+  const _CleanupToolCard({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.statusText,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.all(PomuSpacing.md),
+          decoration: BoxDecoration(
+            color: PomuColors.surface,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: PomuColors.divider),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: PomuColors.primaryLight,
+                  borderRadius: BorderRadius.circular(17),
+                ),
+                child: Icon(icon, size: 26, color: PomuColors.primary),
+              ),
+              const SizedBox(width: PomuSpacing.md),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: PomuColors.textPrimary,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: PomuSpacing.sm),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: PomuColors.background,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            statusText,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: PomuColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        height: 1.35,
+                        color: PomuColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: PomuSpacing.sm),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: PomuColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

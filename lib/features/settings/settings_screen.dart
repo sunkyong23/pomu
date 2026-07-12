@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
+import '../../services/duplicate_history_service.dart';
+import '../../services/duplicate_summary_service.dart';
 import '../duplicates/duplicate_candidates_screen.dart';
 import '../travel/create_travel_album_screen.dart';
 import 'album_name_settings_screen.dart';
-
-import '../../services/duplicate_history_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -29,14 +29,82 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _clearDuplicateHistory(BuildContext context) async {
+  Future<void> _showClearDuplicateHistoryDialog(BuildContext context) async {
+    final shouldClear = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: PomuColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: const Text(
+            '중복 정리 기록을 초기화할까요?',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: PomuColors.textPrimary,
+            ),
+          ),
+          content: const Text(
+            '이미 처리한 중복 후보가 다음 검사에서 다시 나타날 수 있어요.\n\n'
+            '사진 자체가 삭제되거나 변경되지는 않아요.',
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.5,
+              color: PomuColors.textSecondary,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text(
+                '취소',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: PomuColors.textSecondary,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: PomuColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text(
+                '초기화',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldClear != true) return;
+
     await DuplicateHistoryService().clearResolvedGroups();
+    await DuplicateSummaryService().clearSummary();
 
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('중복 정리 기록을 초기화했어요.')));
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text('중복 정리 기록을 초기화했어요.'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: PomuColors.textPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      );
   }
 
   @override
@@ -91,14 +159,13 @@ class SettingsScreen extends StatelessWidget {
             subtitle: '비슷하거나 중복된 사진 후보를 확인해요.',
             onTap: () => _openDuplicatePhotoScreen(context),
           ),
-
           const SizedBox(height: PomuSpacing.md),
 
           _SettingsCard(
             icon: Icons.restart_alt_rounded,
             title: '중복 정리 기록 초기화',
-            subtitle: '이미 정리한 중복 후보를 다시 볼 수 있어요.',
-            onTap: () => _clearDuplicateHistory(context),
+            subtitle: '이미 처리한 중복 후보를 다시 볼 수 있어요.',
+            onTap: () => _showClearDuplicateHistoryDialog(context),
           ),
           const SizedBox(height: PomuSpacing.md),
 

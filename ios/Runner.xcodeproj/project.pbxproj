@@ -16,6 +16,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		CE57C5512FFA3338004F3C16 /* PomuDuplicateHashPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE57C5502FFA3338004F3C16 /* PomuDuplicateHashPlugin.swift */; };
+		CEB7A44530035E6900523E46 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB7A44430035E6900523E46 /* StoreKit.framework */; };
 		D20AE9B9D6A91A821E9C9141 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F130F15886D25D60105DF26 /* Pods_RunnerTests.framework */; };
 		E684BFD24325934036D600EA /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57F2A4B311E740B10C3CF786 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
@@ -68,6 +69,8 @@
 		B1C9B671753EA56039BD9B6A /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		B76A9A44C7756F7D35913CE2 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		CE57C5502FFA3338004F3C16 /* PomuDuplicateHashPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomuDuplicateHashPlugin.swift; sourceTree = "<group>"; };
+		CEB7A44330035E5100523E46 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		CEB7A44430035E6900523E46 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		F781C630D8B432F89ABEE1DA /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -85,6 +88,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E684BFD24325934036D600EA /* Pods_Runner.framework in Frameworks */,
+				CEB7A44530035E6900523E46 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,6 +138,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				CEB7A44330035E5100523E46 /* Runner.entitlements */,
 				CE57C5502FFA3338004F3C16 /* PomuDuplicateHashPlugin.swift */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
@@ -151,6 +156,7 @@
 		CDD8D8615C6CD823F75DC843 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CEB7A44430035E6900523E46 /* StoreKit.framework */,
 				57F2A4B311E740B10C3CF786 /* Pods_Runner.framework */,
 				7F130F15886D25D60105DF26 /* Pods_RunnerTests.framework */,
 			);
@@ -495,6 +501,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 87CW4LR687;
 				ENABLE_BITCODE = NO;
@@ -503,8 +512,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.pomu;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sunkyung.pomu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -678,6 +688,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 87CW4LR687;
 				ENABLE_BITCODE = NO;
@@ -686,8 +699,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.pomu;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sunkyung.pomu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -701,6 +715,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 87CW4LR687;
 				ENABLE_BITCODE = NO;
@@ -709,8 +726,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.pomu;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sunkyung.pomu;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
