@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
 import '../../core/widgets/logo/pomu_logo.dart';
-import '../duplicates/duplicate_candidates_screen.dart';
-import '../settings/settings_screen.dart';
-
 import '../../services/duplicate_summary_service.dart';
+import '../duplicates/duplicate_candidates_screen.dart';
+import '../scan/scan_progress_screen.dart';
+import '../settings/settings_screen.dart';
+import '../travel/create_travel_album_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,7 +45,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (!mounted) return;
+
     await _loadSummary();
+  }
+
+  Future<void> _openCreateAlbum(BuildContext context) async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const CreateTravelAlbumScreen()));
+  }
+
+  Future<void> _openAutoClassification(BuildContext context) async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ScanProgressScreen()));
   }
 
   Future<void> _openSettings(BuildContext context) async {
@@ -82,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final gb = mb / 1024;
+
     return '${gb.toStringAsFixed(2)}GB';
   }
 
@@ -101,10 +116,12 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _HomeHeader(onSettingsPressed: () => _openSettings(context)),
+
               const SizedBox(height: PomuSpacing.xxl),
 
               const Text(
-                '아이폰 사진을 정리하고\n저장공간을 되찾아보세요',
+                '아이폰 사진을 정리하고\n'
+                '저장공간을 되찾아보세요',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
@@ -113,17 +130,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   letterSpacing: -1,
                 ),
               ),
+
               const SizedBox(height: PomuSpacing.md),
 
               const Text(
-                '비슷하거나 필요 없는 사진을 찾아\n안전하게 정리할 수 있어요.',
+                '중복 사진과 불필요한 파일을 찾아\n'
+                '안전하게 정리할 수 있어요.',
                 style: TextStyle(
                   fontSize: 16,
                   height: 1.5,
                   color: PomuColors.textSecondary,
                 ),
               ),
-              const SizedBox(height: PomuSpacing.xl),
+
+              const SizedBox(height: 14),
 
               _MainCleanupCard(
                 isLoading: _isLoadingSummary,
@@ -131,61 +151,59 @@ class _HomeScreenState extends State<HomeScreen> {
                 readableSize: _formatBytes(_summary.reclaimableBytes),
                 onTap: () => _openDuplicateCleanup(context),
               ),
+
               const SizedBox(height: PomuSpacing.xxl),
 
-              const Text(
-                '정리 도구',
-                style: TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.w800,
-                  color: PomuColors.textPrimary,
-                  letterSpacing: -0.4,
-                ),
+              const _SectionTitle(
+                title: '정리하기',
+                subtitle: '저장공간을 차지하는 사진과 영상을 확인해요.',
               ),
+
               const SizedBox(height: PomuSpacing.md),
 
-              _CleanupToolCard(
-                icon: Icons.blur_on_rounded,
-                title: '흐릿한 사진',
-                description: '초점이 흐리거나 흔들린 사진을 찾아요',
-                statusText: '준비 중',
-                onTap: () => _showComingSoon(context, '흐릿한 사진 정리'),
-              ),
-              const SizedBox(height: PomuSpacing.sm),
-
-              _CleanupToolCard(
-                icon: Icons.photo_camera_back_outlined,
-                title: '비슷한 사진',
-                description: '연속으로 찍은 사진 중 좋은 사진을 골라요',
-                statusText: '준비 중',
-                onTap: () => _showComingSoon(context, '비슷한 사진 정리'),
-              ),
-              const SizedBox(height: PomuSpacing.sm),
-
-              _CleanupToolCard(
+              _FeatureCard(
                 icon: Icons.screenshot_rounded,
-                title: '오래된 스크린샷',
-                description: '오랫동안 보지 않은 스크린샷을 모아봐요',
+                title: '스크린샷 정리',
+                description: '오래된 스크린샷을 한곳에서 확인하고 정리해요.',
                 statusText: '준비 중',
                 onTap: () => _showComingSoon(context, '스크린샷 정리'),
               ),
+
               const SizedBox(height: PomuSpacing.sm),
 
-              _CleanupToolCard(
+              _FeatureCard(
                 icon: Icons.video_library_outlined,
-                title: '대용량 동영상',
-                description: '저장공간을 많이 차지하는 영상을 찾아요',
+                title: '큰 동영상 정리',
+                description: '저장공간을 많이 차지하는 동영상을 용량순으로 확인해요.',
                 statusText: '준비 중',
-                onTap: () => _showComingSoon(context, '대용량 동영상 정리'),
+                onTap: () => _showComingSoon(context, '큰 동영상 정리'),
               ),
+
+              const SizedBox(height: PomuSpacing.xxl),
+
+              const _SectionTitle(
+                title: '앨범 만들기',
+                subtitle: '사진을 원하는 기준으로 묶어 앨범을 만들어요.',
+              ),
+
+              const SizedBox(height: PomuSpacing.md),
+
+              _FeatureCard(
+                icon: Icons.date_range_rounded,
+                title: '기간·시간별 앨범 만들기',
+                description: '원하는 날짜와 시간대를 골라 앨범을 만들어요.',
+                statusText: '사용 가능',
+                onTap: () => _openCreateAlbum(context),
+              ),
+
               const SizedBox(height: PomuSpacing.sm),
 
-              _CleanupToolCard(
-                icon: Icons.motion_photos_on_outlined,
-                title: 'Live Photo',
-                description: '용량이 큰 Live Photo를 한곳에서 확인해요',
-                statusText: '준비 중',
-                onTap: () => _showComingSoon(context, 'Live Photo 정리'),
+              _FeatureCard(
+                icon: Icons.auto_awesome_rounded,
+                title: '사진 자동 분류',
+                description: '사진을 분석해 주제별 앨범으로 정리해요.',
+                statusText: 'Beta',
+                onTap: () => _openAutoClassification(context),
               ),
             ],
           ),
@@ -229,6 +247,40 @@ class _HomeHeader extends StatelessWidget {
   }
 }
 
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const _SectionTitle({required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 21,
+            fontWeight: FontWeight.w800,
+            color: PomuColors.textPrimary,
+            letterSpacing: -0.4,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          subtitle,
+          style: const TextStyle(
+            fontSize: 13,
+            height: 1.4,
+            color: PomuColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _MainCleanupCard extends StatelessWidget {
   final bool isLoading;
   final DuplicateSummary summary;
@@ -241,6 +293,10 @@ class _MainCleanupCard extends StatelessWidget {
     required this.readableSize,
     required this.onTap,
   });
+
+  bool get _hasCandidates =>
+      summary.hasScanned && summary.deleteCandidateCount > 0;
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -250,7 +306,7 @@ class _MainCleanupCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         child: Ink(
           width: double.infinity,
-          padding: const EdgeInsets.all(PomuSpacing.lg),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: PomuColors.primary,
             borderRadius: BorderRadius.circular(28),
@@ -266,22 +322,23 @@ class _MainCleanupCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 54,
-                    height: 54,
+                    width: 46,
+                    height: 46,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: const Icon(
                       Icons.content_copy_rounded,
-                      size: 28,
+                      size: 24,
                       color: Colors.white,
                     ),
                   ),
+
                   const Spacer(),
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 11,
@@ -291,9 +348,9 @@ class _MainCleanupCard extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: const Text(
-                      '지금 사용 가능',
-                      style: TextStyle(
+                    child: Text(
+                      summary.hasScanned ? '분석 완료' : '지금 사용 가능',
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -302,61 +359,52 @@ class _MainCleanupCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: PomuSpacing.xl),
+
+              const SizedBox(height: 16),
+
               const Text(
                 '중복 사진 정리',
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
-                  letterSpacing: -0.7,
+                  letterSpacing: -0.6,
                 ),
               ),
-              const SizedBox(height: PomuSpacing.sm),
-              if (isLoading)
-                Text(
-                  '중복 사진 정보를 불러오고 있어요.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    height: 1.5,
-                    color: Colors.white.withValues(alpha: 0.86),
-                  ),
-                )
-              else if (!summary.hasScanned)
-                Text(
-                  '아직 중복 사진을 확인하지 않았어요.\n첫 검사를 시작해보세요.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    height: 1.5,
-                    color: Colors.white.withValues(alpha: 0.86),
-                  ),
-                )
-              else if (summary.deleteCandidateCount == 0)
-                Text(
-                  '현재 정리할 중복 사진이 없어요.\n사진 보관함이 깔끔해요.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    height: 1.5,
-                    color: Colors.white.withValues(alpha: 0.86),
-                  ),
-                )
-              else
-                Text(
-                  '중복 후보 ${summary.groupCount}개 그룹 · '
-                  '${summary.deleteCandidateCount}장\n'
-                  '약 $readableSize의 공간을 확보할 수 있어요.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    height: 1.5,
-                    color: Colors.white.withValues(alpha: 0.86),
-                  ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                _buildDescription(),
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.35,
+                  color: Colors.white.withValues(alpha: 0.82),
                 ),
-              const SizedBox(height: PomuSpacing.xl),
+              ),
+
+              const SizedBox(height: 16),
+
+              if (isLoading)
+                const _DashboardLoading()
+              else if (!summary.hasScanned)
+                const _BeforeScanDashboard()
+              else if (!_hasCandidates)
+                const _CleanDashboard()
+              else
+                _CandidateDashboard(
+                  readableSize: readableSize,
+                  groupCount: summary.groupCount,
+                  deleteCandidateCount: summary.deleteCandidateCount,
+                ),
+
+              const SizedBox(height: 14),
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
                   horizontal: PomuSpacing.md,
-                  vertical: 14,
+                  vertical: 10,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -366,9 +414,9 @@ class _MainCleanupCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      summary.hasScanned ? '다시 분석하기' : '중복 사진 찾아보기',
+                      _buildButtonText(),
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w800,
                         color: PomuColors.primary,
                       ),
@@ -376,7 +424,7 @@ class _MainCleanupCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     const Icon(
                       Icons.arrow_forward_rounded,
-                      size: 20,
+                      size: 18,
                       color: PomuColors.primary,
                     ),
                   ],
@@ -388,22 +436,220 @@ class _MainCleanupCard extends StatelessWidget {
       ),
     );
   }
+
+  String _buildDescription() {
+    if (isLoading) {
+      return '중복 사진 정보를 불러오고 있어요.';
+    }
+
+    if (!summary.hasScanned) {
+      return '사진 보관함에서 중복 사진을 찾아\n확보할 수 있는 공간을 확인해보세요.';
+    }
+
+    if (!_hasCandidates) {
+      return '현재 정리할 중복 사진이 없어요.\n사진 보관함이 깔끔해요.';
+    }
+
+    return '비슷한 사진을 찾아 정리해요.';
+  }
+
+  String _buildButtonText() {
+    if (!summary.hasScanned) {
+      return '중복 사진 찾아보기';
+    }
+
+    if (!_hasCandidates) {
+      return '다시 검사하기';
+    }
+
+    return '중복 사진 정리하기';
+  }
 }
 
-class _CleanupToolCard extends StatelessWidget {
+class _DashboardLoading extends StatelessWidget {
+  const _DashboardLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 88,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: const CircularProgressIndicator(
+        color: Colors.white,
+        strokeWidth: 2.5,
+      ),
+    );
+  }
+}
+
+class _BeforeScanDashboard extends StatelessWidget {
+  const _BeforeScanDashboard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: PomuSpacing.lg,
+        vertical: 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: const Column(
+        children: [
+          Icon(Icons.search_rounded, size: 34, color: Colors.white),
+          SizedBox(height: PomuSpacing.sm),
+          Text(
+            '첫 검사를 시작해보세요',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 5),
+          Text(
+            '사진을 삭제하지 않고\n중복 후보만 먼저 찾아드려요.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, height: 1.45, color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CleanDashboard extends StatelessWidget {
+  const _CleanDashboard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: PomuSpacing.lg,
+        vertical: 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: const Column(
+        children: [
+          Icon(Icons.check_circle_rounded, size: 38, color: Colors.white),
+          SizedBox(height: PomuSpacing.sm),
+          Text(
+            '정리할 중복 사진이 없어요',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 5),
+          Text(
+            '지금 사진 보관함은 깔끔한 상태예요.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CandidateDashboard extends StatelessWidget {
+  final String readableSize;
+  final int groupCount;
+  final int deleteCandidateCount;
+
+  const _CandidateDashboard({
+    required this.readableSize,
+    required this.groupCount,
+    required this.deleteCandidateCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: PomuSpacing.lg,
+        vertical: 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.13),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: readableSize,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const TextSpan(text: '\n'),
+                const TextSpan(
+                  text: '확보 가능',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    height: 1.25,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            '$groupCount개 그룹 · 삭제 후보 $deleteCandidateCount장',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.82),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeatureCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String description;
   final String statusText;
   final VoidCallback onTap;
 
-  const _CleanupToolCard({
+  const _FeatureCard({
     required this.icon,
     required this.title,
     required this.description,
     required this.statusText,
     required this.onTap,
   });
+
+  bool get _isAvailable => statusText == '사용 가능' || statusText == 'Beta';
 
   @override
   Widget build(BuildContext context) {
@@ -431,6 +677,7 @@ class _CleanupToolCard extends StatelessWidget {
                 ),
                 child: Icon(icon, size: 26, color: PomuColors.primary),
               ),
+
               const SizedBox(width: PomuSpacing.md),
 
               Expanded(
@@ -450,28 +697,36 @@ class _CleanupToolCard extends StatelessWidget {
                             ),
                           ),
                         ),
+
                         const SizedBox(width: PomuSpacing.sm),
+
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: PomuColors.background,
+                            color: _isAvailable
+                                ? PomuColors.primaryLight
+                                : PomuColors.background,
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
                             statusText,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: PomuColors.textSecondary,
+                              color: _isAvailable
+                                  ? PomuColors.primary
+                                  : PomuColors.textSecondary,
                             ),
                           ),
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 5),
+
                     Text(
                       description,
                       style: const TextStyle(
@@ -485,6 +740,7 @@ class _CleanupToolCard extends StatelessWidget {
               ),
 
               const SizedBox(width: PomuSpacing.sm),
+
               const Icon(
                 Icons.chevron_right_rounded,
                 color: PomuColors.textSecondary,
