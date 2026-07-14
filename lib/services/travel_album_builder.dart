@@ -60,7 +60,7 @@ class TravelAlbumBuilder {
       return a.id.compareTo(b.id);
     });
 
-    print('🧭 여행 앨범 시간순 정렬 완료: ${assets.length}개');
+    print('🕒 기간·시간 앨범 정렬 완료: ${assets.length}개');
 
     return assets;
   }
@@ -69,9 +69,17 @@ class TravelAlbumBuilder {
     final safeName = albumName
         .trim()
         .replaceAll(RegExp(r'\s+'), '_')
-        .replaceAll(RegExp(r'[^a-zA-Z0-9가-힣_ -]'), '');
+        .replaceAll(RegExp(r'[^a-zA-Z0-9가-힣_-]'), '');
 
-    return 'travel_${startDate.year}${startDate.month.toString().padLeft(2, '0')}${startDate.day.toString().padLeft(2, '0')}_'
-        '${endDate.year}${endDate.month.toString().padLeft(2, '0')}${endDate.day.toString().padLeft(2, '0')}_$safeName';
+    String formatDateTime(DateTime date) {
+      return '${date.year}'
+          '${date.month.toString().padLeft(2, '0')}'
+          '${date.day.toString().padLeft(2, '0')}'
+          '${date.hour.toString().padLeft(2, '0')}'
+          '${date.minute.toString().padLeft(2, '0')}';
+    }
+
+    return 'travel_${formatDateTime(startDate)}_'
+        '${formatDateTime(endDate)}_$safeName';
   }
 }

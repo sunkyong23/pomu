@@ -85,20 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadSummary();
   }
 
-  String _formatBytes(int bytes) {
-    if (bytes <= 0) return '0MB';
-
-    final mb = bytes / (1024 * 1024);
-
-    if (mb < 1024) {
-      return '${mb.toStringAsFixed(1)}MB';
-    }
-
-    final gb = mb / 1024;
-
-    return '${gb.toStringAsFixed(2)}GB';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,7 +133,6 @@ class _HomeScreenState extends State<HomeScreen> {
               _MainCleanupCard(
                 isLoading: _isLoadingSummary,
                 summary: _summary,
-                readableSize: _formatBytes(_summary.reclaimableBytes),
                 onTap: () => _openDuplicateCleanup(context),
               ),
 
@@ -283,13 +268,11 @@ class _SectionTitle extends StatelessWidget {
 class _MainCleanupCard extends StatelessWidget {
   final bool isLoading;
   final DuplicateSummary summary;
-  final String readableSize;
   final VoidCallback onTap;
 
   const _MainCleanupCard({
     required this.isLoading,
     required this.summary,
-    required this.readableSize,
     required this.onTap,
   });
 
@@ -392,7 +375,6 @@ class _MainCleanupCard extends StatelessWidget {
                 const _CleanDashboard()
               else
                 _CandidateDashboard(
-                  readableSize: readableSize,
                   groupCount: summary.groupCount,
                   deleteCandidateCount: summary.deleteCandidateCount,
                 ),
@@ -565,12 +547,10 @@ class _CleanDashboard extends StatelessWidget {
 }
 
 class _CandidateDashboard extends StatelessWidget {
-  final String readableSize;
   final int groupCount;
   final int deleteCandidateCount;
 
   const _CandidateDashboard({
-    required this.readableSize,
     required this.groupCount,
     required this.deleteCandidateCount,
   });
@@ -591,40 +571,31 @@ class _CandidateDashboard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: readableSize,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                const TextSpan(text: '\n'),
-                const TextSpan(
-                  text: '확보 가능',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    height: 1.25,
-                  ),
-                ),
-              ],
+          Text(
+            '$groupCount개 그룹',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: -0.3,
             ),
           ),
-
-          const SizedBox(height: 10),
-
+          const SizedBox(height: 4),
           Text(
-            '$groupCount개 그룹 · 삭제 후보 $deleteCandidateCount장',
+            '삭제 후보 $deleteCandidateCount장',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withValues(alpha: 0.82),
+              color: Colors.white.withValues(alpha: 0.88),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            '확보 용량은 삭제 전에 확인할 수 있어요.',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white.withValues(alpha: 0.72),
             ),
           ),
         ],

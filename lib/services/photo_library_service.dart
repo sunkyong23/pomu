@@ -93,18 +93,18 @@ class PhotoLibraryService {
     required DateTime endDate,
     int limit = 5000,
   }) async {
-    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    if (endDate.isBefore(startDate)) {
+      print(
+        '⚠️ 잘못된 기간·시간 범위: '
+        '${_formatDateTime(startDate)} ~ ${_formatDateTime(endDate)}',
+      );
 
-    final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+      return [];
+    }
 
     final filterOption = FilterOptionGroup(
-      createTimeCond: DateTimeCond(min: start, max: end),
-      orders: [
-        const OrderOption(
-          type: OrderOptionType.createDate,
-          asc: true, // 여행 앨범은 오래된 순
-        ),
-      ],
+      createTimeCond: DateTimeCond(min: startDate, max: endDate),
+      orders: [const OrderOption(type: OrderOptionType.createDate, asc: true)],
     );
 
     final albums = await PhotoManager.getAssetPathList(
@@ -114,15 +114,21 @@ class PhotoLibraryService {
     );
 
     if (albums.isEmpty) {
+      print(
+        '📭 선택한 기간·시간에 사진이나 영상이 없어요 / '
+        '${_formatDateTime(startDate)} ~ ${_formatDateTime(endDate)}',
+      );
+
       return [];
     }
 
     final assets = await albums.first.getAssetListPaged(page: 0, size: limit);
 
     print(
-      '📷+🎥 기간 Asset ${assets.length}개 불러옴 / '
-      '${start.year}.${start.month}.${start.day} ~ '
-      '${end.year}.${end.month}.${end.day} / limit: $limit',
+      '📷+🎥 기간·시간 Asset ${assets.length}개 불러옴 / '
+      '${_formatDateTime(startDate)} ~ '
+      '${_formatDateTime(endDate)} / '
+      'limit: $limit',
     );
 
     return assets;
@@ -144,7 +150,8 @@ class PhotoLibraryService {
 
   Future<List<AssetEntity>> loadPhotosAfter(DateTime? date) async {
     if (debugMode) {
-      // 실기기 테스트용: lastScanAt 무시하고 debugLimit 만큼 분석
+      // 실기기 테스트용:
+      // lastScanAt을 무시하고 debugLimit만큼 분석해요.
       return loadRecentPhotos();
     }
 
@@ -168,5 +175,14 @@ class PhotoLibraryService {
     return FilterOptionGroup(
       orders: [const OrderOption(type: OrderOptionType.createDate, asc: false)],
     );
+  }
+
+  String _formatDateTime(DateTime date) {
+    return '${date.year}.'
+        '${date.month.toString().padLeft(2, '0')}.'
+        '${date.day.toString().padLeft(2, '0')} '
+        '${date.hour.toString().padLeft(2, '0')}:'
+        '${date.minute.toString().padLeft(2, '0')}:'
+        '${date.second.toString().padLeft(2, '0')}';
   }
 }
