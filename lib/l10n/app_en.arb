@@ -332,5 +332,130 @@
   "screenshotLimitedAccessDescription": "Pomu can access only selected photos. Add more photos to view all screenshots.",
   "addPhotos": "Add",
   "screenshotEmptyTitle": "No Screenshots to Clean Up",
-  "screenshotEmptyDescription": "There are no screenshots in your library,\nor none are currently accessible."
+  "screenshotEmptyDescription": "There are no screenshots in your library,\nor none are currently accessible.",
+  "videoLoadFailed": "Couldn’t load your videos.",
+  "videoDeletedSuccess": "Moved {count} videos to Recently Deleted.",
+  "videoDeleteFailed": "Couldn’t delete the videos.",
+  "videoLoadingOriginal": "Loading the video.",
+  "videoOriginalLoadFailed": "Couldn’t load the original video file.",
+  "videoDeletePreparationTitle": "Review Video Deletion",
+  "videoDeleteReview": "Review the {count} selected videos.",
+  "videoMoveToRecentlyDeleted": "Deleted videos will be moved to Recently Deleted in Photos.",
+  "videoDeleteCount": "Delete {count}",
+  "videoSelectToDelete": "Select videos to delete",
+  "videoDeleteSelectedWithSize": "Delete {count} · {size}",
+  "videoFindingLargeVideos": "Finding Large Videos",
+  "videoCheckingSizes": "Checking sizes: {current} / {total}",
+  "videoLoadingList": "Loading your video list.",
+  "videoMayTakeTime": "This may take longer if you have many videos or they’re stored in iCloud.",
+  "videoSummary": "{count} videos · {size}",
+  "videoSortedBySize": "Sorted from largest to smallest.",
+  "videoSelectedSummary": "{count} selected · {size} reclaimable",
+  "videoLongPressPreview": "Press and hold to preview",
+  "videoEmptyTitle": "No Videos to Clean Up",
+  "videoEmptyDescription": "There are currently no accessible videos.",
+  "videoPermissionDescription": "Allow access to your photo library\nto review and clean up large videos.",
+  "videoPreparing": "Preparing the video.",
+  "videoPlaybackFailed": "Couldn’t play the video.",
+  "videoPlayerUnavailable": "Couldn’t prepare the video player.",
+  "videoSizeUnavailable": "Couldn’t determine the video dimensions.",
+  "@videoDeletedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoDeleteReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoDeleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoDeleteSelectedWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@videoCheckingSizes": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@videoSelectedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "select": "Select",
+  "travelPickStartTime": "Select Start Time",
+  "travelPickEndTime": "Select End Time",
+  "travelPickDate": "Select Date",
+  "travelEnterAlbumName": "Enter an album name.",
+  "travelSelectStartAndEndDate": "Select both a start date and an end date.",
+  "travelEndMustBeAfterStart": "The end date and time must be later than the start.",
+  "travelNoAssetsInRange": "There are no photos or videos in the selected date and time range.",
+  "travelAlbumCreated": "Created an album with {count} items.",
+  "travelAlbumCreateError": "Something went wrong while creating the album: {error}",
+  "travelSelectDate": "Select Date",
+  "travelAlbumTitle": "Date & Time Album",
+  "travelAlbumHeroTitle": "Gather photos and videos\nfrom a date and time range.",
+  "travelAlbumNameLabel": "Album Name",
+  "travelAlbumNameHint": "e.g. Jeju Trip, Sports Day, Concert",
+  "travelStartSectionTitle": "Start",
+  "travelStartDate": "Start Date",
+  "travelStartTime": "Start Time",
+  "travelEndSectionTitle": "End",
+  "travelEndDate": "End Date",
+  "travelEndTime": "End Time",
+  "travelCreatingAlbum": "Creating Album...",
+  "travelCreateAlbum": "Create Album",
+  "@travelAlbumCreated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@travelAlbumCreateError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "travelInfoDescription": "Items are found using the capture date and time stored in Photos."
 }

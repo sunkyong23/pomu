@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../models/album_definition.dart';
@@ -60,7 +61,7 @@ class TravelAlbumBuilder {
       return a.id.compareTo(b.id);
     });
 
-    print('🕒 기간·시간 앨범 정렬 완료: ${assets.length}개');
+    debugPrint('🕒 기간·시간 앨범 정렬 완료: ${assets.length}개');
 
     return assets;
   }

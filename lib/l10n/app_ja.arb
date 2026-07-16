@@ -332,5 +332,130 @@
   "screenshotLimitedAccessDescription": "選択した写真のみにアクセスしています。すべてのスクリーンショットを表示するには、写真を追加してください。",
   "addPhotos": "追加",
   "screenshotEmptyTitle": "整理するスクリーンショットはありません",
-  "screenshotEmptyDescription": "写真ライブラリにスクリーンショットがないか、\n現在アクセスできるスクリーンショットがありません。"
+  "screenshotEmptyDescription": "写真ライブラリにスクリーンショットがないか、\n現在アクセスできるスクリーンショットがありません。",
+  "videoLoadFailed": "動画を読み込めませんでした。",
+  "videoDeletedSuccess": "{count}件の動画を「最近削除した項目」に移動しました。",
+  "videoDeleteFailed": "動画を削除できませんでした。",
+  "videoLoadingOriginal": "動画を読み込んでいます。",
+  "videoOriginalLoadFailed": "動画の元ファイルを読み込めませんでした。",
+  "videoDeletePreparationTitle": "動画削除の確認",
+  "videoDeleteReview": "選択した動画{count}件を確認してください。",
+  "videoMoveToRecentlyDeleted": "削除した動画は写真アプリの「最近削除した項目」に移動します。",
+  "videoDeleteCount": "{count}件を削除",
+  "videoSelectToDelete": "削除する動画を選択してください",
+  "videoDeleteSelectedWithSize": "{count}件を削除・{size}",
+  "videoFindingLargeVideos": "大きな動画を探しています",
+  "videoCheckingSizes": "{current} / {total}件の容量を確認中",
+  "videoLoadingList": "動画一覧を読み込んでいます。",
+  "videoMayTakeTime": "動画が多い場合やiCloudに保存されている場合は時間がかかることがあります。",
+  "videoSummary": "動画{count}件・{size}",
+  "videoSortedBySize": "容量の大きい順に表示しています。",
+  "videoSelectedSummary": "{count}件選択・{size}解放可能",
+  "videoLongPressPreview": "長押ししてプレビュー",
+  "videoEmptyTitle": "整理する動画はありません",
+  "videoEmptyDescription": "現在アクセスできる動画はありません。",
+  "videoPermissionDescription": "大きな動画を確認・整理するには\n写真ライブラリへのアクセスを許可してください。",
+  "videoPreparing": "動画を準備しています。",
+  "videoPlaybackFailed": "動画を再生できませんでした。",
+  "videoPlayerUnavailable": "動画プレーヤーを準備できませんでした。",
+  "videoSizeUnavailable": "動画の画面サイズを確認できませんでした。",
+  "@videoDeletedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoDeleteReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoDeleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoDeleteSelectedWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@videoCheckingSizes": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@videoSelectedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "select": "選択",
+  "travelPickStartTime": "開始時刻を選択",
+  "travelPickEndTime": "終了時刻を選択",
+  "travelPickDate": "日付を選択",
+  "travelEnterAlbumName": "アルバム名を入力してください。",
+  "travelSelectStartAndEndDate": "開始日と終了日を選択してください。",
+  "travelEndMustBeAfterStart": "終了日時は開始日時より後に設定してください。",
+  "travelNoAssetsInRange": "選択した日時範囲に写真や動画がありません。",
+  "travelAlbumCreated": "{count}件の項目でアルバムを作成しました。",
+  "travelAlbumCreateError": "アルバムの作成中に問題が発生しました：{error}",
+  "travelSelectDate": "日付を選択",
+  "travelAlbumTitle": "期間・時間アルバム",
+  "travelAlbumHeroTitle": "指定した日時範囲の\n写真と動画をまとめます。",
+  "travelAlbumNameLabel": "アルバム名",
+  "travelAlbumNameHint": "例：済州島旅行、運動会、コンサート",
+  "travelStartSectionTitle": "開始",
+  "travelStartDate": "開始日",
+  "travelStartTime": "開始時刻",
+  "travelEndSectionTitle": "終了",
+  "travelEndDate": "終了日",
+  "travelEndTime": "終了時刻",
+  "travelCreatingAlbum": "アルバムを作成中...",
+  "travelCreateAlbum": "アルバムを作成",
+  "@travelAlbumCreated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@travelAlbumCreateError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "travelInfoDescription": "写真アプリに保存された撮影日時を基準に項目を探します。"
 }

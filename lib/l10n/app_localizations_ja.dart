@@ -521,4 +521,173 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get screenshotEmptyDescription =>
       '写真ライブラリにスクリーンショットがないか、\n現在アクセスできるスクリーンショットがありません。';
+
+  @override
+  String get videoLoadFailed => '動画を読み込めませんでした。';
+
+  @override
+  String videoDeletedSuccess(int count) {
+    return '$count件の動画を「最近削除した項目」に移動しました。';
+  }
+
+  @override
+  String get videoDeleteFailed => '動画を削除できませんでした。';
+
+  @override
+  String get videoLoadingOriginal => '動画を読み込んでいます。';
+
+  @override
+  String get videoOriginalLoadFailed => '動画の元ファイルを読み込めませんでした。';
+
+  @override
+  String get videoDeletePreparationTitle => '動画削除の確認';
+
+  @override
+  String videoDeleteReview(int count) {
+    return '選択した動画$count件を確認してください。';
+  }
+
+  @override
+  String get videoMoveToRecentlyDeleted => '削除した動画は写真アプリの「最近削除した項目」に移動します。';
+
+  @override
+  String videoDeleteCount(int count) {
+    return '$count件を削除';
+  }
+
+  @override
+  String get videoSelectToDelete => '削除する動画を選択してください';
+
+  @override
+  String videoDeleteSelectedWithSize(int count, String size) {
+    return '$count件を削除・$size';
+  }
+
+  @override
+  String get videoFindingLargeVideos => '大きな動画を探しています';
+
+  @override
+  String videoCheckingSizes(int current, int total) {
+    return '$current / $total件の容量を確認中';
+  }
+
+  @override
+  String get videoLoadingList => '動画一覧を読み込んでいます。';
+
+  @override
+  String get videoMayTakeTime => '動画が多い場合やiCloudに保存されている場合は時間がかかることがあります。';
+
+  @override
+  String videoSummary(int count, String size) {
+    return '動画$count件・$size';
+  }
+
+  @override
+  String get videoSortedBySize => '容量の大きい順に表示しています。';
+
+  @override
+  String videoSelectedSummary(int count, String size) {
+    return '$count件選択・$size解放可能';
+  }
+
+  @override
+  String get videoLongPressPreview => '長押ししてプレビュー';
+
+  @override
+  String get videoEmptyTitle => '整理する動画はありません';
+
+  @override
+  String get videoEmptyDescription => '現在アクセスできる動画はありません。';
+
+  @override
+  String get videoPermissionDescription =>
+      '大きな動画を確認・整理するには\n写真ライブラリへのアクセスを許可してください。';
+
+  @override
+  String get videoPreparing => '動画を準備しています。';
+
+  @override
+  String get videoPlaybackFailed => '動画を再生できませんでした。';
+
+  @override
+  String get videoPlayerUnavailable => '動画プレーヤーを準備できませんでした。';
+
+  @override
+  String get videoSizeUnavailable => '動画の画面サイズを確認できませんでした。';
+
+  @override
+  String get select => '選択';
+
+  @override
+  String get travelPickStartTime => '開始時刻を選択';
+
+  @override
+  String get travelPickEndTime => '終了時刻を選択';
+
+  @override
+  String get travelPickDate => '日付を選択';
+
+  @override
+  String get travelEnterAlbumName => 'アルバム名を入力してください。';
+
+  @override
+  String get travelSelectStartAndEndDate => '開始日と終了日を選択してください。';
+
+  @override
+  String get travelEndMustBeAfterStart => '終了日時は開始日時より後に設定してください。';
+
+  @override
+  String get travelNoAssetsInRange => '選択した日時範囲に写真や動画がありません。';
+
+  @override
+  String travelAlbumCreated(int count) {
+    return '$count件の項目でアルバムを作成しました。';
+  }
+
+  @override
+  String travelAlbumCreateError(String error) {
+    return 'アルバムの作成中に問題が発生しました：$error';
+  }
+
+  @override
+  String get travelSelectDate => '日付を選択';
+
+  @override
+  String get travelAlbumTitle => '期間・時間アルバム';
+
+  @override
+  String get travelAlbumHeroTitle => '指定した日時範囲の\n写真と動画をまとめます。';
+
+  @override
+  String get travelAlbumNameLabel => 'アルバム名';
+
+  @override
+  String get travelAlbumNameHint => '例：済州島旅行、運動会、コンサート';
+
+  @override
+  String get travelStartSectionTitle => '開始';
+
+  @override
+  String get travelStartDate => '開始日';
+
+  @override
+  String get travelStartTime => '開始時刻';
+
+  @override
+  String get travelEndSectionTitle => '終了';
+
+  @override
+  String get travelEndDate => '終了日';
+
+  @override
+  String get travelEndTime => '終了時刻';
+
+  @override
+  String get travelCreatingAlbum => 'アルバムを作成中...';
+
+  @override
+  String get travelCreateAlbum => 'アルバムを作成';
+
+  @override
+  String get travelInfoDescription => '写真アプリに保存された撮影日時を基準に項目を探します。';
 }

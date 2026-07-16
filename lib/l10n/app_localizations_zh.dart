@@ -516,4 +516,172 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get screenshotEmptyDescription => '照片图库中没有截图，\n或当前没有可访问的截图。';
+
+  @override
+  String get videoLoadFailed => '无法加载视频。';
+
+  @override
+  String videoDeletedSuccess(int count) {
+    return '已将 $count 个视频移到“最近删除”。';
+  }
+
+  @override
+  String get videoDeleteFailed => '无法删除视频。';
+
+  @override
+  String get videoLoadingOriginal => '正在加载视频。';
+
+  @override
+  String get videoOriginalLoadFailed => '无法加载视频原始文件。';
+
+  @override
+  String get videoDeletePreparationTitle => '确认删除视频';
+
+  @override
+  String videoDeleteReview(int count) {
+    return '请确认选中的 $count 个视频。';
+  }
+
+  @override
+  String get videoMoveToRecentlyDeleted => '删除的视频会移到“照片”中的“最近删除”。';
+
+  @override
+  String videoDeleteCount(int count) {
+    return '删除 $count 个';
+  }
+
+  @override
+  String get videoSelectToDelete => '请选择要删除的视频';
+
+  @override
+  String videoDeleteSelectedWithSize(int count, String size) {
+    return '删除 $count 个 · $size';
+  }
+
+  @override
+  String get videoFindingLargeVideos => '正在查找大视频';
+
+  @override
+  String videoCheckingSizes(int current, int total) {
+    return '正在检查容量：$current / $total';
+  }
+
+  @override
+  String get videoLoadingList => '正在加载视频列表。';
+
+  @override
+  String get videoMayTakeTime => '视频较多或存储在 iCloud 中时，可能需要更长时间。';
+
+  @override
+  String videoSummary(int count, String size) {
+    return '$count 个视频 · $size';
+  }
+
+  @override
+  String get videoSortedBySize => '已按容量从大到小排序。';
+
+  @override
+  String videoSelectedSummary(int count, String size) {
+    return '已选择 $count 个 · 可释放 $size';
+  }
+
+  @override
+  String get videoLongPressPreview => '长按预览';
+
+  @override
+  String get videoEmptyTitle => '没有需要清理的视频';
+
+  @override
+  String get videoEmptyDescription => '当前没有可访问的视频。';
+
+  @override
+  String get videoPermissionDescription => '如需查看并清理大视频，\n请允许访问照片图库。';
+
+  @override
+  String get videoPreparing => '正在准备视频。';
+
+  @override
+  String get videoPlaybackFailed => '无法播放视频。';
+
+  @override
+  String get videoPlayerUnavailable => '无法准备视频播放器。';
+
+  @override
+  String get videoSizeUnavailable => '无法确定视频画面尺寸。';
+
+  @override
+  String get select => '选择';
+
+  @override
+  String get travelPickStartTime => '选择开始时间';
+
+  @override
+  String get travelPickEndTime => '选择结束时间';
+
+  @override
+  String get travelPickDate => '选择日期';
+
+  @override
+  String get travelEnterAlbumName => '请输入相册名称。';
+
+  @override
+  String get travelSelectStartAndEndDate => '请选择开始日期和结束日期。';
+
+  @override
+  String get travelEndMustBeAfterStart => '结束日期和时间必须晚于开始时间。';
+
+  @override
+  String get travelNoAssetsInRange => '所选日期和时间范围内没有照片或视频。';
+
+  @override
+  String travelAlbumCreated(int count) {
+    return '已使用 $count 个项目创建相册。';
+  }
+
+  @override
+  String travelAlbumCreateError(String error) {
+    return '创建相册时出现问题：$error';
+  }
+
+  @override
+  String get travelSelectDate => '选择日期';
+
+  @override
+  String get travelAlbumTitle => '日期与时间相册';
+
+  @override
+  String get travelAlbumHeroTitle => '一次收集指定日期和时间范围内的\n照片与视频。';
+
+  @override
+  String get travelAlbumNameLabel => '相册名称';
+
+  @override
+  String get travelAlbumNameHint => '例如：济州岛旅行、运动会、演唱会';
+
+  @override
+  String get travelStartSectionTitle => '开始';
+
+  @override
+  String get travelStartDate => '开始日期';
+
+  @override
+  String get travelStartTime => '开始时间';
+
+  @override
+  String get travelEndSectionTitle => '结束';
+
+  @override
+  String get travelEndDate => '结束日期';
+
+  @override
+  String get travelEndTime => '结束时间';
+
+  @override
+  String get travelCreatingAlbum => '正在创建相册...';
+
+  @override
+  String get travelCreateAlbum => '创建相册';
+
+  @override
+  String get travelInfoDescription => '系统会根据“照片”中保存的拍摄日期和时间查找项目。';
 }

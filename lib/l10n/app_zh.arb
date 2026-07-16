@@ -332,5 +332,130 @@
   "screenshotLimitedAccessDescription": "Pomu 目前只能访问所选照片。如需查看所有截图，请添加更多照片。",
   "addPhotos": "添加",
   "screenshotEmptyTitle": "没有需要清理的截图",
-  "screenshotEmptyDescription": "照片图库中没有截图，\n或当前没有可访问的截图。"
+  "screenshotEmptyDescription": "照片图库中没有截图，\n或当前没有可访问的截图。",
+  "videoLoadFailed": "无法加载视频。",
+  "videoDeletedSuccess": "已将 {count} 个视频移到“最近删除”。",
+  "videoDeleteFailed": "无法删除视频。",
+  "videoLoadingOriginal": "正在加载视频。",
+  "videoOriginalLoadFailed": "无法加载视频原始文件。",
+  "videoDeletePreparationTitle": "确认删除视频",
+  "videoDeleteReview": "请确认选中的 {count} 个视频。",
+  "videoMoveToRecentlyDeleted": "删除的视频会移到“照片”中的“最近删除”。",
+  "videoDeleteCount": "删除 {count} 个",
+  "videoSelectToDelete": "请选择要删除的视频",
+  "videoDeleteSelectedWithSize": "删除 {count} 个 · {size}",
+  "videoFindingLargeVideos": "正在查找大视频",
+  "videoCheckingSizes": "正在检查容量：{current} / {total}",
+  "videoLoadingList": "正在加载视频列表。",
+  "videoMayTakeTime": "视频较多或存储在 iCloud 中时，可能需要更长时间。",
+  "videoSummary": "{count} 个视频 · {size}",
+  "videoSortedBySize": "已按容量从大到小排序。",
+  "videoSelectedSummary": "已选择 {count} 个 · 可释放 {size}",
+  "videoLongPressPreview": "长按预览",
+  "videoEmptyTitle": "没有需要清理的视频",
+  "videoEmptyDescription": "当前没有可访问的视频。",
+  "videoPermissionDescription": "如需查看并清理大视频，\n请允许访问照片图库。",
+  "videoPreparing": "正在准备视频。",
+  "videoPlaybackFailed": "无法播放视频。",
+  "videoPlayerUnavailable": "无法准备视频播放器。",
+  "videoSizeUnavailable": "无法确定视频画面尺寸。",
+  "@videoDeletedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoDeleteReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoDeleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoDeleteSelectedWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@videoCheckingSizes": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@videoSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@videoSelectedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "select": "选择",
+  "travelPickStartTime": "选择开始时间",
+  "travelPickEndTime": "选择结束时间",
+  "travelPickDate": "选择日期",
+  "travelEnterAlbumName": "请输入相册名称。",
+  "travelSelectStartAndEndDate": "请选择开始日期和结束日期。",
+  "travelEndMustBeAfterStart": "结束日期和时间必须晚于开始时间。",
+  "travelNoAssetsInRange": "所选日期和时间范围内没有照片或视频。",
+  "travelAlbumCreated": "已使用 {count} 个项目创建相册。",
+  "travelAlbumCreateError": "创建相册时出现问题：{error}",
+  "travelSelectDate": "选择日期",
+  "travelAlbumTitle": "日期与时间相册",
+  "travelAlbumHeroTitle": "一次收集指定日期和时间范围内的\n照片与视频。",
+  "travelAlbumNameLabel": "相册名称",
+  "travelAlbumNameHint": "例如：济州岛旅行、运动会、演唱会",
+  "travelStartSectionTitle": "开始",
+  "travelStartDate": "开始日期",
+  "travelStartTime": "开始时间",
+  "travelEndSectionTitle": "结束",
+  "travelEndDate": "结束日期",
+  "travelEndTime": "结束时间",
+  "travelCreatingAlbum": "正在创建相册...",
+  "travelCreateAlbum": "创建相册",
+  "@travelAlbumCreated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@travelAlbumCreateError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "travelInfoDescription": "系统会根据“照片”中保存的拍摄日期和时间查找项目。"
 }

@@ -557,4 +557,182 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get screenshotEmptyDescription =>
       'There are no screenshots in your library,\nor none are currently accessible.';
+
+  @override
+  String get videoLoadFailed => 'Couldn’t load your videos.';
+
+  @override
+  String videoDeletedSuccess(int count) {
+    return 'Moved $count videos to Recently Deleted.';
+  }
+
+  @override
+  String get videoDeleteFailed => 'Couldn’t delete the videos.';
+
+  @override
+  String get videoLoadingOriginal => 'Loading the video.';
+
+  @override
+  String get videoOriginalLoadFailed =>
+      'Couldn’t load the original video file.';
+
+  @override
+  String get videoDeletePreparationTitle => 'Review Video Deletion';
+
+  @override
+  String videoDeleteReview(int count) {
+    return 'Review the $count selected videos.';
+  }
+
+  @override
+  String get videoMoveToRecentlyDeleted =>
+      'Deleted videos will be moved to Recently Deleted in Photos.';
+
+  @override
+  String videoDeleteCount(int count) {
+    return 'Delete $count';
+  }
+
+  @override
+  String get videoSelectToDelete => 'Select videos to delete';
+
+  @override
+  String videoDeleteSelectedWithSize(int count, String size) {
+    return 'Delete $count · $size';
+  }
+
+  @override
+  String get videoFindingLargeVideos => 'Finding Large Videos';
+
+  @override
+  String videoCheckingSizes(int current, int total) {
+    return 'Checking sizes: $current / $total';
+  }
+
+  @override
+  String get videoLoadingList => 'Loading your video list.';
+
+  @override
+  String get videoMayTakeTime =>
+      'This may take longer if you have many videos or they’re stored in iCloud.';
+
+  @override
+  String videoSummary(int count, String size) {
+    return '$count videos · $size';
+  }
+
+  @override
+  String get videoSortedBySize => 'Sorted from largest to smallest.';
+
+  @override
+  String videoSelectedSummary(int count, String size) {
+    return '$count selected · $size reclaimable';
+  }
+
+  @override
+  String get videoLongPressPreview => 'Press and hold to preview';
+
+  @override
+  String get videoEmptyTitle => 'No Videos to Clean Up';
+
+  @override
+  String get videoEmptyDescription =>
+      'There are currently no accessible videos.';
+
+  @override
+  String get videoPermissionDescription =>
+      'Allow access to your photo library\nto review and clean up large videos.';
+
+  @override
+  String get videoPreparing => 'Preparing the video.';
+
+  @override
+  String get videoPlaybackFailed => 'Couldn’t play the video.';
+
+  @override
+  String get videoPlayerUnavailable => 'Couldn’t prepare the video player.';
+
+  @override
+  String get videoSizeUnavailable => 'Couldn’t determine the video dimensions.';
+
+  @override
+  String get select => 'Select';
+
+  @override
+  String get travelPickStartTime => 'Select Start Time';
+
+  @override
+  String get travelPickEndTime => 'Select End Time';
+
+  @override
+  String get travelPickDate => 'Select Date';
+
+  @override
+  String get travelEnterAlbumName => 'Enter an album name.';
+
+  @override
+  String get travelSelectStartAndEndDate =>
+      'Select both a start date and an end date.';
+
+  @override
+  String get travelEndMustBeAfterStart =>
+      'The end date and time must be later than the start.';
+
+  @override
+  String get travelNoAssetsInRange =>
+      'There are no photos or videos in the selected date and time range.';
+
+  @override
+  String travelAlbumCreated(int count) {
+    return 'Created an album with $count items.';
+  }
+
+  @override
+  String travelAlbumCreateError(String error) {
+    return 'Something went wrong while creating the album: $error';
+  }
+
+  @override
+  String get travelSelectDate => 'Select Date';
+
+  @override
+  String get travelAlbumTitle => 'Date & Time Album';
+
+  @override
+  String get travelAlbumHeroTitle =>
+      'Gather photos and videos\nfrom a date and time range.';
+
+  @override
+  String get travelAlbumNameLabel => 'Album Name';
+
+  @override
+  String get travelAlbumNameHint => 'e.g. Jeju Trip, Sports Day, Concert';
+
+  @override
+  String get travelStartSectionTitle => 'Start';
+
+  @override
+  String get travelStartDate => 'Start Date';
+
+  @override
+  String get travelStartTime => 'Start Time';
+
+  @override
+  String get travelEndSectionTitle => 'End';
+
+  @override
+  String get travelEndDate => 'End Date';
+
+  @override
+  String get travelEndTime => 'End Time';
+
+  @override
+  String get travelCreatingAlbum => 'Creating Album...';
+
+  @override
+  String get travelCreateAlbum => 'Create Album';
+
+  @override
+  String get travelInfoDescription =>
+      'Items are found using the capture date and time stored in Photos.';
 }

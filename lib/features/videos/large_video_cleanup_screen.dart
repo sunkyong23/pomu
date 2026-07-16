@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -5,9 +6,13 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
+import '../../l10n/app_localizations.dart';
 
-import 'dart:io';
 import 'package:video_player/video_player.dart';
+
+extension _LargeVideoCleanupL10n on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+}
 
 class LargeVideoCleanupScreen extends StatefulWidget {
   const LargeVideoCleanupScreen({super.key});
@@ -163,7 +168,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
         _isLoading = false;
       });
 
-      _showSnackBar('동영상을 불러오지 못했어요.');
+      _showSnackBar(context.l10n.videoLoadFailed);
     }
   }
 
@@ -251,8 +256,8 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                   ),
                 ),
                 const SizedBox(height: PomuSpacing.lg),
-                const Text(
-                  '동영상 삭제 준비',
+                Text(
+                  sheetContext.l10n.videoDeletePreparationTitle,
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -262,7 +267,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '선택한 동영상 ${selectedEntries.length}개를 확인해주세요.',
+                  sheetContext.l10n.videoDeleteReview(selectedEntries.length),
                   style: const TextStyle(
                     fontSize: 14,
                     color: PomuColors.textSecondary,
@@ -285,7 +290,9 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                       const SizedBox(width: PomuSpacing.sm),
                       Expanded(
                         child: Text(
-                          '예상 확보 공간 ${_formatBytes(_selectedTotalBytes)}',
+                          sheetContext.l10n.estimatedSpace(
+                            _formatBytes(sheetContext, _selectedTotalBytes),
+                          ),
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
@@ -313,8 +320,8 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                   ),
                 ),
                 const SizedBox(height: PomuSpacing.lg),
-                const Text(
-                  '삭제한 동영상은 사진 앱의 최근 삭제된 항목으로 이동해요.',
+                Text(
+                  sheetContext.l10n.videoMoveToRecentlyDeleted,
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.4,
@@ -329,7 +336,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                         onPressed: () {
                           Navigator.of(sheetContext).pop();
                         },
-                        child: const Text('취소'),
+                        child: Text(sheetContext.l10n.cancel),
                       ),
                     ),
                     const SizedBox(width: PomuSpacing.sm),
@@ -341,7 +348,11 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                           await _deleteVideos(selectedEntries);
                         },
                         icon: const Icon(Icons.delete_outline_rounded),
-                        label: Text('${selectedEntries.length}개 삭제'),
+                        label: Text(
+                          sheetContext.l10n.videoDeleteCount(
+                            selectedEntries.length,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -373,7 +384,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
           _isDeleting = false;
         });
 
-        _showSnackBar('삭제가 취소되었거나 실패했어요.');
+        _showSnackBar(context.l10n.deleteCanceledOrFailed);
         return;
       }
 
@@ -386,7 +397,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
         _isDeleting = false;
       });
 
-      _showSnackBar('${deletedIds.length}개의 동영상을 최근 삭제된 항목으로 이동했어요.');
+      _showSnackBar(context.l10n.videoDeletedSuccess(deletedIds.length));
     } catch (error, stackTrace) {
       debugPrint('❌ 동영상 삭제 실패: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -397,12 +408,12 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
         _isDeleting = false;
       });
 
-      _showSnackBar('동영상을 삭제하지 못했어요.');
+      _showSnackBar(context.l10n.videoDeleteFailed);
     }
   }
 
   Future<void> _showVideoPreview(_VideoEntry entry) async {
-    _showSnackBar('동영상을 불러오고 있어요.');
+    _showSnackBar(context.l10n.videoLoadingOriginal);
 
     final file = await entry.asset.originFile;
 
@@ -411,7 +422,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     if (file == null) {
-      _showSnackBar('동영상 원본 파일을 불러오지 못했어요.');
+      _showSnackBar(context.l10n.videoOriginalLoadFailed);
       return;
     }
 
@@ -424,7 +435,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
         fullscreenDialog: true,
         builder: (_) => _VideoPreviewScreen(
           file: file,
-          sizeText: _formatBytes(entry.sizeBytes),
+          sizeText: _formatBytes(context, entry.sizeBytes),
           dateText: _formatDate(entry.asset.createDateTime),
         ),
       ),
@@ -457,8 +468,8 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
     return '${date.year}.$month.$day';
   }
 
-  String _formatBytes(int bytes) {
-    if (bytes <= 0) return '용량 확인 불가';
+  String _formatBytes(BuildContext context, int bytes) {
+    if (bytes <= 0) return context.l10n.unableToCheckSize;
 
     final kb = bytes / 1024;
 
@@ -501,8 +512,8 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
       appBar: AppBar(
         backgroundColor: PomuColors.background,
         elevation: 0,
-        title: const Text(
-          '큰 동영상 정리',
+        title: Text(
+          context.l10n.homeLargeVideoCleanupTitle,
           style: TextStyle(
             color: PomuColors.textPrimary,
             fontWeight: FontWeight.w800,
@@ -513,7 +524,9 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
             TextButton(
               onPressed: _isDeleting ? null : _toggleSelectAll,
               child: Text(
-                _isAllSelected ? '선택 해제' : '전체 선택',
+                _isAllSelected
+                    ? context.l10n.screenshotDeselectAll
+                    : context.l10n.screenshotSelectAll,
                 style: const TextStyle(
                   color: PomuColors.primary,
                   fontWeight: FontWeight.w800,
@@ -522,12 +535,12 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
             ),
         ],
       ),
-      body: _buildBody(),
-      bottomNavigationBar: _buildBottomBar(),
+      body: _buildBody(context),
+      bottomNavigationBar: _buildBottomBar(context),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext context) {
     if (_permissionDenied) {
       return _PermissionDeniedView(onOpenSettings: _openAppSettings);
     }
@@ -558,7 +571,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                 totalBytes: _totalVideoBytes,
                 selectedCount: _selectedIds.length,
                 selectedBytes: _selectedTotalBytes,
-                formatBytes: _formatBytes,
+                formatBytes: (bytes) => _formatBytes(context, bytes),
               ),
             ),
           ),
@@ -585,7 +598,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                   return _VideoListTile(
                     entry: entry,
                     isSelected: _selectedIds.contains(entry.asset.id),
-                    formatBytes: _formatBytes,
+                    formatBytes: (bytes) => _formatBytes(context, bytes),
                     formatDuration: _formatDuration,
                     formatDate: _formatDate,
                     onTap: () => _toggleSelection(entry),
@@ -599,7 +612,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
     );
   }
 
-  Widget? _buildBottomBar() {
+  Widget? _buildBottomBar(BuildContext context) {
     if (_isLoading || _permissionDenied || _videos.isEmpty) {
       return null;
     }
@@ -635,11 +648,13 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
               : const Icon(Icons.delete_outline_rounded),
           label: Text(
             _isDeleting
-                ? '삭제 중...'
+                ? context.l10n.deleting
                 : selectedCount == 0
-                ? '삭제할 동영상을 선택해주세요'
-                : '$selectedCount개 삭제 · '
-                      '${_formatBytes(_selectedTotalBytes)}',
+                ? context.l10n.videoSelectToDelete
+                : context.l10n.videoDeleteSelectedWithSize(
+                    selectedCount,
+                    _formatBytes(context, _selectedTotalBytes),
+                  ),
           ),
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(54),
@@ -695,8 +710,8 @@ class _LoadingView extends StatelessWidget {
                 color: PomuColors.primary,
               ),
               const SizedBox(height: PomuSpacing.md),
-              const Text(
-                '큰 동영상을 찾고 있어요',
+              Text(
+                context.l10n.videoFindingLargeVideos,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -713,15 +728,17 @@ class _LoadingView extends StatelessWidget {
               ),
               const SizedBox(height: PomuSpacing.md),
               Text(
-                hasTotal ? '$current / $total개 용량 확인 중' : '동영상 목록을 불러오고 있어요.',
+                hasTotal
+                    ? context.l10n.videoCheckingSizes(current, total)
+                    : context.l10n.videoLoadingList,
                 style: const TextStyle(
                   fontSize: 14,
                   color: PomuColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 5),
-              const Text(
-                '동영상이 많거나 iCloud에 있으면 시간이 걸릴 수 있어요.',
+              Text(
+                context.l10n.videoMayTakeTime,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,
@@ -782,7 +799,10 @@ class _VideoSummaryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '동영상 $videoCount개 · ${formatBytes(totalBytes)}',
+                  context.l10n.videoSummary(
+                    videoCount,
+                    formatBytes(totalBytes),
+                  ),
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
@@ -792,9 +812,11 @@ class _VideoSummaryCard extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   selectedCount == 0
-                      ? '용량이 큰 순서로 표시했어요.'
-                      : '$selectedCount개 선택 · '
-                            '${formatBytes(selectedBytes)} 확보 가능',
+                      ? context.l10n.videoSortedBySize
+                      : context.l10n.videoSelectedSummary(
+                          selectedCount,
+                          formatBytes(selectedBytes),
+                        ),
                   style: const TextStyle(
                     fontSize: 13,
                     color: PomuColors.textSecondary,
@@ -924,8 +946,8 @@ class _VideoListTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      '길게 눌러 크게 보기',
+                    Text(
+                      context.l10n.videoLongPressPreview,
                       style: TextStyle(
                         fontSize: 12,
                         color: PomuColors.textSecondary,
@@ -1043,8 +1065,8 @@ class _EmptyVideoView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: PomuSpacing.md),
-            const Text(
-              '정리할 동영상이 없어요',
+            Text(
+              context.l10n.videoEmptyTitle,
               style: TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.w800,
@@ -1052,8 +1074,8 @@ class _EmptyVideoView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              '현재 접근 가능한 동영상이 없어요.',
+            Text(
+              context.l10n.videoEmptyDescription,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: PomuColors.textSecondary),
             ),
@@ -1083,8 +1105,8 @@ class _PermissionDeniedView extends StatelessWidget {
               color: PomuColors.primary,
             ),
             const SizedBox(height: PomuSpacing.md),
-            const Text(
-              '사진 접근 권한이 필요해요',
+            Text(
+              context.l10n.photoPermissionRequiredTitle,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -1092,8 +1114,8 @@ class _PermissionDeniedView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '큰 동영상을 확인하고 정리하려면\n사진 보관함 접근을 허용해주세요.',
+            Text(
+              context.l10n.videoPermissionDescription,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -1104,7 +1126,7 @@ class _PermissionDeniedView extends StatelessWidget {
             const SizedBox(height: PomuSpacing.lg),
             ElevatedButton(
               onPressed: onOpenSettings,
-              child: const Text('설정 열기'),
+              child: Text(context.l10n.openSettings),
             ),
           ],
         ),
@@ -1260,14 +1282,14 @@ class _VideoPreviewScreenState extends State<_VideoPreviewScreen> {
 
   Widget _buildVideoArea(VideoPlayerController? controller) {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(color: Colors.white),
-            SizedBox(height: 14),
+            const CircularProgressIndicator(color: Colors.white),
+            const SizedBox(height: 14),
             Text(
-              '동영상을 준비하고 있어요.',
+              context.l10n.videoPreparing,
               style: TextStyle(color: Colors.white, fontSize: 14),
             ),
           ],
@@ -1288,8 +1310,8 @@ class _VideoPreviewScreenState extends State<_VideoPreviewScreen> {
                 size: 46,
               ),
               const SizedBox(height: 14),
-              const Text(
-                '동영상을 재생하지 못했어요.',
+              Text(
+                context.l10n.videoPlaybackFailed,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 17,
@@ -1309,9 +1331,9 @@ class _VideoPreviewScreenState extends State<_VideoPreviewScreen> {
     }
 
     if (controller == null || !controller.value.isInitialized) {
-      return const Center(
+      return Center(
         child: Text(
-          '동영상 플레이어를 준비하지 못했어요.',
+          context.l10n.videoPlayerUnavailable,
           style: TextStyle(color: Colors.white),
         ),
       );
@@ -1321,9 +1343,9 @@ class _VideoPreviewScreenState extends State<_VideoPreviewScreen> {
     final height = controller.value.size.height;
 
     if (width <= 0 || height <= 0) {
-      return const Center(
+      return Center(
         child: Text(
-          '동영상 화면 크기를 확인하지 못했어요.',
+          context.l10n.videoSizeUnavailable,
           style: TextStyle(color: Colors.white),
         ),
       );

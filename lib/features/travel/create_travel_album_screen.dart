@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
 import '../../core/widgets/buttons/pomu_primary_button.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/album_service.dart';
 import '../../services/travel_album_builder.dart';
+
+extension _TravelAlbumL10n on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+}
 
 class CreateTravelAlbumScreen extends StatefulWidget {
   const CreateTravelAlbumScreen({super.key});
@@ -67,9 +72,9 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
     final time = await showTimePicker(
       context: context,
       initialTime: _startTime,
-      helpText: '시작 시간 선택',
-      cancelText: '취소',
-      confirmText: '선택',
+      helpText: context.l10n.travelPickStartTime,
+      cancelText: context.l10n.cancel,
+      confirmText: context.l10n.select,
     );
 
     if (time == null) return;
@@ -83,9 +88,9 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
     final time = await showTimePicker(
       context: context,
       initialTime: _endTime,
-      helpText: '종료 시간 선택',
-      cancelText: '취소',
-      confirmText: '선택',
+      helpText: context.l10n.travelPickEndTime,
+      cancelText: context.l10n.cancel,
+      confirmText: context.l10n.select,
     );
 
     if (time == null) return;
@@ -101,9 +106,9 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
       initialDate: initialDate,
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
-      helpText: '날짜 선택',
-      cancelText: '취소',
-      confirmText: '선택',
+      helpText: context.l10n.travelPickDate,
+      cancelText: context.l10n.cancel,
+      confirmText: context.l10n.select,
     );
   }
 
@@ -127,16 +132,16 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
     final albumName = _albumNameController.text.trim();
 
     if (albumName.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('앨범 이름을 입력해주세요')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.travelEnterAlbumName)),
+      );
       return;
     }
 
     if (_startDate == null || _endDate == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('시작 날짜와 종료 날짜를 선택해주세요')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.travelSelectStartAndEndDate)),
+      );
       return;
     }
 
@@ -146,7 +151,7 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
 
     if (endDateTime.isBefore(startDateTime)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('종료 날짜와 시간은 시작 시점보다 늦어야 해요')),
+        SnackBar(content: Text(context.l10n.travelEndMustBeAfterStart)),
       );
       return;
     }
@@ -164,7 +169,7 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
 
       if (album.photos.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('선택한 날짜와 시간대에 사진이나 영상이 없어요')),
+          SnackBar(content: Text(context.l10n.travelNoAssetsInRange)),
         );
         return;
       }
@@ -174,16 +179,20 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${album.photos.length}개의 항목으로 앨범을 만들었어요')),
+        SnackBar(
+          content: Text(context.l10n.travelAlbumCreated(album.photos.length)),
+        ),
       );
 
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('앨범 생성 중 문제가 발생했어요: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.travelAlbumCreateError(e.toString())),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -191,30 +200,14 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
     }
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return '날짜 선택';
+  String _formatDate(BuildContext context, DateTime? date) {
+    if (date == null) return context.l10n.travelSelectDate;
 
-    return '${date.year}.${date.month.toString().padLeft(2, '0')}.'
-        '${date.day.toString().padLeft(2, '0')}';
+    return MaterialLocalizations.of(context).formatMediumDate(date);
   }
 
-  String _formatTime(TimeOfDay time) {
-    final hour = time.hour;
-    final minute = time.minute.toString().padLeft(2, '0');
-
-    if (hour == 0) {
-      return '오전 12:$minute';
-    }
-
-    if (hour < 12) {
-      return '오전 $hour:$minute';
-    }
-
-    if (hour == 12) {
-      return '오후 12:$minute';
-    }
-
-    return '오후 ${hour - 12}:$minute';
+  String _formatTime(BuildContext context, TimeOfDay time) {
+    return MaterialLocalizations.of(context).formatTimeOfDay(time);
   }
 
   @override
@@ -224,8 +217,8 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
       appBar: AppBar(
         backgroundColor: PomuColors.background,
         elevation: 0,
-        title: const Text(
-          '기간·시간 앨범',
+        title: Text(
+          context.l10n.travelAlbumTitle,
           style: TextStyle(
             color: PomuColors.textPrimary,
             fontWeight: FontWeight.w800,
@@ -235,8 +228,8 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
       body: ListView(
         padding: const EdgeInsets.all(PomuSpacing.lg),
         children: [
-          const Text(
-            '원하는 날짜와 시간대의\n사진과 영상을 한 번에 모아요.',
+          Text(
+            context.l10n.travelAlbumHeroTitle,
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -250,8 +243,8 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '앨범 이름',
+                Text(
+                  context.l10n.travelAlbumNameLabel,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -263,7 +256,7 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
                   controller: _albumNameController,
                   textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
-                    hintText: '예: 제주도 여행, 운동회, 콘서트',
+                    hintText: context.l10n.travelAlbumNameHint,
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -291,8 +284,8 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '시작 시점',
+                Text(
+                  context.l10n.travelStartSectionTitle,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -302,16 +295,16 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
                 const SizedBox(height: PomuSpacing.sm),
                 _DateTimeRow(
                   icon: Icons.calendar_today_rounded,
-                  title: '시작 날짜',
-                  value: _formatDate(_startDate),
+                  title: context.l10n.travelStartDate,
+                  value: _formatDate(context, _startDate),
                   isEmpty: _startDate == null,
                   onTap: _pickStartDate,
                 ),
                 const Divider(height: 28),
                 _DateTimeRow(
                   icon: Icons.schedule_rounded,
-                  title: '시작 시간',
-                  value: _formatTime(_startTime),
+                  title: context.l10n.travelStartTime,
+                  value: _formatTime(context, _startTime),
                   onTap: _pickStartTime,
                 ),
               ],
@@ -322,8 +315,8 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '종료 시점',
+                Text(
+                  context.l10n.travelEndSectionTitle,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -333,16 +326,16 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
                 const SizedBox(height: PomuSpacing.sm),
                 _DateTimeRow(
                   icon: Icons.event_available_rounded,
-                  title: '종료 날짜',
-                  value: _formatDate(_endDate),
+                  title: context.l10n.travelEndDate,
+                  value: _formatDate(context, _endDate),
                   isEmpty: _endDate == null,
                   onTap: _pickEndDate,
                 ),
                 const Divider(height: 28),
                 _DateTimeRow(
                   icon: Icons.schedule_rounded,
-                  title: '종료 시간',
-                  value: _formatTime(_endTime),
+                  title: context.l10n.travelEndTime,
+                  value: _formatTime(context, _endTime),
                   onTap: _pickEndTime,
                 ),
               ],
@@ -356,7 +349,9 @@ class _CreateTravelAlbumScreenState extends State<CreateTravelAlbumScreen> {
         child: Padding(
           padding: const EdgeInsets.all(PomuSpacing.lg),
           child: PomuPrimaryButton(
-            text: _isLoading ? '앨범 생성 중...' : '앨범 만들기',
+            text: _isLoading
+                ? context.l10n.travelCreatingAlbum
+                : context.l10n.travelCreateAlbum,
             icon: Icons.photo_album_outlined,
             onPressed: _isLoading ? null : _createAlbum,
           ),
@@ -451,14 +446,18 @@ class _InfoBox extends StatelessWidget {
         color: PomuColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline_rounded, size: 20, color: PomuColors.primary),
+          const Icon(
+            Icons.info_outline_rounded,
+            size: 20,
+            color: PomuColors.primary,
+          ),
           SizedBox(width: PomuSpacing.sm),
           Expanded(
             child: Text(
-              '사진 앱에 저장된 촬영 날짜와 시간을 기준으로 항목을 찾아요.',
+              context.l10n.travelInfoDescription,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

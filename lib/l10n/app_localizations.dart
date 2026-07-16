@@ -1025,6 +1025,306 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'현재 사진 보관함에 스크린샷이 없거나\n접근 가능한 스크린샷이 없어요.'**
   String get screenshotEmptyDescription;
+
+  /// No description provided for @videoLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상을 불러오지 못했어요.'**
+  String get videoLoadFailed;
+
+  /// No description provided for @videoDeletedSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개의 동영상을 최근 삭제된 항목으로 이동했어요.'**
+  String videoDeletedSuccess(int count);
+
+  /// No description provided for @videoDeleteFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상을 삭제하지 못했어요.'**
+  String get videoDeleteFailed;
+
+  /// No description provided for @videoLoadingOriginal.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상을 불러오고 있어요.'**
+  String get videoLoadingOriginal;
+
+  /// No description provided for @videoOriginalLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상 원본 파일을 불러오지 못했어요.'**
+  String get videoOriginalLoadFailed;
+
+  /// No description provided for @videoDeletePreparationTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상 삭제 준비'**
+  String get videoDeletePreparationTitle;
+
+  /// No description provided for @videoDeleteReview.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택한 동영상 {count}개를 확인해주세요.'**
+  String videoDeleteReview(int count);
+
+  /// No description provided for @videoMoveToRecentlyDeleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제한 동영상은 사진 앱의 최근 삭제된 항목으로 이동해요.'**
+  String get videoMoveToRecentlyDeleted;
+
+  /// No description provided for @videoDeleteCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 삭제'**
+  String videoDeleteCount(int count);
+
+  /// No description provided for @videoSelectToDelete.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제할 동영상을 선택해주세요'**
+  String get videoSelectToDelete;
+
+  /// No description provided for @videoDeleteSelectedWithSize.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 삭제 · {size}'**
+  String videoDeleteSelectedWithSize(int count, String size);
+
+  /// No description provided for @videoFindingLargeVideos.
+  ///
+  /// In ko, this message translates to:
+  /// **'큰 동영상을 찾고 있어요'**
+  String get videoFindingLargeVideos;
+
+  /// No description provided for @videoCheckingSizes.
+  ///
+  /// In ko, this message translates to:
+  /// **'{current} / {total}개 용량 확인 중'**
+  String videoCheckingSizes(int current, int total);
+
+  /// No description provided for @videoLoadingList.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상 목록을 불러오고 있어요.'**
+  String get videoLoadingList;
+
+  /// No description provided for @videoMayTakeTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상이 많거나 iCloud에 있으면 시간이 걸릴 수 있어요.'**
+  String get videoMayTakeTime;
+
+  /// No description provided for @videoSummary.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상 {count}개 · {size}'**
+  String videoSummary(int count, String size);
+
+  /// No description provided for @videoSortedBySize.
+  ///
+  /// In ko, this message translates to:
+  /// **'용량이 큰 순서로 표시했어요.'**
+  String get videoSortedBySize;
+
+  /// No description provided for @videoSelectedSummary.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 선택 · {size} 확보 가능'**
+  String videoSelectedSummary(int count, String size);
+
+  /// No description provided for @videoLongPressPreview.
+  ///
+  /// In ko, this message translates to:
+  /// **'길게 눌러 크게 보기'**
+  String get videoLongPressPreview;
+
+  /// No description provided for @videoEmptyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'정리할 동영상이 없어요'**
+  String get videoEmptyTitle;
+
+  /// No description provided for @videoEmptyDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 접근 가능한 동영상이 없어요.'**
+  String get videoEmptyDescription;
+
+  /// No description provided for @videoPermissionDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'큰 동영상을 확인하고 정리하려면\n사진 보관함 접근을 허용해주세요.'**
+  String get videoPermissionDescription;
+
+  /// No description provided for @videoPreparing.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상을 준비하고 있어요.'**
+  String get videoPreparing;
+
+  /// No description provided for @videoPlaybackFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상을 재생하지 못했어요.'**
+  String get videoPlaybackFailed;
+
+  /// No description provided for @videoPlayerUnavailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상 플레이어를 준비하지 못했어요.'**
+  String get videoPlayerUnavailable;
+
+  /// No description provided for @videoSizeUnavailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'동영상 화면 크기를 확인하지 못했어요.'**
+  String get videoSizeUnavailable;
+
+  /// No description provided for @select.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택'**
+  String get select;
+
+  /// No description provided for @travelPickStartTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작 시간 선택'**
+  String get travelPickStartTime;
+
+  /// No description provided for @travelPickEndTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'종료 시간 선택'**
+  String get travelPickEndTime;
+
+  /// No description provided for @travelPickDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'날짜 선택'**
+  String get travelPickDate;
+
+  /// No description provided for @travelEnterAlbumName.
+  ///
+  /// In ko, this message translates to:
+  /// **'앨범 이름을 입력해주세요.'**
+  String get travelEnterAlbumName;
+
+  /// No description provided for @travelSelectStartAndEndDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작 날짜와 종료 날짜를 선택해주세요.'**
+  String get travelSelectStartAndEndDate;
+
+  /// No description provided for @travelEndMustBeAfterStart.
+  ///
+  /// In ko, this message translates to:
+  /// **'종료 날짜와 시간은 시작 시점보다 늦어야 해요.'**
+  String get travelEndMustBeAfterStart;
+
+  /// No description provided for @travelNoAssetsInRange.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택한 날짜와 시간대에 사진이나 영상이 없어요.'**
+  String get travelNoAssetsInRange;
+
+  /// No description provided for @travelAlbumCreated.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개의 항목으로 앨범을 만들었어요.'**
+  String travelAlbumCreated(int count);
+
+  /// No description provided for @travelAlbumCreateError.
+  ///
+  /// In ko, this message translates to:
+  /// **'앨범 생성 중 문제가 발생했어요: {error}'**
+  String travelAlbumCreateError(String error);
+
+  /// No description provided for @travelSelectDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'날짜 선택'**
+  String get travelSelectDate;
+
+  /// No description provided for @travelAlbumTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'기간·시간 앨범'**
+  String get travelAlbumTitle;
+
+  /// No description provided for @travelAlbumHeroTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'원하는 날짜와 시간대의\n사진과 영상을 한 번에 모아요.'**
+  String get travelAlbumHeroTitle;
+
+  /// No description provided for @travelAlbumNameLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'앨범 이름'**
+  String get travelAlbumNameLabel;
+
+  /// No description provided for @travelAlbumNameHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 제주도 여행, 운동회, 콘서트'**
+  String get travelAlbumNameHint;
+
+  /// No description provided for @travelStartSectionTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작 시점'**
+  String get travelStartSectionTitle;
+
+  /// No description provided for @travelStartDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작 날짜'**
+  String get travelStartDate;
+
+  /// No description provided for @travelStartTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작 시간'**
+  String get travelStartTime;
+
+  /// No description provided for @travelEndSectionTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'종료 시점'**
+  String get travelEndSectionTitle;
+
+  /// No description provided for @travelEndDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'종료 날짜'**
+  String get travelEndDate;
+
+  /// No description provided for @travelEndTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'종료 시간'**
+  String get travelEndTime;
+
+  /// No description provided for @travelCreatingAlbum.
+  ///
+  /// In ko, this message translates to:
+  /// **'앨범 생성 중...'**
+  String get travelCreatingAlbum;
+
+  /// No description provided for @travelCreateAlbum.
+  ///
+  /// In ko, this message translates to:
+  /// **'앨범 만들기'**
+  String get travelCreateAlbum;
+
+  /// No description provided for @travelInfoDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 앱에 저장된 촬영 날짜와 시간을 기준으로 항목을 찾아요.'**
+  String get travelInfoDescription;
 }
 
 class _AppLocalizationsDelegate
