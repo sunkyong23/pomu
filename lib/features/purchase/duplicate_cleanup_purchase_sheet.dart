@@ -6,13 +6,23 @@ import '../../services/in_app_purchase_service.dart';
 import '../../services/purchase_access_service.dart';
 
 Future<bool> showDuplicateCleanupPurchaseSheet(BuildContext context) async {
-  final result = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    backgroundColor: Colors.transparent,
-    builder: (_) => const DuplicateCleanupPurchaseSheet(),
+  debugPrint('🟣 구매 페이지 열기 시작');
+
+  final result = await Navigator.of(context).push<bool>(
+    MaterialPageRoute<bool>(
+      fullscreenDialog: true,
+      builder: (pageContext) {
+        debugPrint('🟢 구매 페이지 builder 실행');
+
+        return const Scaffold(
+          backgroundColor: PomuColors.surface,
+          body: SafeArea(child: DuplicateCleanupPurchaseSheet()),
+        );
+      },
+    ),
   );
+
+  debugPrint('🟡 구매 페이지 닫힘: $result');
 
   return result ?? false;
 }
@@ -63,8 +73,17 @@ class _DuplicateCleanupPurchaseSheetState
   }
 
   Future<void> _purchase() async {
+    debugPrint('');
+    debugPrint('========================================');
+    debugPrint('🔥 구매 버튼 눌림');
+    debugPrint('========================================');
+
     _purchaseService.clearError();
-    await _purchaseService.buyDuplicateCleanup();
+
+    final started = await _purchaseService.buyDuplicateCleanup();
+
+    debugPrint('🔥 구매 버튼 처리 결과: $started');
+    debugPrint('');
   }
 
   Future<void> _restore() async {
@@ -98,131 +117,134 @@ class _DuplicateCleanupPurchaseSheetState
 
     final priceText = product?.price;
 
-    return FractionallySizedBox(
-      heightFactor: 0.93,
-      child: Container(
-        decoration: const BoxDecoration(
-          color: PomuColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
+    debugPrint(
+      '🧾 구매 시트 build: '
+      'product=${product?.id}, price=$priceText, busy=$isBusy',
+    );
 
-            Container(
-              width: 42,
-              height: 5,
-              decoration: BoxDecoration(
-                color: PomuColors.divider,
-                borderRadius: BorderRadius.circular(999),
-              ),
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: PomuColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+
+          Container(
+            width: 42,
+            height: 5,
+            decoration: BoxDecoration(
+              color: PomuColors.divider,
+              borderRadius: BorderRadius.circular(999),
             ),
+          ),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  PomuSpacing.lg,
-                  PomuSpacing.lg,
-                  PomuSpacing.lg,
-                  MediaQuery.paddingOf(context).bottom + PomuSpacing.lg,
-                ),
-                child: Column(
-                  children: [
-                    _HeaderSection(priceText: priceText),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                PomuSpacing.lg,
+                PomuSpacing.lg,
+                PomuSpacing.lg,
+                MediaQuery.paddingOf(context).bottom + PomuSpacing.lg,
+              ),
+              child: Column(
+                children: [
+                  _HeaderSection(priceText: priceText),
 
-                    const SizedBox(height: PomuSpacing.lg),
+                  const SizedBox(height: PomuSpacing.lg),
 
-                    const _BenefitGrid(),
+                  const _BenefitGrid(),
 
-                    if (_purchaseService.errorMessage != null) ...[
-                      const SizedBox(height: PomuSpacing.md),
-                      _ErrorCard(message: _purchaseService.errorMessage!),
-                    ],
-
-                    const SizedBox(height: PomuSpacing.lg),
-
-                    _PrimaryPurchaseButton(
-                      isBusy: isBusy,
-                      isLoading: _purchaseService.isLoading,
-                      isPurchasing: _purchaseService.isPurchasing,
-                      hasProductError: hasProductError,
-                      canPurchase: _purchaseService.canPurchase,
-                      priceText: priceText,
-                      onPurchase: _purchase,
-                      onReload: _reloadProducts,
-                    ),
-
-                    const SizedBox(height: PomuSpacing.sm),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                          onPressed: isBusy ? null : _restore,
-                          child: Text(
-                            _purchaseService.isRestoring
-                                ? '구매 내역 확인 중...'
-                                : '구매 복원',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-
-                        Container(
-                          width: 1,
-                          height: 14,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          color: PomuColors.divider,
-                        ),
-
-                        TextButton(
-                          onPressed: isBusy
-                              ? null
-                              : () {
-                                  Navigator.of(context).pop(false);
-                                },
-                          child: const Text(
-                            '나중에',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: PomuColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    const Text(
-                      '구독이 아닌 일회성 구매예요.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: PomuColors.textSecondary,
-                      ),
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Text(
-                      '결제는 Apple ID를 통해 진행됩니다.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: PomuColors.textSecondary.withValues(alpha: 0.8),
-                      ),
-                    ),
+                  if (_purchaseService.errorMessage != null) ...[
+                    const SizedBox(height: PomuSpacing.md),
+                    _ErrorCard(message: _purchaseService.errorMessage!),
                   ],
-                ),
+
+                  const SizedBox(height: PomuSpacing.lg),
+
+                  _PrimaryPurchaseButton(
+                    isBusy: isBusy,
+                    isLoading: _purchaseService.isLoading,
+                    isPurchasing: _purchaseService.isPurchasing,
+                    hasProductError: hasProductError,
+                    canPurchase: _purchaseService.canPurchase,
+                    priceText: priceText,
+                    onPurchase: _purchase,
+                    onReload: _reloadProducts,
+                  ),
+
+                  const SizedBox(height: PomuSpacing.sm),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: isBusy ? null : _restore,
+                        child: Text(
+                          _purchaseService.isRestoring
+                              ? '구매 내역 확인 중...'
+                              : '구매 복원',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+
+                      Container(
+                        width: 1,
+                        height: 14,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        color: PomuColors.divider,
+                      ),
+
+                      TextButton(
+                        onPressed: isBusy
+                            ? null
+                            : () {
+                                Navigator.of(context).pop(false);
+                              },
+                        child: const Text(
+                          '나중에',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: PomuColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  const Text(
+                    '구독이 아닌 일회성 구매예요.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: PomuColors.textSecondary,
+                    ),
+                  ),
+
+                  const SizedBox(height: 5),
+
+                  Text(
+                    '결제는 Apple ID를 통해 진행됩니다.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: PomuColors.textSecondary.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -437,7 +459,7 @@ class _BenefitTile extends StatelessWidget {
             child: Icon(icon, size: 19, color: PomuColors.primary),
           ),
 
-          const Spacer(),
+          const SizedBox(height: 18),
 
           Text(
             title,

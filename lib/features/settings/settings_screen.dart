@@ -19,70 +19,152 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _showClearDuplicateResultDialog(BuildContext context) async {
     final shouldClear = await showDialog<bool>(
       context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.52),
       builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: PomuColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-          contentPadding: const EdgeInsets.fromLTRB(24, 14, 24, 0),
-          actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          title: const Text(
-            '검사 결과를 초기화할까요?',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: PomuColors.textPrimary,
-              letterSpacing: -0.4,
-            ),
-          ),
-          content: const Text(
-            '저장된 중복 그룹과 처리 완료 기록이 삭제돼요.\n\n'
-            '다음 검사에서는 이전에 처리했던 그룹도 '
-            '다시 나타날 수 있어요.\n\n'
-            '아이폰 사진은 삭제되거나 변경되지 않아요.',
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.5,
-              color: PomuColors.textSecondary,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(false);
-              },
-              child: const Text(
-                '취소',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: PomuColors.textSecondary,
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
+            decoration: BoxDecoration(
+              color: PomuColors.surface,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.14),
+                  blurRadius: 32,
+                  offset: const Offset(0, 16),
                 ),
-              ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(true);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: PomuColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 11,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 58,
+                  height: 58,
+                  decoration: const BoxDecoration(
+                    color: PomuColors.primaryLight,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.restart_alt_rounded,
+                    size: 30,
+                    color: PomuColors.primary,
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+
+                const SizedBox(height: 18),
+
+                const Text(
+                  '검사 결과를 초기화할까요?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w900,
+                    color: PomuColors.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
                 ),
-              ),
-              child: const Text(
-                '초기화',
-                style: TextStyle(fontWeight: FontWeight.w800),
-              ),
+
+                const SizedBox(height: 10),
+
+                const Text(
+                  '저장된 중복 그룹과 처리 완료 기록을\n'
+                  '초기화하고 처음부터 다시 검사해요.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: PomuColors.textSecondary,
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: PomuColors.background,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: PomuColors.divider),
+                  ),
+                  child: const Column(
+                    children: [
+                      _ResetNoticeRow(
+                        icon: Icons.refresh_rounded,
+                        text: '이전에 처리한 그룹도 다시 나타날 수 있어요.',
+                      ),
+                      SizedBox(height: 12),
+                      _ResetNoticeRow(
+                        icon: Icons.photo_outlined,
+                        text: '아이폰 사진은 삭제되거나 변경되지 않아요.',
+                      ),
+                      SizedBox(height: 12),
+                      _ResetNoticeRow(
+                        icon: Icons.lock_outline_rounded,
+                        text: '구매 기록과 무료 이용 기록은 유지돼요.',
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 22),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop(true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: PomuColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(17),
+                      ),
+                    ),
+                    child: const Text(
+                      '검사 결과 초기화',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop(false);
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: PomuColors.textSecondary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text(
+                      '취소',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -441,6 +523,48 @@ class _SettingsDivider extends StatelessWidget {
     return const Padding(
       padding: EdgeInsets.only(left: 76),
       child: Divider(height: 1, thickness: 1, color: PomuColors.divider),
+    );
+  }
+}
+
+class _ResetNoticeRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _ResetNoticeRow({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 30,
+          height: 30,
+          decoration: const BoxDecoration(
+            color: PomuColors.primaryLight,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 17, color: PomuColors.primary),
+        ),
+
+        const SizedBox(width: 11),
+
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                fontWeight: FontWeight.w600,
+                color: PomuColors.textPrimary,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

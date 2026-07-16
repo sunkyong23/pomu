@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -233,33 +234,56 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
   ) async {
     if (_isSavingResult) return;
 
-    final key = _buildGroupKeyFromIds(remainingAssetIds);
+    // 해결 기록은 삭제 전 원래 그룹 구성으로 저장해요.
+    final originalGroupKey = _buildGroupKeyFromIds(
+      resolvedGroup.assets.map((asset) => asset.id).toList(),
+    );
 
     final updatedGroups = _groups
         .where((group) => group.id != resolvedGroup.id)
         .toList();
 
     setState(() {
-      _resolvedGroupKeys.add(key);
+      _resolvedGroupKeys.add(originalGroupKey);
       _groups = updatedGroups;
       _isSavingResult = true;
     });
 
     try {
-      await _historyService.saveResolvedGroup(key);
-      await _resultCacheService.removeGroupById(resolvedGroup.id);
+      debugPrint('💾 1. 해결 그룹 기록 시작');
+      await _historyService.saveResolvedGroup(originalGroupKey);
+      debugPrint('✅ 1. 해결 그룹 기록 완료');
 
-      final nextGroupCount = (_savedSummary.groupCount - 1).clamp(0, 1 << 31);
-      final nextDeleteCandidateCount =
-          (_savedSummary.deleteCandidateCount - deletedCount).clamp(0, 1 << 31);
-      final nextReclaimableBytes =
-          (_savedSummary.reclaimableBytes - deletedBytes).clamp(0, 1 << 63);
+      debugPrint('💾 2. 캐시 그룹 제거 시작: ${resolvedGroup.id}');
+      await _resultCacheService.removeGroupById(resolvedGroup.id);
+      debugPrint('✅ 2. 캐시 그룹 제거 완료');
+
+      final nextGroupCount = math.max(0, _savedSummary.groupCount - 1);
+
+      final nextDeleteCandidateCount = math.max(
+        0,
+        _savedSummary.deleteCandidateCount - deletedCount,
+      );
+
+      final nextReclaimableBytes = math.max(
+        0,
+        _savedSummary.reclaimableBytes - deletedBytes,
+      );
+
+      debugPrint(
+        '💾 3. 요약 저장 시작: '
+        'groupCount=$nextGroupCount, '
+        'deleteCandidateCount=$nextDeleteCandidateCount, '
+        'reclaimableBytes=$nextReclaimableBytes',
+      );
 
       await _summaryService.saveSummary(
         groupCount: nextGroupCount,
         deleteCandidateCount: nextDeleteCandidateCount,
         reclaimableBytes: nextReclaimableBytes,
       );
+
+      debugPrint('✅ 3. 요약 저장 완료');
 
       final updatedSummary = await _summaryService.loadSummary();
 
@@ -268,22 +292,27 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
       setState(() {
         _savedSummary = updatedSummary;
         _isSavingResult = false;
-        _totalCachedGroupCount = (_totalCachedGroupCount - 1).clamp(0, 1 << 31);
-        _cachedGroupOffset = _cachedGroupOffset.clamp(
-          0,
+
+        _totalCachedGroupCount = math.max(0, _totalCachedGroupCount - 1);
+
+        _cachedGroupOffset = math.min(
+          _cachedGroupOffset,
           _totalCachedGroupCount,
         );
       });
-    } catch (e) {
+    } catch (error, stackTrace) {
+      debugPrint('❌ 삭제 결과 저장 실패: $error');
+      debugPrint('$stackTrace');
+
       if (!mounted) return;
 
       setState(() {
         _isSavingResult = false;
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('삭제 결과를 저장하는 중 문제가 발생했어요: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('삭제 결과를 저장하는 중 문제가 발생했어요: $error')),
+      );
     }
   }
 
@@ -967,22 +996,31 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
 
   Future<int> _tryGetAssetFileSizeForGroup(AssetEntity asset) async {
     try {
-      final file = await asset.file.timeout(const Duration(seconds: 1));
+      // iCloud 사진은 불러오는 데 시간이 걸릴 수 있으므로
+      // 기존 1초보다 넉넉하게 기다려요.
+      final file = await asset.file.timeout(const Duration(seconds: 8));
 
       if (file == null) {
+        debugPrint('⚠️ 파일을 가져오지 못함: ${asset.id}');
         return 0;
       }
 
-      return await file.length().timeout(const Duration(seconds: 1));
+      final size = await file.length().timeout(const Duration(seconds: 3));
+
+      debugPrint('📦 파일 크기: ${asset.id} / $size bytes');
+
+      return size;
     } on TimeoutException {
+      debugPrint('⏱️ 파일 크기 확인 시간 초과: ${asset.id}');
       return 0;
-    } catch (_) {
+    } catch (error) {
+      debugPrint('❌ 파일 크기 확인 실패: ${asset.id} / $error');
       return 0;
     }
   }
 
   String _formatBytes(int bytes) {
-    if (bytes <= 0) return '계산 중';
+    if (bytes <= 0) return '용량을 확인하지 못했어요';
 
     final mb = bytes / (1024 * 1024);
 
