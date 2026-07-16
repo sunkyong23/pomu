@@ -5,6 +5,20 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 
 import 'purchase_access_service.dart';
 
+enum PurchaseServiceError {
+  purchaseStatusUnavailable,
+  storeUnavailable,
+  productLoadFailed,
+  productNotFound,
+  noRegisteredProducts,
+  productUnavailable,
+  purchaseStartFailed,
+  purchaseVerificationFailed,
+  purchaseFailed,
+  restoreFailed,
+  completionFailed,
+}
+
 class InAppPurchaseService extends ChangeNotifier {
   InAppPurchaseService._();
 
@@ -12,6 +26,8 @@ class InAppPurchaseService extends ChangeNotifier {
 
   static const String duplicateCleanupProductId =
       'com.sunkyung.pomu.duplicate_cleanup_lifetime';
+
+  static const Duration _restoreTimeout = Duration(seconds: 12);
 
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
 
@@ -22,8 +38,10 @@ class InAppPurchaseService extends ChangeNotifier {
   bool _isLoading = false;
   bool _isPurchasing = false;
   bool _isRestoring = false;
+  bool _isDisposed = false;
 
   ProductDetails? _duplicateCleanupProduct;
+  PurchaseServiceError? _errorCode;
   String? _errorMessage;
 
   bool get isInitialized => _isInitialized;
@@ -34,6 +52,12 @@ class InAppPurchaseService extends ChangeNotifier {
 
   ProductDetails? get duplicateCleanupProduct => _duplicateCleanupProduct;
 
+  PurchaseServiceError? get errorCode => _errorCode;
+
+  /// Backward-compatible fallback text.
+  ///
+  /// User-facing widgets should prefer [errorCode] and resolve it through
+  /// AppLocalizations. This value may contain a StoreKit diagnostic message.
   String? get errorMessage => _errorMessage;
 
   String? get displayPrice => _duplicateCleanupProduct?.price;
@@ -41,29 +65,47 @@ class InAppPurchaseService extends ChangeNotifier {
   bool get canPurchase =>
       _isStoreAvailable && _duplicateCleanupProduct != null && !_isPurchasing;
 
+  void _notifySafely() {
+    if (_isDisposed) return;
+    notifyListeners();
+  }
+
+  void _log(String message) {
+    if (kDebugMode) {
+      debugPrint(message);
+    }
+  }
+
   Future<void> initialize() async {
+    if (_isDisposed) return;
+
     if (_isInitialized) {
-      debugPrint('🟡 InAppPurchaseService: 이미 초기화되어 있어요.');
+      _log('🟡 InAppPurchaseService: 이미 초기화되어 있어요.');
       return;
     }
 
-    debugPrint('🟣 InAppPurchaseService 초기화 시작');
+    _log('🟣 InAppPurchaseService 초기화 시작');
+
+    await _purchaseSubscription?.cancel();
 
     _purchaseSubscription = _inAppPurchase.purchaseStream.listen(
       _handlePurchaseUpdates,
       onError: (Object error, StackTrace stackTrace) {
-        debugPrint('❌ purchaseStream 오류');
-        debugPrint('❌ error: $error');
-        debugPrint('❌ stackTrace: $stackTrace');
+        _log('❌ purchaseStream 오류');
+        _log('❌ error: $error');
+        _log('❌ stackTrace: $stackTrace');
 
-        _errorMessage = '결제 상태를 확인하지 못했어요.';
+        _setError(
+          PurchaseServiceError.purchaseStatusUnavailable,
+          '결제 상태를 확인하지 못했어요.',
+        );
         _isPurchasing = false;
         _isRestoring = false;
 
-        notifyListeners();
+        _notifySafely();
       },
       onDone: () {
-        debugPrint('🟡 purchaseStream 종료');
+        _log('🟡 purchaseStream 종료');
       },
     );
 
@@ -71,29 +113,33 @@ class InAppPurchaseService extends ChangeNotifier {
 
     await loadProducts();
 
-    debugPrint('🟢 InAppPurchaseService 초기화 완료');
+    _log('🟢 InAppPurchaseService 초기화 완료');
   }
 
   Future<void> loadProducts() async {
-    debugPrint('');
-    debugPrint('========================================');
-    debugPrint('🛍️ StoreKit 상품 조회 시작');
-    debugPrint('🛍️ 요청 Product ID: $duplicateCleanupProductId');
-    debugPrint('========================================');
+    _log('');
+    _log('========================================');
+    _log('🛍️ StoreKit 상품 조회 시작');
+    _log('🛍️ 요청 Product ID: $duplicateCleanupProductId');
+    _log('========================================');
 
     _setLoading(true);
-    _errorMessage = null;
+    _clearErrorState();
 
     try {
       _isStoreAvailable = await _inAppPurchase.isAvailable();
 
-      debugPrint('🛍️ Store available: $_isStoreAvailable');
+      _log('🛍️ Store available: $_isStoreAvailable');
 
       if (!_isStoreAvailable) {
         _duplicateCleanupProduct = null;
-        _errorMessage = '현재 App Store 결제를 사용할 수 없어요.';
+        _isPurchasing = false;
+        _setError(
+          PurchaseServiceError.storeUnavailable,
+          '현재 App Store 결제를 사용할 수 없어요.',
+        );
 
-        debugPrint('❌ App Store 결제를 사용할 수 없음');
+        _log('❌ App Store 결제를 사용할 수 없음');
         return;
       }
 
@@ -101,28 +147,31 @@ class InAppPurchaseService extends ChangeNotifier {
         duplicateCleanupProductId,
       });
 
-      debugPrint('');
-      debugPrint('========================');
-      debugPrint('Store available: $_isStoreAvailable');
-      debugPrint('Found: ${response.productDetails.length}');
-      debugPrint('Not Found: ${response.notFoundIDs}');
-      debugPrint('Error: ${response.error}');
+      _log('');
+      _log('========================');
+      _log('Store available: $_isStoreAvailable');
+      _log('Found: ${response.productDetails.length}');
+      _log('Not Found: ${response.notFoundIDs}');
+      _log('Error: ${response.error}');
 
       for (final product in response.productDetails) {
-        debugPrint('Product: ${product.id}');
-        debugPrint('Title: ${product.title}');
-        debugPrint('Price: ${product.price}');
-        debugPrint('Currency: ${product.currencyCode}');
+        _log('Product: ${product.id}');
+        _log('Title: ${product.title}');
+        _log('Price: ${product.price}');
+        _log('Currency: ${product.currencyCode}');
       }
 
-      debugPrint('========================');
-      debugPrint('');
+      _log('========================');
+      _log('');
 
       if (response.error != null) {
         _duplicateCleanupProduct = null;
-        _errorMessage = response.error?.message ?? '상품 정보를 불러오지 못했어요.';
+        _setError(
+          PurchaseServiceError.productLoadFailed,
+          response.error?.message ?? '상품 정보를 불러오지 못했어요.',
+        );
 
-        debugPrint('❌ 상품 조회 응답 오류: ${response.error}');
+        _log('❌ 상품 조회 응답 오류: ${response.error}');
         return;
       }
 
@@ -130,13 +179,19 @@ class InAppPurchaseService extends ChangeNotifier {
         _duplicateCleanupProduct = null;
 
         if (response.notFoundIDs.contains(duplicateCleanupProductId)) {
-          _errorMessage = 'App Store에서 결제 상품을 찾지 못했어요.';
+          _setError(
+            PurchaseServiceError.productNotFound,
+            'App Store에서 결제 상품을 찾지 못했어요.',
+          );
         } else {
-          _errorMessage = '등록된 결제 상품이 없어요.';
+          _setError(
+            PurchaseServiceError.noRegisteredProducts,
+            '등록된 결제 상품이 없어요.',
+          );
         }
 
-        debugPrint('❌ 상품이 비어 있음');
-        debugPrint('❌ notFoundIDs: ${response.notFoundIDs}');
+        _log('❌ 상품이 비어 있음');
+        _log('❌ notFoundIDs: ${response.notFoundIDs}');
         return;
       }
 
@@ -152,93 +207,102 @@ class InAppPurchaseService extends ChangeNotifier {
       _duplicateCleanupProduct =
           matchedProduct ?? response.productDetails.first;
 
-      debugPrint('✅ 상품 저장 완료');
-      debugPrint('✅ id: ${_duplicateCleanupProduct?.id}');
-      debugPrint('✅ price: ${_duplicateCleanupProduct?.price}');
+      _log('✅ 상품 저장 완료');
+      _log('✅ id: ${_duplicateCleanupProduct?.id}');
+      _log('✅ price: ${_duplicateCleanupProduct?.price}');
     } catch (error, stackTrace) {
-      debugPrint('❌ loadProducts 예외 발생');
-      debugPrint('❌ error: $error');
-      debugPrint('❌ stackTrace: $stackTrace');
+      _log('❌ loadProducts 예외 발생');
+      _log('❌ error: $error');
+      _log('❌ stackTrace: $stackTrace');
 
       _duplicateCleanupProduct = null;
-      _errorMessage = '상품 정보를 불러오는 중 문제가 발생했어요.';
+      _setError(
+        PurchaseServiceError.productLoadFailed,
+        '상품 정보를 불러오는 중 문제가 발생했어요.',
+      );
     } finally {
       _setLoading(false);
 
-      debugPrint('🛍️ StoreKit 상품 조회 종료');
-      debugPrint('');
+      _log('🛍️ StoreKit 상품 조회 종료');
+      _log('');
     }
   }
 
   Future<bool> buyDuplicateCleanup() async {
-    debugPrint('');
-    debugPrint('========================================');
-    debugPrint('🚀 buyDuplicateCleanup 호출');
-    debugPrint('========================================');
+    _log('');
+    _log('========================================');
+    _log('🚀 buyDuplicateCleanup 호출');
+    _log('========================================');
 
     final product = _duplicateCleanupProduct;
 
-    debugPrint('🚀 store available: $_isStoreAvailable');
-    debugPrint('🚀 isPurchasing: $_isPurchasing');
-    debugPrint('🚀 product: ${product?.id}');
-    debugPrint('🚀 price: ${product?.price}');
+    _log('🚀 store available: $_isStoreAvailable');
+    _log('🚀 isPurchasing: $_isPurchasing');
+    _log('🚀 product: ${product?.id}');
+    _log('🚀 price: ${product?.price}');
 
     if (product == null || !_isStoreAvailable) {
-      debugPrint('❌ 상품 또는 Store 사용 불가');
-      debugPrint('❌ product null: ${product == null}');
-      debugPrint('❌ store available: $_isStoreAvailable');
+      _log('❌ 상품 또는 Store 사용 불가');
+      _log('❌ product null: ${product == null}');
+      _log('❌ store available: $_isStoreAvailable');
 
-      _errorMessage = '구매할 상품 정보를 아직 불러오지 못했어요.';
-      notifyListeners();
+      _setError(
+        PurchaseServiceError.productUnavailable,
+        '구매할 상품 정보를 아직 불러오지 못했어요.',
+      );
+      _notifySafely();
 
       return false;
     }
 
     if (_isPurchasing) {
-      debugPrint('🟡 이미 결제가 진행 중이라 중복 호출을 막았어요.');
+      _log('🟡 이미 결제가 진행 중이라 중복 호출을 막았어요.');
       return false;
     }
 
     _isPurchasing = true;
-    _errorMessage = null;
-    notifyListeners();
+    _clearErrorState();
+    _notifySafely();
 
     try {
       final purchaseParam = PurchaseParam(productDetails: product);
 
-      debugPrint('🔥 buyNonConsumable 호출 직전');
-      debugPrint('🔥 product ID: ${product.id}');
-      debugPrint('🔥 product price: ${product.price}');
+      _log('🔥 buyNonConsumable 호출 직전');
+      _log('🔥 product ID: ${product.id}');
+      _log('🔥 product price: ${product.price}');
 
       final started = await _inAppPurchase.buyNonConsumable(
         purchaseParam: purchaseParam,
       );
 
-      debugPrint('🔥 buyNonConsumable 호출 완료');
-      debugPrint('🔥 started: $started');
+      _log('🔥 buyNonConsumable 호출 완료');
+      _log('🔥 started: $started');
 
       if (!started) {
         _isPurchasing = false;
-        _errorMessage = '결제를 시작하지 못했어요.';
+        _setError(PurchaseServiceError.purchaseStartFailed, '결제를 시작하지 못했어요.');
 
-        debugPrint('❌ StoreKit이 결제 시작 요청을 거절했어요.');
+        _log('❌ StoreKit이 결제 시작 요청을 거절했어요.');
 
-        notifyListeners();
+        _notifySafely();
       } else {
-        debugPrint('✅ StoreKit 결제 요청 시작 성공');
-        debugPrint('✅ 이제 purchaseStream 응답을 기다려요.');
+        _log('✅ StoreKit 결제 요청 시작 성공');
+        _log('✅ 이제 purchaseStream 응답을 기다려요.');
       }
 
       return started;
     } catch (error, stackTrace) {
-      debugPrint('❌ buyNonConsumable 예외 발생');
-      debugPrint('❌ error: $error');
-      debugPrint('❌ stackTrace: $stackTrace');
+      _log('❌ buyNonConsumable 예외 발생');
+      _log('❌ error: $error');
+      _log('❌ stackTrace: $stackTrace');
 
       _isPurchasing = false;
-      _errorMessage = '결제를 시작하는 중 문제가 발생했어요.';
+      _setError(
+        PurchaseServiceError.purchaseStartFailed,
+        '결제를 시작하는 중 문제가 발생했어요.',
+      );
 
-      notifyListeners();
+      _notifySafely();
 
       return false;
     }
@@ -246,68 +310,77 @@ class InAppPurchaseService extends ChangeNotifier {
 
   Future<void> restorePurchases() async {
     if (_isRestoring) {
-      debugPrint('🟡 이미 구매 복원을 진행 중이에요.');
+      _log('🟡 이미 구매 복원을 진행 중이에요.');
       return;
     }
 
-    debugPrint('');
-    debugPrint('========================================');
-    debugPrint('♻️ 구매 복원 시작');
-    debugPrint('========================================');
+    _log('');
+    _log('========================================');
+    _log('♻️ 구매 복원 시작');
+    _log('========================================');
 
     _isRestoring = true;
-    _errorMessage = null;
+    _clearErrorState();
 
-    notifyListeners();
+    _notifySafely();
 
     try {
       await _inAppPurchase.restorePurchases();
 
-      debugPrint('✅ restorePurchases 호출 완료');
-      debugPrint('✅ purchaseStream 응답을 기다려요.');
+      _log('✅ restorePurchases 호출 완료');
+      _log('✅ purchaseStream 응답을 기다려요.');
+
+      unawaited(
+        Future<void>.delayed(_restoreTimeout).then((_) {
+          if (_isDisposed || !_isRestoring) return;
+
+          _isRestoring = false;
+          _notifySafely();
+        }),
+      );
     } catch (error, stackTrace) {
-      debugPrint('❌ 구매 복원 예외 발생');
-      debugPrint('❌ error: $error');
-      debugPrint('❌ stackTrace: $stackTrace');
+      _log('❌ 구매 복원 예외 발생');
+      _log('❌ error: $error');
+      _log('❌ stackTrace: $stackTrace');
 
       _isRestoring = false;
-      _errorMessage = '구매 내역을 복원하지 못했어요.';
+      _setError(PurchaseServiceError.restoreFailed, '구매 내역을 복원하지 못했어요.');
 
-      notifyListeners();
+      _notifySafely();
     }
   }
 
   Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchases) async {
-    debugPrint('');
-    debugPrint('========================================');
-    debugPrint('📦 purchaseStream 업데이트 수신');
-    debugPrint('📦 purchase count: ${purchases.length}');
-    debugPrint('========================================');
+    _log('');
+    _log('========================================');
+    _log('📦 purchaseStream 업데이트 수신');
+    _log('📦 purchase count: ${purchases.length}');
+    _log('========================================');
 
     if (purchases.isEmpty) {
-      debugPrint('🟡 구매 업데이트가 비어 있어요.');
+      _log('🟡 구매 업데이트가 비어 있어요.');
 
       _isPurchasing = false;
       _isRestoring = false;
 
-      notifyListeners();
+      _notifySafely();
       return;
     }
 
     for (final purchase in purchases) {
-      debugPrint('');
-      debugPrint('📦 productID: ${purchase.productID}');
-      debugPrint('📦 status: ${purchase.status}');
-      debugPrint(
+      _log('');
+      _log('📦 productID: ${purchase.productID}');
+      _log('📦 status: ${purchase.status}');
+      _log(
         '📦 pendingCompletePurchase: '
         '${purchase.pendingCompletePurchase}',
       );
-      debugPrint('📦 error: ${purchase.error}');
-      debugPrint('📦 purchaseID: ${purchase.purchaseID}');
-      debugPrint('📦 transactionDate: ${purchase.transactionDate}');
+      _log('📦 error: ${purchase.error}');
+      _log('📦 purchaseID: ${purchase.purchaseID}');
+      _log('📦 transactionDate: ${purchase.transactionDate}');
 
       if (purchase.productID != duplicateCleanupProductId) {
-        debugPrint('🟡 포무 상품이 아닌 구매 업데이트예요.');
+        _log('🟡 포무 상품이 아닌 구매 업데이트예요.');
 
         await _completePurchaseIfNeeded(purchase);
         continue;
@@ -315,27 +388,30 @@ class InAppPurchaseService extends ChangeNotifier {
 
       switch (purchase.status) {
         case PurchaseStatus.pending:
-          debugPrint('⏳ 결제 승인 대기 중');
+          _log('⏳ 결제 승인 대기 중');
 
           _isPurchasing = true;
           break;
 
         case PurchaseStatus.purchased:
-          debugPrint('✅ 구매 완료 상태 수신');
+          _log('✅ 구매 완료 상태 수신');
 
           final isValid = await _verifyPurchase(purchase);
 
           if (isValid) {
-            debugPrint('✅ 구매 검증 성공');
+            _log('✅ 구매 검증 성공');
 
             await PurchaseAccessService.instance
                 .markDuplicateCleanupPurchased();
 
-            _errorMessage = null;
+            _clearErrorState();
           } else {
-            debugPrint('❌ 구매 검증 실패');
+            _log('❌ 구매 검증 실패');
 
-            _errorMessage = '구매 확인에 실패했어요.';
+            _setError(
+              PurchaseServiceError.purchaseVerificationFailed,
+              '구매 확인에 실패했어요.',
+            );
           }
 
           _isPurchasing = false;
@@ -343,21 +419,24 @@ class InAppPurchaseService extends ChangeNotifier {
           break;
 
         case PurchaseStatus.restored:
-          debugPrint('♻️ 구매 복원 상태 수신');
+          _log('♻️ 구매 복원 상태 수신');
 
           final isValid = await _verifyPurchase(purchase);
 
           if (isValid) {
-            debugPrint('✅ 복원 구매 검증 성공');
+            _log('✅ 복원 구매 검증 성공');
 
             await PurchaseAccessService.instance
                 .markDuplicateCleanupPurchased();
 
-            _errorMessage = null;
+            _clearErrorState();
           } else {
-            debugPrint('❌ 복원 구매 검증 실패');
+            _log('❌ 복원 구매 검증 실패');
 
-            _errorMessage = '구매 확인에 실패했어요.';
+            _setError(
+              PurchaseServiceError.purchaseVerificationFailed,
+              '구매 확인에 실패했어요.',
+            );
           }
 
           _isPurchasing = false;
@@ -365,34 +444,37 @@ class InAppPurchaseService extends ChangeNotifier {
           break;
 
         case PurchaseStatus.error:
-          debugPrint('❌ 구매 오류 상태 수신');
-          debugPrint('❌ purchase error: ${purchase.error}');
+          _log('❌ 구매 오류 상태 수신');
+          _log('❌ purchase error: ${purchase.error}');
 
           _isPurchasing = false;
           _isRestoring = false;
-          _errorMessage = purchase.error?.message ?? '결제를 완료하지 못했어요.';
+          _setError(
+            PurchaseServiceError.purchaseFailed,
+            purchase.error?.message ?? '결제를 완료하지 못했어요.',
+          );
           break;
 
         case PurchaseStatus.canceled:
-          debugPrint('🟡 사용자가 결제를 취소했어요.');
+          _log('🟡 사용자가 결제를 취소했어요.');
 
           _isPurchasing = false;
           _isRestoring = false;
-          _errorMessage = null;
+          _clearErrorState();
           break;
       }
 
       await _completePurchaseIfNeeded(purchase);
     }
 
-    notifyListeners();
+    _notifySafely();
   }
 
   Future<bool> _verifyPurchase(PurchaseDetails purchase) async {
-    debugPrint('');
-    debugPrint('🔍 구매 검증 시작');
-    debugPrint('🔍 productID: ${purchase.productID}');
-    debugPrint('🔍 status: ${purchase.status}');
+    _log('');
+    _log('🔍 구매 검증 시작');
+    _log('🔍 productID: ${purchase.productID}');
+    _log('🔍 status: ${purchase.status}');
 
     /*
      * 현재 1차 구현에서는 App Store가 전달한 purchased/restored 상태를
@@ -406,51 +488,63 @@ class InAppPurchaseService extends ChangeNotifier {
         (purchase.status == PurchaseStatus.purchased ||
             purchase.status == PurchaseStatus.restored);
 
-    debugPrint('🔍 검증 결과: $isValid');
+    _log('🔍 검증 결과: $isValid');
 
     return isValid;
   }
 
   Future<void> _completePurchaseIfNeeded(PurchaseDetails purchase) async {
     if (!purchase.pendingCompletePurchase) {
-      debugPrint('🟡 completePurchase가 필요하지 않아요.');
+      _log('🟡 completePurchase가 필요하지 않아요.');
       return;
     }
 
-    debugPrint('🔵 completePurchase 호출 시작');
+    _log('🔵 completePurchase 호출 시작');
 
     try {
       await _inAppPurchase.completePurchase(purchase);
 
-      debugPrint('✅ completePurchase 완료');
+      _log('✅ completePurchase 완료');
     } catch (error, stackTrace) {
-      debugPrint('❌ completePurchase 오류');
-      debugPrint('❌ error: $error');
-      debugPrint('❌ stackTrace: $stackTrace');
+      _log('❌ completePurchase 오류');
+      _log('❌ error: $error');
+      _log('❌ stackTrace: $stackTrace');
 
-      _errorMessage = '구매 완료 처리 중 문제가 발생했어요.';
+      _setError(PurchaseServiceError.completionFailed, '구매 완료 처리 중 문제가 발생했어요.');
     }
+  }
+
+  void _setError(PurchaseServiceError code, String fallbackMessage) {
+    _errorCode = code;
+    _errorMessage = fallbackMessage;
+  }
+
+  void _clearErrorState() {
+    _errorCode = null;
+    _errorMessage = null;
   }
 
   void clearError() {
     if (_errorMessage == null) return;
 
-    debugPrint('🧹 결제 오류 메시지 초기화');
+    _log('🧹 결제 오류 메시지 초기화');
 
-    _errorMessage = null;
-    notifyListeners();
+    _clearErrorState();
+    _notifySafely();
   }
 
   void _setLoading(bool value) {
     _isLoading = value;
-    notifyListeners();
+    _notifySafely();
   }
 
   @override
   void dispose() {
-    debugPrint('🟣 InAppPurchaseService dispose');
+    _log('🟣 InAppPurchaseService dispose');
 
+    _isDisposed = true;
     _purchaseSubscription?.cancel();
+    _purchaseSubscription = null;
 
     super.dispose();
   }

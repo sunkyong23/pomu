@@ -457,5 +457,83 @@
       }
     }
   },
-  "travelInfoDescription": "写真アプリに保存された撮影日時を基準に項目を探します。"
+  "travelInfoDescription": "写真アプリに保存された撮影日時を基準に項目を探します。",
+  "permissionTitle": "写真をもっときれいに\n整理します",
+  "permissionDescription": "重複写真や不要な写真を見つけて\niPhoneの空き容量を簡単に増やせます。",
+  "permissionPrivacyTitle": "写真は安全に処理されます",
+  "permissionPrivacyDescription": "写真は端末内だけで解析され、\n外部サーバーにはアップロードされません。",
+  "permissionStartButton": "写真整理を始める",
+  "permissionBottomDescription": "写真へのアクセスはiPhoneの設定からいつでも変更できます。",
+  "permissionDialogTitle": "写真へのアクセスが必要です",
+  "permissionDialogDescription": "重複写真を探してストレージを整理するには、写真ライブラリへのアクセスが必要です。\n\n写真は端末内だけで処理され、外部サーバーにはアップロードされません。",
+  "scanCheckingNewPhotos": "新しい写真を確認しています",
+  "scanAnalyzingPhotos": "AIが写真を解析しています",
+  "scanPreparingAlbums": "アルバムを準備しています",
+  "scanCompleteTitle": "整理が完了しました",
+  "scanWorkingTitle": "写真を整理しています",
+  "scanBackHome": "ホームに戻る",
+  "scanStepPhotoCheck": "写真確認",
+  "scanStepAiAnalysis": "AI解析",
+  "scanStepAlbumCreation": "アルバム作成",
+  "scanTotalOrganized": "{count}枚の整理が完了",
+  "scanAlbumCount": "{count}個のアルバムに分類しました",
+  "photoCount": "{count}枚",
+  "categoryPets": "ペット",
+  "categoryPeople": "人物",
+  "categoryFood": "食べ物",
+  "categoryLandscape": "風景",
+  "categoryDocuments": "書類",
+  "categoryScreenshots": "スクリーンショット",
+  "categoryReceipts": "レシート",
+  "categoryOther": "その他",
+  "@scanTotalOrganized": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scanAlbumCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@photoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "albumNameSettingsTitle": "アルバム名の設定",
+  "reset": "リセット",
+  "save": "保存",
+  "albumNamesSaved": "アルバム名を保存しました。",
+  "albumNamesReset": "標準のアルバム名に戻しました。",
+  "defaultNameLabel": "標準名",
+  "customNameLabel": "カスタム名",
+  "albumNameEmptyHint": "空欄の場合は標準名を使用",
+  "albumNameDefaultHelp": "入力しない場合は標準名でアルバムが作成されます。",
+  "defaultAlbumName": "Pomu {category}",
+  "@defaultAlbumName": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "saving": "保存中...",
+  "purchaseErrorStatusUnavailable": "購入状況を確認できませんでした。",
+  "purchaseErrorStoreUnavailable": "現在App Storeでの購入を利用できません。",
+  "purchaseErrorProductLoadFailed": "商品情報を読み込めませんでした。しばらくしてからもう一度お試しください。",
+  "purchaseErrorProductNotFound": "App Storeで購入商品が見つかりませんでした。",
+  "purchaseErrorNoRegisteredProducts": "登録された購入商品がありません。",
+  "purchaseErrorProductUnavailable": "購入商品の情報をまだ読み込めていません。",
+  "purchaseErrorStartFailed": "購入を開始できませんでした。",
+  "purchaseErrorVerificationFailed": "購入を確認できませんでした。",
+  "purchaseErrorFailed": "購入を完了できませんでした。",
+  "purchaseErrorRestoreFailed": "購入を復元できませんでした。",
+  "purchaseErrorCompletionFailed": "購入完了処理中に問題が発生しました。"
 }

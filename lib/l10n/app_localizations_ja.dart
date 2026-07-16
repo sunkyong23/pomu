@@ -690,4 +690,165 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get travelInfoDescription => '写真アプリに保存された撮影日時を基準に項目を探します。';
+
+  @override
+  String get permissionTitle => '写真をもっときれいに\n整理します';
+
+  @override
+  String get permissionDescription => '重複写真や不要な写真を見つけて\niPhoneの空き容量を簡単に増やせます。';
+
+  @override
+  String get permissionPrivacyTitle => '写真は安全に処理されます';
+
+  @override
+  String get permissionPrivacyDescription =>
+      '写真は端末内だけで解析され、\n外部サーバーにはアップロードされません。';
+
+  @override
+  String get permissionStartButton => '写真整理を始める';
+
+  @override
+  String get permissionBottomDescription => '写真へのアクセスはiPhoneの設定からいつでも変更できます。';
+
+  @override
+  String get permissionDialogTitle => '写真へのアクセスが必要です';
+
+  @override
+  String get permissionDialogDescription =>
+      '重複写真を探してストレージを整理するには、写真ライブラリへのアクセスが必要です。\n\n写真は端末内だけで処理され、外部サーバーにはアップロードされません。';
+
+  @override
+  String get scanCheckingNewPhotos => '新しい写真を確認しています';
+
+  @override
+  String get scanAnalyzingPhotos => 'AIが写真を解析しています';
+
+  @override
+  String get scanPreparingAlbums => 'アルバムを準備しています';
+
+  @override
+  String get scanCompleteTitle => '整理が完了しました';
+
+  @override
+  String get scanWorkingTitle => '写真を整理しています';
+
+  @override
+  String get scanBackHome => 'ホームに戻る';
+
+  @override
+  String get scanStepPhotoCheck => '写真確認';
+
+  @override
+  String get scanStepAiAnalysis => 'AI解析';
+
+  @override
+  String get scanStepAlbumCreation => 'アルバム作成';
+
+  @override
+  String scanTotalOrganized(int count) {
+    return '$count枚の整理が完了';
+  }
+
+  @override
+  String scanAlbumCount(int count) {
+    return '$count個のアルバムに分類しました';
+  }
+
+  @override
+  String photoCount(int count) {
+    return '$count枚';
+  }
+
+  @override
+  String get categoryPets => 'ペット';
+
+  @override
+  String get categoryPeople => '人物';
+
+  @override
+  String get categoryFood => '食べ物';
+
+  @override
+  String get categoryLandscape => '風景';
+
+  @override
+  String get categoryDocuments => '書類';
+
+  @override
+  String get categoryScreenshots => 'スクリーンショット';
+
+  @override
+  String get categoryReceipts => 'レシート';
+
+  @override
+  String get categoryOther => 'その他';
+
+  @override
+  String get albumNameSettingsTitle => 'アルバム名の設定';
+
+  @override
+  String get reset => 'リセット';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get albumNamesSaved => 'アルバム名を保存しました。';
+
+  @override
+  String get albumNamesReset => '標準のアルバム名に戻しました。';
+
+  @override
+  String get defaultNameLabel => '標準名';
+
+  @override
+  String get customNameLabel => 'カスタム名';
+
+  @override
+  String get albumNameEmptyHint => '空欄の場合は標準名を使用';
+
+  @override
+  String get albumNameDefaultHelp => '入力しない場合は標準名でアルバムが作成されます。';
+
+  @override
+  String defaultAlbumName(String category) {
+    return 'Pomu $category';
+  }
+
+  @override
+  String get saving => '保存中...';
+
+  @override
+  String get purchaseErrorStatusUnavailable => '購入状況を確認できませんでした。';
+
+  @override
+  String get purchaseErrorStoreUnavailable => '現在App Storeでの購入を利用できません。';
+
+  @override
+  String get purchaseErrorProductLoadFailed =>
+      '商品情報を読み込めませんでした。しばらくしてからもう一度お試しください。';
+
+  @override
+  String get purchaseErrorProductNotFound => 'App Storeで購入商品が見つかりませんでした。';
+
+  @override
+  String get purchaseErrorNoRegisteredProducts => '登録された購入商品がありません。';
+
+  @override
+  String get purchaseErrorProductUnavailable => '購入商品の情報をまだ読み込めていません。';
+
+  @override
+  String get purchaseErrorStartFailed => '購入を開始できませんでした。';
+
+  @override
+  String get purchaseErrorVerificationFailed => '購入を確認できませんでした。';
+
+  @override
+  String get purchaseErrorFailed => '購入を完了できませんでした。';
+
+  @override
+  String get purchaseErrorRestoreFailed => '購入を復元できませんでした。';
+
+  @override
+  String get purchaseErrorCompletionFailed => '購入完了処理中に問題が発生しました。';
 }

@@ -1325,6 +1325,306 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'사진 앱에 저장된 촬영 날짜와 시간을 기준으로 항목을 찾아요.'**
   String get travelInfoDescription;
+
+  /// No description provided for @permissionTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 더 깔끔하게\n정리해드릴게요'**
+  String get permissionTitle;
+
+  /// No description provided for @permissionDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'중복 사진과 불필요한 사진을 찾아\n아이폰 저장공간을 쉽게 확보할 수 있어요.'**
+  String get permissionDescription;
+
+  /// No description provided for @permissionPrivacyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진은 안전하게 처리돼요'**
+  String get permissionPrivacyTitle;
+
+  /// No description provided for @permissionPrivacyDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진은 기기 안에서만 분석되며\n외부 서버로 업로드되지 않아요.'**
+  String get permissionPrivacyDescription;
+
+  /// No description provided for @permissionStartButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 정리 시작하기'**
+  String get permissionStartButton;
+
+  /// No description provided for @permissionBottomDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'권한은 언제든 아이폰 설정에서 변경할 수 있어요.'**
+  String get permissionBottomDescription;
+
+  /// No description provided for @permissionDialogTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 접근 권한이 필요해요'**
+  String get permissionDialogTitle;
+
+  /// No description provided for @permissionDialogDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'중복 사진을 찾고 저장공간을 정리하려면 사진 보관함 접근 권한이 필요해요.\n\n사진은 기기 안에서만 처리되며 외부 서버로 업로드되지 않아요.'**
+  String get permissionDialogDescription;
+
+  /// No description provided for @scanCheckingNewPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'새 사진을 확인하고 있어요'**
+  String get scanCheckingNewPhotos;
+
+  /// No description provided for @scanAnalyzingPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'AI가 사진을 분석하고 있어요'**
+  String get scanAnalyzingPhotos;
+
+  /// No description provided for @scanPreparingAlbums.
+  ///
+  /// In ko, this message translates to:
+  /// **'앨범을 준비하고 있어요'**
+  String get scanPreparingAlbums;
+
+  /// No description provided for @scanCompleteTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'정리가 완료됐어요'**
+  String get scanCompleteTitle;
+
+  /// No description provided for @scanWorkingTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 정리하고 있어요'**
+  String get scanWorkingTitle;
+
+  /// No description provided for @scanBackHome.
+  ///
+  /// In ko, this message translates to:
+  /// **'홈으로 돌아가기'**
+  String get scanBackHome;
+
+  /// No description provided for @scanStepPhotoCheck.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 확인'**
+  String get scanStepPhotoCheck;
+
+  /// No description provided for @scanStepAiAnalysis.
+  ///
+  /// In ko, this message translates to:
+  /// **'AI 분석'**
+  String get scanStepAiAnalysis;
+
+  /// No description provided for @scanStepAlbumCreation.
+  ///
+  /// In ko, this message translates to:
+  /// **'앨범 생성'**
+  String get scanStepAlbumCreation;
+
+  /// No description provided for @scanTotalOrganized.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장 정리 완료'**
+  String scanTotalOrganized(int count);
+
+  /// No description provided for @scanAlbumCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 앨범으로 분류했어요'**
+  String scanAlbumCount(int count);
+
+  /// No description provided for @photoCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장'**
+  String photoCount(int count);
+
+  /// No description provided for @categoryPets.
+  ///
+  /// In ko, this message translates to:
+  /// **'반려동물'**
+  String get categoryPets;
+
+  /// No description provided for @categoryPeople.
+  ///
+  /// In ko, this message translates to:
+  /// **'사람'**
+  String get categoryPeople;
+
+  /// No description provided for @categoryFood.
+  ///
+  /// In ko, this message translates to:
+  /// **'음식'**
+  String get categoryFood;
+
+  /// No description provided for @categoryLandscape.
+  ///
+  /// In ko, this message translates to:
+  /// **'풍경'**
+  String get categoryLandscape;
+
+  /// No description provided for @categoryDocuments.
+  ///
+  /// In ko, this message translates to:
+  /// **'문서'**
+  String get categoryDocuments;
+
+  /// No description provided for @categoryScreenshots.
+  ///
+  /// In ko, this message translates to:
+  /// **'스크린샷'**
+  String get categoryScreenshots;
+
+  /// No description provided for @categoryReceipts.
+  ///
+  /// In ko, this message translates to:
+  /// **'영수증'**
+  String get categoryReceipts;
+
+  /// No description provided for @categoryOther.
+  ///
+  /// In ko, this message translates to:
+  /// **'기타'**
+  String get categoryOther;
+
+  /// No description provided for @albumNameSettingsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'앨범 이름 설정'**
+  String get albumNameSettingsTitle;
+
+  /// No description provided for @reset.
+  ///
+  /// In ko, this message translates to:
+  /// **'초기화'**
+  String get reset;
+
+  /// No description provided for @save.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장'**
+  String get save;
+
+  /// No description provided for @albumNamesSaved.
+  ///
+  /// In ko, this message translates to:
+  /// **'앨범 이름이 저장되었어요.'**
+  String get albumNamesSaved;
+
+  /// No description provided for @albumNamesReset.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 앨범 이름으로 되돌렸어요.'**
+  String get albumNamesReset;
+
+  /// No description provided for @defaultNameLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본 이름'**
+  String get defaultNameLabel;
+
+  /// No description provided for @customNameLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용자 지정 이름'**
+  String get customNameLabel;
+
+  /// No description provided for @albumNameEmptyHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'비워두면 기본 이름 사용'**
+  String get albumNameEmptyHint;
+
+  /// No description provided for @albumNameDefaultHelp.
+  ///
+  /// In ko, this message translates to:
+  /// **'입력하지 않으면 기본 이름으로 앨범이 생성돼요.'**
+  String get albumNameDefaultHelp;
+
+  /// No description provided for @defaultAlbumName.
+  ///
+  /// In ko, this message translates to:
+  /// **'Pomu {category}'**
+  String defaultAlbumName(String category);
+
+  /// No description provided for @saving.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장 중...'**
+  String get saving;
+
+  /// No description provided for @purchaseErrorStatusUnavailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제 상태를 확인하지 못했어요.'**
+  String get purchaseErrorStatusUnavailable;
+
+  /// No description provided for @purchaseErrorStoreUnavailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 App Store 결제를 사용할 수 없어요.'**
+  String get purchaseErrorStoreUnavailable;
+
+  /// No description provided for @purchaseErrorProductLoadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'상품 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.'**
+  String get purchaseErrorProductLoadFailed;
+
+  /// No description provided for @purchaseErrorProductNotFound.
+  ///
+  /// In ko, this message translates to:
+  /// **'App Store에서 결제 상품을 찾지 못했어요.'**
+  String get purchaseErrorProductNotFound;
+
+  /// No description provided for @purchaseErrorNoRegisteredProducts.
+  ///
+  /// In ko, this message translates to:
+  /// **'등록된 결제 상품이 없어요.'**
+  String get purchaseErrorNoRegisteredProducts;
+
+  /// No description provided for @purchaseErrorProductUnavailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'구매할 상품 정보를 아직 불러오지 못했어요.'**
+  String get purchaseErrorProductUnavailable;
+
+  /// No description provided for @purchaseErrorStartFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 시작하지 못했어요.'**
+  String get purchaseErrorStartFailed;
+
+  /// No description provided for @purchaseErrorVerificationFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'구매 확인에 실패했어요.'**
+  String get purchaseErrorVerificationFailed;
+
+  /// No description provided for @purchaseErrorFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'결제를 완료하지 못했어요.'**
+  String get purchaseErrorFailed;
+
+  /// No description provided for @purchaseErrorRestoreFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'구매 내역을 복원하지 못했어요.'**
+  String get purchaseErrorRestoreFailed;
+
+  /// No description provided for @purchaseErrorCompletionFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'구매 완료 처리 중 문제가 발생했어요.'**
+  String get purchaseErrorCompletionFailed;
 }
 
 class _AppLocalizationsDelegate

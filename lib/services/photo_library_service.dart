@@ -1,13 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class PhotoLibraryService {
-  static const bool debugMode = true;
+  static const bool debugMode = kDebugMode;
   static const int debugLimit = 1000;
 
   Future<List<AssetEntity>> loadRecentPhotos({
     int limit = 500,
     bool ignoreDebugLimit = false,
   }) async {
+    final safeLimit = limit <= 0 ? 1 : limit;
     final filterOption = _createNewestFirstFilter();
 
     final albums = await PhotoManager.getAssetPathList(
@@ -20,14 +22,14 @@ class PhotoLibraryService {
       return [];
     }
 
-    final actualLimit = debugMode && !ignoreDebugLimit ? debugLimit : limit;
+    final actualLimit = debugMode && !ignoreDebugLimit ? debugLimit : safeLimit;
 
     final photos = await albums.first.getAssetListPaged(
       page: 0,
       size: actualLimit,
     );
 
-    print('📸 사진 ${photos.length}장 불러옴 / limit: $actualLimit');
+    debugPrint('📸 사진 ${photos.length}장 불러옴 / limit: $actualLimit');
 
     return photos;
   }
@@ -36,6 +38,7 @@ class PhotoLibraryService {
     int pageSize = 500,
     void Function(int loaded, int total)? onProgress,
   }) async {
+    final safePageSize = pageSize <= 0 ? 500 : pageSize;
     final filterOption = _createNewestFirstFilter();
 
     final albums = await PhotoManager.getAssetPathList(
@@ -59,7 +62,7 @@ class PhotoLibraryService {
     while (photos.length < totalCount) {
       final pageAssets = await album.getAssetListPaged(
         page: page,
-        size: pageSize,
+        size: safePageSize,
       );
 
       if (pageAssets.isEmpty) {
@@ -74,7 +77,7 @@ class PhotoLibraryService {
 
       onProgress?.call(loadedCount, totalCount);
 
-      print(
+      debugPrint(
         '📸 전체 사진 불러오는 중 '
         '$loadedCount / $totalCount '
         '(page: $page)',
@@ -83,7 +86,7 @@ class PhotoLibraryService {
       page++;
     }
 
-    print('✅ 전체 사진 ${photos.length}장 불러오기 완료');
+    debugPrint('✅ 전체 사진 ${photos.length}장 불러오기 완료');
 
     return photos;
   }
@@ -93,8 +96,9 @@ class PhotoLibraryService {
     required DateTime endDate,
     int limit = 5000,
   }) async {
+    final safeLimit = limit <= 0 ? 5000 : limit;
     if (endDate.isBefore(startDate)) {
-      print(
+      debugPrint(
         '⚠️ 잘못된 기간·시간 범위: '
         '${_formatDateTime(startDate)} ~ ${_formatDateTime(endDate)}',
       );
@@ -114,7 +118,7 @@ class PhotoLibraryService {
     );
 
     if (albums.isEmpty) {
-      print(
+      debugPrint(
         '📭 선택한 기간·시간에 사진이나 영상이 없어요 / '
         '${_formatDateTime(startDate)} ~ ${_formatDateTime(endDate)}',
       );
@@ -122,13 +126,16 @@ class PhotoLibraryService {
       return [];
     }
 
-    final assets = await albums.first.getAssetListPaged(page: 0, size: limit);
+    final assets = await albums.first.getAssetListPaged(
+      page: 0,
+      size: safeLimit,
+    );
 
-    print(
+    debugPrint(
       '📷+🎥 기간·시간 Asset ${assets.length}개 불러옴 / '
       '${_formatDateTime(startDate)} ~ '
       '${_formatDateTime(endDate)} / '
-      'limit: $limit',
+      'limit: $safeLimit',
     );
 
     return assets;
@@ -150,12 +157,11 @@ class PhotoLibraryService {
 
   Future<List<AssetEntity>> loadPhotosAfter(DateTime? date) async {
     if (debugMode) {
-      // 실기기 테스트용:
-      // lastScanAt을 무시하고 debugLimit만큼 분석해요.
+      // Debug builds only: ignore lastScanAt and analyze a limited batch.
       return loadRecentPhotos();
     }
 
-    final photos = await loadRecentPhotos(limit: 5000);
+    final photos = await loadRecentPhotos(limit: 5000, ignoreDebugLimit: true);
 
     if (date == null) {
       return photos;
@@ -167,7 +173,7 @@ class PhotoLibraryService {
   }
 
   Future<int> getRecentPhotoCount() async {
-    final photos = await loadRecentPhotos();
+    final photos = await loadRecentPhotos(ignoreDebugLimit: !debugMode);
     return photos.length;
   }
 

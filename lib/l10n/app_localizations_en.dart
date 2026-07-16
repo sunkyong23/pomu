@@ -735,4 +735,174 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get travelInfoDescription =>
       'Items are found using the capture date and time stored in Photos.';
+
+  @override
+  String get permissionTitle => 'Let’s keep your photos\nneat and organized';
+
+  @override
+  String get permissionDescription =>
+      'Find duplicate and unnecessary photos\nto free up iPhone storage easily.';
+
+  @override
+  String get permissionPrivacyTitle => 'Your photos stay private';
+
+  @override
+  String get permissionPrivacyDescription =>
+      'Photos are analyzed only on your device.\nNothing is uploaded to external servers.';
+
+  @override
+  String get permissionStartButton => 'Start Photo Cleanup';
+
+  @override
+  String get permissionBottomDescription =>
+      'You can change photo access anytime in iPhone Settings.';
+
+  @override
+  String get permissionDialogTitle => 'Photo Access Required';
+
+  @override
+  String get permissionDialogDescription =>
+      'Pomu needs access to your photo library to find duplicate photos and help free up storage.\n\nYour photos are processed only on your device and are never uploaded to external servers.';
+
+  @override
+  String get scanCheckingNewPhotos => 'Checking for new photos';
+
+  @override
+  String get scanAnalyzingPhotos => 'AI is analyzing your photos';
+
+  @override
+  String get scanPreparingAlbums => 'Preparing albums';
+
+  @override
+  String get scanCompleteTitle => 'Organization Complete';
+
+  @override
+  String get scanWorkingTitle => 'Organizing Your Photos';
+
+  @override
+  String get scanBackHome => 'Back to Home';
+
+  @override
+  String get scanStepPhotoCheck => 'Photo Check';
+
+  @override
+  String get scanStepAiAnalysis => 'AI Analysis';
+
+  @override
+  String get scanStepAlbumCreation => 'Album Creation';
+
+  @override
+  String scanTotalOrganized(int count) {
+    return '$count photos organized';
+  }
+
+  @override
+  String scanAlbumCount(int count) {
+    return 'Sorted into $count albums';
+  }
+
+  @override
+  String photoCount(int count) {
+    return '$count photos';
+  }
+
+  @override
+  String get categoryPets => 'Pets';
+
+  @override
+  String get categoryPeople => 'People';
+
+  @override
+  String get categoryFood => 'Food';
+
+  @override
+  String get categoryLandscape => 'Landscape';
+
+  @override
+  String get categoryDocuments => 'Documents';
+
+  @override
+  String get categoryScreenshots => 'Screenshots';
+
+  @override
+  String get categoryReceipts => 'Receipts';
+
+  @override
+  String get categoryOther => 'Others';
+
+  @override
+  String get albumNameSettingsTitle => 'Album Name Settings';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get albumNamesSaved => 'Album names have been saved.';
+
+  @override
+  String get albumNamesReset => 'Album names were reset to their defaults.';
+
+  @override
+  String get defaultNameLabel => 'Default Name';
+
+  @override
+  String get customNameLabel => 'Custom Name';
+
+  @override
+  String get albumNameEmptyHint => 'Leave blank to use the default';
+
+  @override
+  String get albumNameDefaultHelp =>
+      'Leave this blank to create the album with its default name.';
+
+  @override
+  String defaultAlbumName(String category) {
+    return 'Pomu $category';
+  }
+
+  @override
+  String get saving => 'Saving...';
+
+  @override
+  String get purchaseErrorStatusUnavailable =>
+      'Couldn’t check the purchase status.';
+
+  @override
+  String get purchaseErrorStoreUnavailable =>
+      'App Store purchases are currently unavailable.';
+
+  @override
+  String get purchaseErrorProductLoadFailed =>
+      'Couldn’t load the product information. Please try again shortly.';
+
+  @override
+  String get purchaseErrorProductNotFound =>
+      'The purchase product could not be found in the App Store.';
+
+  @override
+  String get purchaseErrorNoRegisteredProducts =>
+      'No purchase products are currently registered.';
+
+  @override
+  String get purchaseErrorProductUnavailable =>
+      'The product information is not ready yet.';
+
+  @override
+  String get purchaseErrorStartFailed => 'Couldn’t start the purchase.';
+
+  @override
+  String get purchaseErrorVerificationFailed => 'Couldn’t verify the purchase.';
+
+  @override
+  String get purchaseErrorFailed => 'Couldn’t complete the purchase.';
+
+  @override
+  String get purchaseErrorRestoreFailed => 'Couldn’t restore your purchase.';
+
+  @override
+  String get purchaseErrorCompletionFailed =>
+      'Something went wrong while completing the purchase.';
 }

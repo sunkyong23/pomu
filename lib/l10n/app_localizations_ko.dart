@@ -693,4 +693,166 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get travelInfoDescription => '사진 앱에 저장된 촬영 날짜와 시간을 기준으로 항목을 찾아요.';
+
+  @override
+  String get permissionTitle => '사진을 더 깔끔하게\n정리해드릴게요';
+
+  @override
+  String get permissionDescription =>
+      '중복 사진과 불필요한 사진을 찾아\n아이폰 저장공간을 쉽게 확보할 수 있어요.';
+
+  @override
+  String get permissionPrivacyTitle => '사진은 안전하게 처리돼요';
+
+  @override
+  String get permissionPrivacyDescription =>
+      '사진은 기기 안에서만 분석되며\n외부 서버로 업로드되지 않아요.';
+
+  @override
+  String get permissionStartButton => '사진 정리 시작하기';
+
+  @override
+  String get permissionBottomDescription => '권한은 언제든 아이폰 설정에서 변경할 수 있어요.';
+
+  @override
+  String get permissionDialogTitle => '사진 접근 권한이 필요해요';
+
+  @override
+  String get permissionDialogDescription =>
+      '중복 사진을 찾고 저장공간을 정리하려면 사진 보관함 접근 권한이 필요해요.\n\n사진은 기기 안에서만 처리되며 외부 서버로 업로드되지 않아요.';
+
+  @override
+  String get scanCheckingNewPhotos => '새 사진을 확인하고 있어요';
+
+  @override
+  String get scanAnalyzingPhotos => 'AI가 사진을 분석하고 있어요';
+
+  @override
+  String get scanPreparingAlbums => '앨범을 준비하고 있어요';
+
+  @override
+  String get scanCompleteTitle => '정리가 완료됐어요';
+
+  @override
+  String get scanWorkingTitle => '사진을 정리하고 있어요';
+
+  @override
+  String get scanBackHome => '홈으로 돌아가기';
+
+  @override
+  String get scanStepPhotoCheck => '사진 확인';
+
+  @override
+  String get scanStepAiAnalysis => 'AI 분석';
+
+  @override
+  String get scanStepAlbumCreation => '앨범 생성';
+
+  @override
+  String scanTotalOrganized(int count) {
+    return '$count장 정리 완료';
+  }
+
+  @override
+  String scanAlbumCount(int count) {
+    return '$count개 앨범으로 분류했어요';
+  }
+
+  @override
+  String photoCount(int count) {
+    return '$count장';
+  }
+
+  @override
+  String get categoryPets => '반려동물';
+
+  @override
+  String get categoryPeople => '사람';
+
+  @override
+  String get categoryFood => '음식';
+
+  @override
+  String get categoryLandscape => '풍경';
+
+  @override
+  String get categoryDocuments => '문서';
+
+  @override
+  String get categoryScreenshots => '스크린샷';
+
+  @override
+  String get categoryReceipts => '영수증';
+
+  @override
+  String get categoryOther => '기타';
+
+  @override
+  String get albumNameSettingsTitle => '앨범 이름 설정';
+
+  @override
+  String get reset => '초기화';
+
+  @override
+  String get save => '저장';
+
+  @override
+  String get albumNamesSaved => '앨범 이름이 저장되었어요.';
+
+  @override
+  String get albumNamesReset => '기본 앨범 이름으로 되돌렸어요.';
+
+  @override
+  String get defaultNameLabel => '기본 이름';
+
+  @override
+  String get customNameLabel => '사용자 지정 이름';
+
+  @override
+  String get albumNameEmptyHint => '비워두면 기본 이름 사용';
+
+  @override
+  String get albumNameDefaultHelp => '입력하지 않으면 기본 이름으로 앨범이 생성돼요.';
+
+  @override
+  String defaultAlbumName(String category) {
+    return 'Pomu $category';
+  }
+
+  @override
+  String get saving => '저장 중...';
+
+  @override
+  String get purchaseErrorStatusUnavailable => '결제 상태를 확인하지 못했어요.';
+
+  @override
+  String get purchaseErrorStoreUnavailable => '현재 App Store 결제를 사용할 수 없어요.';
+
+  @override
+  String get purchaseErrorProductLoadFailed =>
+      '상품 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.';
+
+  @override
+  String get purchaseErrorProductNotFound => 'App Store에서 결제 상품을 찾지 못했어요.';
+
+  @override
+  String get purchaseErrorNoRegisteredProducts => '등록된 결제 상품이 없어요.';
+
+  @override
+  String get purchaseErrorProductUnavailable => '구매할 상품 정보를 아직 불러오지 못했어요.';
+
+  @override
+  String get purchaseErrorStartFailed => '결제를 시작하지 못했어요.';
+
+  @override
+  String get purchaseErrorVerificationFailed => '구매 확인에 실패했어요.';
+
+  @override
+  String get purchaseErrorFailed => '결제를 완료하지 못했어요.';
+
+  @override
+  String get purchaseErrorRestoreFailed => '구매 내역을 복원하지 못했어요.';
+
+  @override
+  String get purchaseErrorCompletionFailed => '구매 완료 처리 중 문제가 발생했어요.';
 }

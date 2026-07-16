@@ -3,9 +3,35 @@ import 'package:flutter/material.dart';
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
 import '../../core/widgets/logo/pomu_logo.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/photo_category.dart';
 import '../../services/scan_service.dart';
 import '../home/home_screen.dart';
+
+extension _ScanProgressL10n on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+}
+
+String _localizedCategoryName(BuildContext context, PhotoCategory category) {
+  switch (category) {
+    case PhotoCategory.pets:
+      return context.l10n.categoryPets;
+    case PhotoCategory.people:
+      return context.l10n.categoryPeople;
+    case PhotoCategory.food:
+      return context.l10n.categoryFood;
+    case PhotoCategory.landscape:
+      return context.l10n.categoryLandscape;
+    case PhotoCategory.documents:
+      return context.l10n.categoryDocuments;
+    case PhotoCategory.screenshots:
+      return context.l10n.categoryScreenshots;
+    case PhotoCategory.receipts:
+      return context.l10n.categoryReceipts;
+    case PhotoCategory.other:
+      return context.l10n.categoryOther;
+  }
+}
 
 class ScanProgressScreen extends StatefulWidget {
   const ScanProgressScreen({super.key});
@@ -19,13 +45,6 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
 
   int _step = 0;
   ScanResult? _result;
-
-  final List<String> _messages = const [
-    '새 사진을 확인하고 있어요',
-    'AI가 사진을 분석하고 있어요',
-    '앨범을 준비하고 있어요',
-    '정리가 완료됐어요',
-  ];
 
   @override
   void initState() {
@@ -62,6 +81,12 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
   @override
   Widget build(BuildContext context) {
     final isComplete = _step == 3 && _result != null;
+    final messages = [
+      context.l10n.scanCheckingNewPhotos,
+      context.l10n.scanAnalyzingPhotos,
+      context.l10n.scanPreparingAlbums,
+      context.l10n.scanCompleteTitle,
+    ];
 
     return Scaffold(
       backgroundColor: PomuColors.background,
@@ -71,10 +96,16 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
           child: Column(
             children: [
               const Spacer(),
-              PomuLogo(size: isComplete ? 72 : 96),
+              Semantics(
+                label: context.l10n.appName,
+                image: true,
+                child: PomuLogo(size: isComplete ? 72 : 96),
+              ),
               const SizedBox(height: PomuSpacing.xl),
               Text(
-                isComplete ? '정리가 완료됐어요' : '사진을 정리하고 있어요',
+                isComplete
+                    ? context.l10n.scanCompleteTitle
+                    : context.l10n.scanWorkingTitle,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 28,
@@ -88,8 +119,8 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   child: Text(
-                    _messages[_step],
-                    key: ValueKey(_messages[_step]),
+                    messages[_step],
+                    key: ValueKey(messages[_step]),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 16,
@@ -97,7 +128,7 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
                     ),
                   ),
                 ),
-              SizedBox(height: isComplete ? PomuSpacing.xl : PomuSpacing.xl),
+              const SizedBox(height: PomuSpacing.xl),
               if (isComplete)
                 _CompleteSummary(result: _result!)
               else
@@ -107,13 +138,17 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
                 SizedBox(
                   width: double.infinity,
                   height: 56,
-                  child: ElevatedButton(
-                    onPressed: _goHome,
-                    child: const Text(
-                      '홈으로 돌아가기',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                  child: Semantics(
+                    button: true,
+                    label: context.l10n.scanBackHome,
+                    child: ElevatedButton(
+                      onPressed: _goHome,
+                      child: Text(
+                        context.l10n.scanBackHome,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
@@ -134,7 +169,11 @@ class _StepIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = ['사진 확인', 'AI 분석', '앨범 생성'];
+    final items = [
+      context.l10n.scanStepPhotoCheck,
+      context.l10n.scanStepAiAnalysis,
+      context.l10n.scanStepAlbumCreation,
+    ];
 
     return Column(
       children: List.generate(items.length, (index) {
@@ -194,7 +233,7 @@ class _CompleteSummary extends StatelessWidget {
         border: Border.all(color: PomuColors.divider),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.045),
+            color: Colors.black.withValues(alpha: 0.045),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -209,7 +248,7 @@ class _CompleteSummary extends StatelessWidget {
           ),
           const SizedBox(height: PomuSpacing.md),
           Text(
-            '${result.totalCount}장 정리 완료',
+            context.l10n.scanTotalOrganized(result.totalCount),
             style: const TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -219,7 +258,7 @@ class _CompleteSummary extends StatelessWidget {
           ),
           const SizedBox(height: PomuSpacing.xs),
           Text(
-            '${result.albumCount}개 앨범으로 분류했어요',
+            context.l10n.scanAlbumCount(result.albumCount),
             style: const TextStyle(
               fontSize: 15,
               color: PomuColors.textSecondary,
@@ -235,7 +274,7 @@ class _CompleteSummary extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      entry.key.koreanName,
+                      _localizedCategoryName(context, entry.key),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -244,7 +283,7 @@ class _CompleteSummary extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${entry.value.length}장',
+                    context.l10n.photoCount(entry.value.length),
                     style: const TextStyle(
                       fontSize: 15,
                       color: PomuColors.textSecondary,

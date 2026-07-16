@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 enum PhotoCategory {
   pets,
   people,
@@ -11,7 +13,11 @@ enum PhotoCategory {
   other,
 }
 
-extension PhotoCategoryLabel on PhotoCategory {
+extension PhotoCategoryPresentation on PhotoCategory {
+  /// Stable English suffix used by existing album creation and saved settings.
+  ///
+  /// Keep this value stable so previously created album names and preferences
+  /// continue to work across app-language changes.
   String get albumName {
     switch (this) {
       case PhotoCategory.pets:
@@ -33,29 +39,28 @@ extension PhotoCategoryLabel on PhotoCategory {
     }
   }
 
-  String get koreanName {
+  /// Localized category label for user-facing screens.
+  String localizedName(AppLocalizations l10n) {
     switch (this) {
       case PhotoCategory.pets:
-        return '반려동물';
+        return l10n.categoryPets;
       case PhotoCategory.people:
-        return '사람';
+        return l10n.categoryPeople;
       case PhotoCategory.food:
-        return '음식';
+        return l10n.categoryFood;
       case PhotoCategory.landscape:
-        return '풍경';
+        return l10n.categoryLandscape;
       case PhotoCategory.documents:
-        return '문서';
+        return l10n.categoryDocuments;
       case PhotoCategory.screenshots:
-        return '스크린샷';
+        return l10n.categoryScreenshots;
       case PhotoCategory.receipts:
-        return '영수증';
+        return l10n.categoryReceipts;
       case PhotoCategory.other:
-        return '기타';
+        return l10n.categoryOther;
     }
   }
-}
 
-extension PhotoCategoryIcon on PhotoCategory {
   IconData get icon {
     switch (this) {
       case PhotoCategory.pets:

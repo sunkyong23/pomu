@@ -684,4 +684,163 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get travelInfoDescription => '系统会根据“照片”中保存的拍摄日期和时间查找项目。';
+
+  @override
+  String get permissionTitle => '让照片更整洁，\n轻松完成整理';
+
+  @override
+  String get permissionDescription => '查找重复和不需要的照片，\n轻松释放 iPhone 存储空间。';
+
+  @override
+  String get permissionPrivacyTitle => '照片会被安全处理';
+
+  @override
+  String get permissionPrivacyDescription => '所有照片分析都在设备本地完成，\n不会上传到外部服务器。';
+
+  @override
+  String get permissionStartButton => '开始整理照片';
+
+  @override
+  String get permissionBottomDescription => '您可以随时在 iPhone 设置中更改照片访问权限。';
+
+  @override
+  String get permissionDialogTitle => '需要照片访问权限';
+
+  @override
+  String get permissionDialogDescription =>
+      '为了查找重复照片并整理存储空间，Pomu 需要访问您的照片图库。\n\n照片只会在设备本地处理，不会上传到外部服务器。';
+
+  @override
+  String get scanCheckingNewPhotos => '正在检查新照片';
+
+  @override
+  String get scanAnalyzingPhotos => 'AI 正在分析照片';
+
+  @override
+  String get scanPreparingAlbums => '正在准备相册';
+
+  @override
+  String get scanCompleteTitle => '整理完成';
+
+  @override
+  String get scanWorkingTitle => '正在整理照片';
+
+  @override
+  String get scanBackHome => '返回首页';
+
+  @override
+  String get scanStepPhotoCheck => '检查照片';
+
+  @override
+  String get scanStepAiAnalysis => 'AI 分析';
+
+  @override
+  String get scanStepAlbumCreation => '创建相册';
+
+  @override
+  String scanTotalOrganized(int count) {
+    return '已整理 $count 张照片';
+  }
+
+  @override
+  String scanAlbumCount(int count) {
+    return '已分类到 $count 个相册';
+  }
+
+  @override
+  String photoCount(int count) {
+    return '$count 张';
+  }
+
+  @override
+  String get categoryPets => '宠物';
+
+  @override
+  String get categoryPeople => '人物';
+
+  @override
+  String get categoryFood => '食物';
+
+  @override
+  String get categoryLandscape => '风景';
+
+  @override
+  String get categoryDocuments => '文档';
+
+  @override
+  String get categoryScreenshots => '截图';
+
+  @override
+  String get categoryReceipts => '收据';
+
+  @override
+  String get categoryOther => '其他';
+
+  @override
+  String get albumNameSettingsTitle => '相册名称设置';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get albumNamesSaved => '相册名称已保存。';
+
+  @override
+  String get albumNamesReset => '已恢复默认相册名称。';
+
+  @override
+  String get defaultNameLabel => '默认名称';
+
+  @override
+  String get customNameLabel => '自定义名称';
+
+  @override
+  String get albumNameEmptyHint => '留空则使用默认名称';
+
+  @override
+  String get albumNameDefaultHelp => '不输入时，将使用默认名称创建相册。';
+
+  @override
+  String defaultAlbumName(String category) {
+    return 'Pomu $category';
+  }
+
+  @override
+  String get saving => '正在保存...';
+
+  @override
+  String get purchaseErrorStatusUnavailable => '无法检查购买状态。';
+
+  @override
+  String get purchaseErrorStoreUnavailable => '当前无法使用 App Store 购买。';
+
+  @override
+  String get purchaseErrorProductLoadFailed => '无法加载商品信息，请稍后重试。';
+
+  @override
+  String get purchaseErrorProductNotFound => '在 App Store 中找不到该购买商品。';
+
+  @override
+  String get purchaseErrorNoRegisteredProducts => '当前没有已注册的购买商品。';
+
+  @override
+  String get purchaseErrorProductUnavailable => '商品信息尚未准备好。';
+
+  @override
+  String get purchaseErrorStartFailed => '无法开始购买。';
+
+  @override
+  String get purchaseErrorVerificationFailed => '无法验证购买。';
+
+  @override
+  String get purchaseErrorFailed => '无法完成购买。';
+
+  @override
+  String get purchaseErrorRestoreFailed => '无法恢复购买。';
+
+  @override
+  String get purchaseErrorCompletionFailed => '完成购买时出现问题。';
 }

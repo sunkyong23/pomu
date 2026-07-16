@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/pomu_colors.dart';
@@ -8,13 +9,13 @@ import '../../services/purchase_access_service.dart';
 import '../../l10n/app_localizations.dart';
 
 Future<bool> showDuplicateCleanupPurchaseSheet(BuildContext context) async {
-  debugPrint('🟣 구매 페이지 열기 시작');
+  if (kDebugMode) debugPrint('🟣 구매 페이지 열기 시작');
 
   final result = await Navigator.of(context).push<bool>(
     MaterialPageRoute<bool>(
       fullscreenDialog: true,
       builder: (pageContext) {
-        debugPrint('🟢 구매 페이지 builder 실행');
+        if (kDebugMode) debugPrint('🟢 구매 페이지 builder 실행');
 
         return const Scaffold(
           backgroundColor: PomuColors.surface,
@@ -24,7 +25,7 @@ Future<bool> showDuplicateCleanupPurchaseSheet(BuildContext context) async {
     ),
   );
 
-  debugPrint('🟡 구매 페이지 닫힘: $result');
+  if (kDebugMode) debugPrint('🟡 구매 페이지 닫힘: $result');
 
   return result ?? false;
 }
@@ -75,17 +76,21 @@ class _DuplicateCleanupPurchaseSheetState
   }
 
   Future<void> _purchase() async {
-    debugPrint('');
-    debugPrint('========================================');
-    debugPrint('🔥 구매 버튼 눌림');
-    debugPrint('========================================');
+    if (kDebugMode) {
+      debugPrint('');
+      debugPrint('========================================');
+      debugPrint('🔥 구매 버튼 눌림');
+      debugPrint('========================================');
+    }
 
     _purchaseService.clearError();
 
     final started = await _purchaseService.buyDuplicateCleanup();
 
-    debugPrint('🔥 구매 버튼 처리 결과: $started');
-    debugPrint('');
+    if (kDebugMode) {
+      debugPrint('🔥 구매 버튼 처리 결과: $started');
+      debugPrint('');
+    }
   }
 
   Future<void> _restore() async {
@@ -111,7 +116,7 @@ class _DuplicateCleanupPurchaseSheetState
     final product = _purchaseService.duplicateCleanupProduct;
 
     final hasProductError =
-        product == null && _purchaseService.errorMessage != null;
+        product == null && _purchaseService.errorCode != null;
 
     final isBusy =
         _purchaseService.isLoading ||
@@ -120,10 +125,12 @@ class _DuplicateCleanupPurchaseSheetState
 
     final priceText = product?.price;
 
-    debugPrint(
-      '🧾 구매 시트 build: '
-      'product=${product?.id}, price=$priceText, busy=$isBusy',
-    );
+    if (kDebugMode) {
+      debugPrint(
+        '🧾 구매 시트 build: '
+        'product=${product?.id}, price=$priceText, busy=$isBusy',
+      );
+    }
 
     return Container(
       width: double.infinity,
@@ -160,9 +167,9 @@ class _DuplicateCleanupPurchaseSheetState
 
                   _BenefitGrid(),
 
-                  if (_purchaseService.errorMessage != null) ...[
+                  if (_purchaseService.errorCode != null) ...[
                     const SizedBox(height: PomuSpacing.md),
-                    _ErrorCard(message: _purchaseService.errorMessage!),
+                    _ErrorCard(errorCode: _purchaseService.errorCode!),
                   ],
 
                   const SizedBox(height: PomuSpacing.lg),
@@ -393,7 +400,7 @@ class _BenefitGrid extends StatelessWidget {
                   description: l10n.purchaseBenefitLifetimeDescription,
                 ),
               ),
-              SizedBox(width: PomuSpacing.sm),
+              const SizedBox(width: PomuSpacing.sm),
               Expanded(
                 child: _BenefitTile(
                   icon: Icons.collections_rounded,
@@ -404,7 +411,7 @@ class _BenefitGrid extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: PomuSpacing.sm),
+          const SizedBox(height: PomuSpacing.sm),
 
           Row(
             children: [
@@ -415,7 +422,7 @@ class _BenefitGrid extends StatelessWidget {
                   description: l10n.purchaseBenefitRestoreDescription,
                 ),
               ),
-              SizedBox(width: PomuSpacing.sm),
+              const SizedBox(width: PomuSpacing.sm),
               Expanded(
                 child: _BenefitTile(
                   icon: Icons.subscriptions_outlined,
@@ -494,9 +501,9 @@ class _BenefitTile extends StatelessWidget {
 }
 
 class _ErrorCard extends StatelessWidget {
-  final String message;
+  final PurchaseServiceError errorCode;
 
-  const _ErrorCard({required this.message});
+  const _ErrorCard({required this.errorCode});
 
   @override
   Widget build(BuildContext context) {
@@ -515,12 +522,10 @@ class _ErrorCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(Icons.info_outline_rounded, size: 19, color: Colors.red),
-
           const SizedBox(width: PomuSpacing.sm),
-
           Expanded(
             child: Text(
-              _buildFriendlyErrorMessage(context, message),
+              _localizedErrorMessage(context, errorCode),
               style: const TextStyle(
                 fontSize: 12,
                 height: 1.4,
@@ -533,12 +538,36 @@ class _ErrorCard extends StatelessWidget {
     );
   }
 
-  String _buildFriendlyErrorMessage(BuildContext context, String rawMessage) {
-    if (rawMessage.contains('StoreKit') || rawMessage.contains('platform')) {
-      return AppLocalizations.of(context).purchaseLoadFailed;
-    }
+  String _localizedErrorMessage(
+    BuildContext context,
+    PurchaseServiceError code,
+  ) {
+    final l10n = AppLocalizations.of(context);
 
-    return rawMessage;
+    switch (code) {
+      case PurchaseServiceError.purchaseStatusUnavailable:
+        return l10n.purchaseErrorStatusUnavailable;
+      case PurchaseServiceError.storeUnavailable:
+        return l10n.purchaseErrorStoreUnavailable;
+      case PurchaseServiceError.productLoadFailed:
+        return l10n.purchaseErrorProductLoadFailed;
+      case PurchaseServiceError.productNotFound:
+        return l10n.purchaseErrorProductNotFound;
+      case PurchaseServiceError.noRegisteredProducts:
+        return l10n.purchaseErrorNoRegisteredProducts;
+      case PurchaseServiceError.productUnavailable:
+        return l10n.purchaseErrorProductUnavailable;
+      case PurchaseServiceError.purchaseStartFailed:
+        return l10n.purchaseErrorStartFailed;
+      case PurchaseServiceError.purchaseVerificationFailed:
+        return l10n.purchaseErrorVerificationFailed;
+      case PurchaseServiceError.purchaseFailed:
+        return l10n.purchaseErrorFailed;
+      case PurchaseServiceError.restoreFailed:
+        return l10n.purchaseErrorRestoreFailed;
+      case PurchaseServiceError.completionFailed:
+        return l10n.purchaseErrorCompletionFailed;
+    }
   }
 }
 

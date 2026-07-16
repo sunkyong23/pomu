@@ -457,5 +457,83 @@
       }
     }
   },
-  "travelInfoDescription": "Items are found using the capture date and time stored in Photos."
+  "travelInfoDescription": "Items are found using the capture date and time stored in Photos.",
+  "permissionTitle": "Let’s keep your photos\nneat and organized",
+  "permissionDescription": "Find duplicate and unnecessary photos\nto free up iPhone storage easily.",
+  "permissionPrivacyTitle": "Your photos stay private",
+  "permissionPrivacyDescription": "Photos are analyzed only on your device.\nNothing is uploaded to external servers.",
+  "permissionStartButton": "Start Photo Cleanup",
+  "permissionBottomDescription": "You can change photo access anytime in iPhone Settings.",
+  "permissionDialogTitle": "Photo Access Required",
+  "permissionDialogDescription": "Pomu needs access to your photo library to find duplicate photos and help free up storage.\n\nYour photos are processed only on your device and are never uploaded to external servers.",
+  "scanCheckingNewPhotos": "Checking for new photos",
+  "scanAnalyzingPhotos": "AI is analyzing your photos",
+  "scanPreparingAlbums": "Preparing albums",
+  "scanCompleteTitle": "Organization Complete",
+  "scanWorkingTitle": "Organizing Your Photos",
+  "scanBackHome": "Back to Home",
+  "scanStepPhotoCheck": "Photo Check",
+  "scanStepAiAnalysis": "AI Analysis",
+  "scanStepAlbumCreation": "Album Creation",
+  "scanTotalOrganized": "{count} photos organized",
+  "scanAlbumCount": "Sorted into {count} albums",
+  "photoCount": "{count} photos",
+  "categoryPets": "Pets",
+  "categoryPeople": "People",
+  "categoryFood": "Food",
+  "categoryLandscape": "Landscape",
+  "categoryDocuments": "Documents",
+  "categoryScreenshots": "Screenshots",
+  "categoryReceipts": "Receipts",
+  "categoryOther": "Others",
+  "@scanTotalOrganized": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scanAlbumCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@photoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "albumNameSettingsTitle": "Album Name Settings",
+  "reset": "Reset",
+  "save": "Save",
+  "albumNamesSaved": "Album names have been saved.",
+  "albumNamesReset": "Album names were reset to their defaults.",
+  "defaultNameLabel": "Default Name",
+  "customNameLabel": "Custom Name",
+  "albumNameEmptyHint": "Leave blank to use the default",
+  "albumNameDefaultHelp": "Leave this blank to create the album with its default name.",
+  "defaultAlbumName": "Pomu {category}",
+  "@defaultAlbumName": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "saving": "Saving...",
+  "purchaseErrorStatusUnavailable": "Couldn’t check the purchase status.",
+  "purchaseErrorStoreUnavailable": "App Store purchases are currently unavailable.",
+  "purchaseErrorProductLoadFailed": "Couldn’t load the product information. Please try again shortly.",
+  "purchaseErrorProductNotFound": "The purchase product could not be found in the App Store.",
+  "purchaseErrorNoRegisteredProducts": "No purchase products are currently registered.",
+  "purchaseErrorProductUnavailable": "The product information is not ready yet.",
+  "purchaseErrorStartFailed": "Couldn’t start the purchase.",
+  "purchaseErrorVerificationFailed": "Couldn’t verify the purchase.",
+  "purchaseErrorFailed": "Couldn’t complete the purchase.",
+  "purchaseErrorRestoreFailed": "Couldn’t restore your purchase.",
+  "purchaseErrorCompletionFailed": "Something went wrong while completing the purchase."
 }

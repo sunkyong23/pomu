@@ -5,8 +5,13 @@ import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
 import '../../core/widgets/buttons/pomu_primary_button.dart';
 import '../../core/widgets/logo/pomu_logo.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/photo_permission_service.dart';
 import '../home/home_screen.dart';
+
+extension _PhotoPermissionL10n on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+}
 
 class PhotoPermissionScreen extends StatefulWidget {
   const PhotoPermissionScreen({super.key});
@@ -46,18 +51,15 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text(
-            '사진 접근 권한이 필요해요',
+          title: Text(
+            dialogContext.l10n.permissionDialogTitle,
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: PomuColors.textPrimary,
             ),
           ),
-          content: const Text(
-            '중복 사진을 찾고 저장공간을 정리하려면 '
-            '사진 보관함 접근 권한이 필요해요.\n\n'
-            '사진은 기기 안에서만 처리되며 '
-            '외부 서버로 업로드되지 않아요.',
+          content: Text(
+            dialogContext.l10n.permissionDialogDescription,
             style: TextStyle(
               fontSize: 15,
               height: 1.5,
@@ -67,14 +69,14 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('나중에'),
+              child: Text(dialogContext.l10n.later),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(dialogContext).pop();
-                _permissionService.openSettings();
+                await _permissionService.openSettings();
               },
-              child: const Text('설정 열기'),
+              child: Text(dialogContext.l10n.openSettings),
             ),
           ],
         );
@@ -96,12 +98,16 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
             children: [
               const Spacer(flex: 2),
 
-              const PomuLogo(size: 88),
+              Semantics(
+                label: context.l10n.appName,
+                image: true,
+                child: const PomuLogo(size: 88),
+              ),
 
               const SizedBox(height: PomuSpacing.xl),
 
-              const Text(
-                '사진을 더 깔끔하게\n정리해드릴게요',
+              Text(
+                context.l10n.permissionTitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
@@ -114,9 +120,8 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
 
               const SizedBox(height: PomuSpacing.md),
 
-              const Text(
-                '중복 사진과 불필요한 사진을 찾아\n'
-                '아이폰 저장공간을 쉽게 확보할 수 있어요.',
+              Text(
+                context.l10n.permissionDescription,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -135,27 +140,26 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: PomuColors.divider),
                 ),
-                child: const Row(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _PrivacyIcon(),
-                    SizedBox(width: PomuSpacing.md),
+                    const _PrivacyIcon(),
+                    const SizedBox(width: PomuSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '사진은 안전하게 처리돼요',
+                            context.l10n.permissionPrivacyTitle,
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: PomuColors.textPrimary,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            '사진은 기기 안에서만 분석되며\n'
-                            '외부 서버로 업로드되지 않아요.',
+                            context.l10n.permissionPrivacyDescription,
                             style: TextStyle(
                               fontSize: 13,
                               height: 1.45,
@@ -171,17 +175,22 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
 
               const Spacer(flex: 3),
 
-              PomuPrimaryButton(
-                text: '사진 정리 시작하기',
-                icon: Icons.photo_library_outlined,
-                isLoading: _isLoading,
-                onPressed: _isLoading ? null : _requestPermission,
+              Semantics(
+                button: true,
+                enabled: !_isLoading,
+                label: context.l10n.permissionStartButton,
+                child: PomuPrimaryButton(
+                  text: context.l10n.permissionStartButton,
+                  icon: Icons.photo_library_outlined,
+                  isLoading: _isLoading,
+                  onPressed: _isLoading ? null : _requestPermission,
+                ),
               ),
 
               const SizedBox(height: PomuSpacing.md),
 
-              const Text(
-                '권한은 언제든 아이폰 설정에서 변경할 수 있어요.',
+              Text(
+                context.l10n.permissionBottomDescription,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: PomuColors.textSecondary),
               ),

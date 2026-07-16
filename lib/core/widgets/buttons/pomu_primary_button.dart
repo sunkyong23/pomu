@@ -31,7 +31,7 @@ class PomuPrimaryButton extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: PomuColors.primary.withOpacity(0.22),
+              color: PomuColors.primary.withValues(alpha: 0.22),
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),
