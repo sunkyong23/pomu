@@ -5,6 +5,8 @@ import '../../core/theme/pomu_spacing.dart';
 import '../../services/in_app_purchase_service.dart';
 import '../../services/purchase_access_service.dart';
 
+import '../../l10n/app_localizations.dart';
+
 Future<bool> showDuplicateCleanupPurchaseSheet(BuildContext context) async {
   debugPrint('🟣 구매 페이지 열기 시작');
 
@@ -93,9 +95,9 @@ class _DuplicateCleanupPurchaseSheetState
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('구매 내역을 확인하고 있어요.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context).purchaseRestoring)),
+    );
   }
 
   Future<void> _reloadProducts() async {
@@ -105,6 +107,7 @@ class _DuplicateCleanupPurchaseSheetState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final product = _purchaseService.duplicateCleanupProduct;
 
     final hasProductError =
@@ -155,7 +158,7 @@ class _DuplicateCleanupPurchaseSheetState
 
                   const SizedBox(height: PomuSpacing.lg),
 
-                  const _BenefitGrid(),
+                  _BenefitGrid(),
 
                   if (_purchaseService.errorMessage != null) ...[
                     const SizedBox(height: PomuSpacing.md),
@@ -184,8 +187,8 @@ class _DuplicateCleanupPurchaseSheetState
                         onPressed: isBusy ? null : _restore,
                         child: Text(
                           _purchaseService.isRestoring
-                              ? '구매 내역 확인 중...'
-                              : '구매 복원',
+                              ? l10n.purchaseRestoringShort
+                              : l10n.restorePurchase,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -206,9 +209,9 @@ class _DuplicateCleanupPurchaseSheetState
                             : () {
                                 Navigator.of(context).pop(false);
                               },
-                        child: const Text(
-                          '나중에',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.later,
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: PomuColors.textSecondary,
@@ -220,10 +223,10 @@ class _DuplicateCleanupPurchaseSheetState
 
                   const SizedBox(height: 4),
 
-                  const Text(
-                    '구독이 아닌 일회성 구매예요.',
+                  Text(
+                    l10n.oneTimePurchase,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: PomuColors.textSecondary,
@@ -233,7 +236,7 @@ class _DuplicateCleanupPurchaseSheetState
                   const SizedBox(height: 5),
 
                   Text(
-                    '결제는 Apple ID를 통해 진행됩니다.',
+                    l10n.paymentThroughApple,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 11,
@@ -257,6 +260,8 @@ class _HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       children: [
         Container(
@@ -281,8 +286,8 @@ class _HeaderSection extends StatelessWidget {
             color: PomuColors.primaryLight,
             borderRadius: BorderRadius.circular(999),
           ),
-          child: const Text(
-            '한 번 구매로 영구 이용',
+          child: Text(
+            l10n.purchaseLifetimeBadge,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
@@ -293,8 +298,8 @@ class _HeaderSection extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        const Text(
-          '중복 사진 정리를\n계속 이용해보세요',
+        Text(
+          l10n.purchaseTitle,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 26,
@@ -307,9 +312,8 @@ class _HeaderSection extends StatelessWidget {
 
         const SizedBox(height: 10),
 
-        const Text(
-          '첫 번째 중복 그룹은 무료로 정리했어요.\n'
-          '이제 제한 없이 계속 정리할 수 있어요.',
+        Text(
+          l10n.purchaseDescription,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
@@ -336,7 +340,7 @@ class _HeaderSection extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                priceText ?? '상품 정보 확인 중',
+                priceText ?? l10n.purchaseLoadingProduct,
                 style: TextStyle(
                   fontSize: priceText == null ? 18 : 30,
                   fontWeight: FontWeight.w900,
@@ -347,8 +351,8 @@ class _HeaderSection extends StatelessWidget {
 
               const SizedBox(height: 4),
 
-              const Text(
-                '일회성 결제 · 추가 결제 없음',
+              Text(
+                l10n.purchaseOneTimeNoExtraCharge,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -368,6 +372,8 @@ class _BenefitGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(PomuSpacing.md),
@@ -376,23 +382,23 @@ class _BenefitGrid extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: PomuColors.divider),
       ),
-      child: const Column(
+      child: Column(
         children: [
           Row(
             children: [
               Expanded(
                 child: _BenefitTile(
                   icon: Icons.all_inclusive_rounded,
-                  title: '영구 이용',
-                  description: '한 번만 결제',
+                  title: l10n.purchaseBenefitLifetimeTitle,
+                  description: l10n.purchaseBenefitLifetimeDescription,
                 ),
               ),
               SizedBox(width: PomuSpacing.sm),
               Expanded(
                 child: _BenefitTile(
                   icon: Icons.collections_rounded,
-                  title: '무제한 정리',
-                  description: '그룹 개수 제한 없음',
+                  title: l10n.purchaseBenefitUnlimitedTitle,
+                  description: l10n.purchaseBenefitUnlimitedDescription,
                 ),
               ),
             ],
@@ -405,16 +411,16 @@ class _BenefitGrid extends StatelessWidget {
               Expanded(
                 child: _BenefitTile(
                   icon: Icons.restore_rounded,
-                  title: '구매 복원',
-                  description: '재설치 후에도 복원',
+                  title: l10n.purchaseBenefitRestoreTitle,
+                  description: l10n.purchaseBenefitRestoreDescription,
                 ),
               ),
               SizedBox(width: PomuSpacing.sm),
               Expanded(
                 child: _BenefitTile(
                   icon: Icons.subscriptions_outlined,
-                  title: '구독 없음',
-                  description: '매달 결제하지 않아요',
+                  title: l10n.purchaseBenefitNoSubscriptionTitle,
+                  description: l10n.purchaseBenefitNoSubscriptionDescription,
                 ),
               ),
             ],
@@ -514,7 +520,7 @@ class _ErrorCard extends StatelessWidget {
 
           Expanded(
             child: Text(
-              _buildFriendlyErrorMessage(message),
+              _buildFriendlyErrorMessage(context, message),
               style: const TextStyle(
                 fontSize: 12,
                 height: 1.4,
@@ -527,9 +533,9 @@ class _ErrorCard extends StatelessWidget {
     );
   }
 
-  String _buildFriendlyErrorMessage(String rawMessage) {
+  String _buildFriendlyErrorMessage(BuildContext context, String rawMessage) {
     if (rawMessage.contains('StoreKit') || rawMessage.contains('platform')) {
-      return '상품 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.';
+      return AppLocalizations.of(context).purchaseLoadFailed;
     }
 
     return rawMessage;
@@ -559,14 +565,15 @@ class _PrimaryPurchaseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     String buttonText;
 
     if (hasProductError) {
-      buttonText = '상품 정보 다시 불러오기';
+      buttonText = l10n.purchaseReloadProduct;
     } else if (priceText == null) {
-      buttonText = '상품 정보 불러오는 중...';
+      buttonText = l10n.purchaseLoadingProduct;
     } else {
-      buttonText = '$priceText으로 영구 이용';
+      buttonText = l10n.purchaseWithPrice(priceText!);
     }
 
     return SizedBox(

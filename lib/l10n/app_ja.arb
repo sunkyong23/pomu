@@ -1,0 +1,336 @@
+{
+  "@@locale": "ja",
+  "appName": "Pomu",
+  "duplicateCleanupTitle": "重複写真の整理",
+  "later": "あとで",
+  "restorePurchase": "購入を復元",
+  "oneTimePurchase": "サブスクリプションではなく、一度きりの購入です。",
+  "paymentThroughApple": "お支払いはApple IDを通じて行われます。",
+  "duplicateIntroTitle": "似ている写真を\n先に候補として探します。",
+  "duplicateIntroDescription": "まだ削除は行わず、残す写真と削除候補だけを表示します。",
+  "duplicateSavingShort": "結果を保存中...",
+  "duplicateAnalyzingShort": "解析中...",
+  "duplicateScanAgain": "もう一度スキャン",
+  "duplicateFindCandidates": "重複候補を探す",
+  "loading": "読み込み中...",
+  "duplicateLoadMore": "重複候補をさらに表示",
+  "duplicateRestoringLastResult": "前回のスキャン結果を読み込んでいます。",
+  "duplicateSavingResult": "スキャン結果を保存中...",
+  "duplicateReanalyzing": "重複写真を再解析中...",
+  "duplicateSavingSafely": "スキャン結果を安全に保存しています。",
+  "duplicateFindingCandidates": "重複候補を探しています。",
+  "duplicateContinueSoon": "まもなく整理を続けられます。",
+  "duplicateMayTakeTime": "写真が多い場合は少し時間がかかることがあります。",
+  "duplicateKeeperMinimum": "残す写真を1枚以上選んでください。",
+  "purchaseCompletedContinueDelete": "購入が完了しました。削除を続けます。",
+  "deleteCanceledOrFailed": "削除がキャンセルされたか失敗しました。",
+  "deletePreparation": "削除の確認",
+  "deletedPhotosMoveToRecentlyDeleted": "削除した写真は「最近削除した項目」に移動します。",
+  "cancel": "キャンセル",
+  "unableToCheckSize": "容量を確認できません",
+  "noPhotosToDelete": "削除する写真はありません",
+  "keep": "✓ 残す",
+  "deleteCandidate": "削除候補",
+  "noRemainingDuplicateCandidates": "重複候補は残っていません",
+  "noAnalysisResult": "まだ解析結果がありません",
+  "scanAgainIfNewPhotos": "新しい写真を追加した場合は、もう一度スキャンしてください。",
+  "tapFindCandidatesGuide": "「重複候補を探す」をタップして写真ライブラリをスキャンしてください。",
+  "duplicateSavingWait": "スキャン結果を保存しています。しばらくお待ちください。",
+  "duplicateAnalyzingWait": "重複写真を解析しています。しばらくお待ちください。",
+  "duplicateLoadLastResultError": "前回のスキャン結果を読み込めませんでした：{error}",
+  "@duplicateLoadLastResultError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateLoadMoreError": "重複候補をさらに読み込めませんでした：{error}",
+  "@duplicateLoadMoreError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateAnalysisError": "重複写真の解析中に問題が発生しました：{error}",
+  "@duplicateAnalysisError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateSaveDeleteResultError": "削除結果の保存中に問題が発生しました：{error}",
+  "@duplicateSaveDeleteResultError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateProgress": "{percent}%・{current} / {total} グループを解析中",
+  "@duplicateProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateSummaryPartial": "重複候補は全{total}グループ\n現在{visible}件を表示・削除候補{deleteCount}枚",
+  "@duplicateSummaryPartial": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateSummaryFull": "重複候補{total}グループ\n削除候補{deleteCount}枚",
+  "@duplicateSummaryFull": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "freeDeleteCompleted": "{count}枚の写真を削除しました。無料整理を使用しました。",
+  "@freeDeleteCompleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteMovedToRecentlyDeleted": "{count}枚の写真を「最近削除した項目」に移動しました。",
+  "@deleteMovedToRecentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteCandidatesReview": "削除候補の写真{count}枚をもう一度確認してください。",
+  "@deleteCandidatesReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "estimatedSpace": "空き容量の目安：{size}",
+  "@estimatedSpace": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteCount": "{count}枚を削除",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateCandidateCount": "重複候補{count}枚",
+  "@duplicateCandidateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "keeperAndDeleteCount": "残す{keepCount}枚・削除候補{deleteCount}枚",
+  "@keeperAndDeleteCount": {
+    "placeholders": {
+      "keepCount": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "deletePreparationCount": "削除の確認（{count}枚）",
+  "@deletePreparationCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeHeroTitle": "iPhoneの写真を整理して\n空き容量を増やしましょう",
+  "homeHeroSubtitle": "重複写真や不要なファイルを見つけて\n安全に整理できます。",
+  "homeCleanupSectionTitle": "整理する",
+  "homeCleanupSectionSubtitle": "ストレージを使用している写真や動画を確認します。",
+  "homeScreenshotCleanupTitle": "スクリーンショット整理",
+  "homeScreenshotCleanupDescription": "古いスクリーンショットをまとめて確認・整理します。",
+  "homeLargeVideoCleanupTitle": "大きな動画を整理",
+  "homeLargeVideoCleanupDescription": "容量の大きい動画をサイズ順に確認します。",
+  "homeAlbumSectionTitle": "アルバムを作成",
+  "homeAlbumSectionSubtitle": "写真を好きな条件でまとめてアルバムを作ります。",
+  "homeDateTimeAlbumTitle": "期間・時間別アルバム",
+  "homeDateTimeAlbumDescription": "日付と時間帯を選んでアルバムを作成します。",
+  "homeAutoClassificationTitle": "写真の自動分類",
+  "homeAutoClassificationDescription": "写真を解析し、テーマ別アルバムに整理します。",
+  "available": "利用可能",
+  "beta": "ベータ",
+  "settings": "設定",
+  "analysisComplete": "解析完了",
+  "availableNow": "今すぐ利用可能",
+  "homeDuplicateLoading": "重複写真の情報を読み込んでいます。",
+  "homeDuplicateBeforeScanDescription": "写真ライブラリから重複写真を見つけて\n空けられる容量を確認しましょう。",
+  "homeDuplicateCleanDescription": "整理する重複写真はありません。\n写真ライブラリはきれいです。",
+  "homeDuplicateHasCandidatesDescription": "似ている写真を見つけて整理します。",
+  "homeFindDuplicates": "重複写真を探す",
+  "homeCleanDuplicates": "重複写真を整理",
+  "homeStartFirstScan": "最初のスキャンを始めましょう",
+  "homeFirstScanDescription": "写真は削除せず、\nまず重複候補だけを探します。",
+  "homeNoDuplicatesTitle": "整理する重複写真はありません",
+  "homeNoDuplicatesDescription": "写真ライブラリはきれいな状態です。",
+  "homeGroupCount": "{count}グループ",
+  "homeDeleteCandidateCount": "削除候補{count}枚",
+  "homeReclaimableBeforeDelete": "空けられる容量は削除前に確認できます。",
+  "@homeGroupCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@homeDeleteCandidateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "設定",
+  "settingsPhotoCleanupSectionTitle": "写真整理",
+  "settingsPhotoCleanupSectionSubtitle": "保存されたスキャン結果を管理します。",
+  "settingsResetDuplicateTitle": "重複写真のスキャン結果をリセット",
+  "settingsResetDuplicateSubtitle": "保存済みの結果と処理履歴を消去して、もう一度スキャンします。",
+  "settingsAlbumSectionTitle": "アルバム",
+  "settingsAlbumSectionSubtitle": "自動作成されるアルバム名を設定します。",
+  "settingsAutoAlbumNameTitle": "自動分類アルバム名",
+  "settingsAutoAlbumNameSubtitle": "写真の自動分類で使用するアルバム名を変更します。",
+  "settingsAppSectionTitle": "アプリ設定",
+  "settingsAppSectionSubtitle": "Pomuの基本設定を確認します。",
+  "settingsLanguageTitle": "言語",
+  "settingsLanguageSubtitle": "iPhone設定でPomuに選択した言語を使用します。",
+  "settingsInfoSectionTitle": "アプリ情報",
+  "settingsInfoSectionSubtitle": "Pomuに関する情報を確認します。",
+  "settingsPrivacyPolicyTitle": "プライバシーポリシー",
+  "settingsPrivacyPolicySubtitle": "個人情報の取り扱いを確認します。",
+  "settingsTermsTitle": "利用規約",
+  "settingsTermsSubtitle": "サービスの利用規約を確認します。",
+  "settingsContactTitle": "お問い合わせ",
+  "settingsContactSubtitle": "アプリの利用について問い合わせます。",
+  "settingsAppVersionTitle": "アプリバージョン",
+  "comingSoon": "準備中",
+  "settingsResetDialogTitle": "スキャン結果をリセットしますか？",
+  "settingsResetDialogDescription": "保存された重複グループと処理履歴を消去し、\n最初からスキャンし直します。",
+  "settingsResetNoticeResolvedGroups": "以前に処理したグループも再表示される場合があります。",
+  "settingsResetNoticePhotosSafe": "iPhoneの写真が削除・変更されることはありません。",
+  "settingsResetNoticePurchaseKept": "購入履歴と無料利用履歴は保持されます。",
+  "settingsResetAction": "スキャン結果をリセット",
+  "settingsResetSuccess": "重複写真のスキャン結果をリセットしました。",
+  "settingsResetFailure": "リセットできませんでした。しばらくしてからもう一度お試しください。",
+  "purchaseLifetimeBadge": "一度の購入で永久利用",
+  "purchaseTitle": "重複写真の整理を\n引き続き利用しましょう",
+  "purchaseDescription": "最初の重複グループは無料で整理しました。\nこれからは制限なく利用できます。",
+  "purchaseLoadingProduct": "商品情報を確認中",
+  "purchaseOneTimeNoExtraCharge": "一度きりの支払い・追加料金なし",
+  "purchaseBenefitLifetimeTitle": "永久利用",
+  "purchaseBenefitLifetimeDescription": "支払いは一度だけ",
+  "purchaseBenefitUnlimitedTitle": "無制限整理",
+  "purchaseBenefitUnlimitedDescription": "グループ数の制限なし",
+  "purchaseBenefitRestoreTitle": "購入を復元",
+  "purchaseBenefitRestoreDescription": "再インストール後も復元",
+  "purchaseBenefitNoSubscriptionTitle": "サブスクなし",
+  "purchaseBenefitNoSubscriptionDescription": "毎月の支払いなし",
+  "purchaseLoadFailed": "商品情報を読み込めませんでした。しばらくしてからもう一度お試しください。",
+  "purchaseReloadProduct": "商品情報を再読み込み",
+  "purchaseRestoring": "購入履歴を確認しています。",
+  "purchaseRestoringShort": "購入履歴を確認中...",
+  "purchaseWithPrice": "{price}で永久利用",
+  "@purchaseWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "screenshotLoadFailed": "スクリーンショットを読み込めませんでした。",
+  "screenshotDeleteFailed": "スクリーンショットを削除できませんでした。",
+  "screenshotDeletedSuccess": "{count}枚のスクリーンショットを「最近削除した項目」に移動しました。",
+  "screenshotDeletePreparationTitle": "スクリーンショット削除の確認",
+  "screenshotDeleteReview": "選択したスクリーンショット{count}枚を確認してください。",
+  "screenshotMoveToRecentlyDeleted": "削除した項目は写真アプリの「最近削除した項目」に移動します。",
+  "screenshotDeselectAll": "選択解除",
+  "screenshotSelectAll": "すべて選択",
+  "deleting": "削除中...",
+  "screenshotSelectToDelete": "削除するスクリーンショットを選択してください",
+  "screenshotDeleteSelected": "選択した{count}枚を削除",
+  "screenshotTotalCount": "スクリーンショット{count}枚",
+  "screenshotSelectToDeleteWithPeriod": "削除するスクリーンショットを選択してください。",
+  "screenshotSelectedCount": "{count}枚を選択しました。",
+  "photoPermissionRequiredTitle": "写真へのアクセスが必要です",
+  "screenshotPermissionDescription": "スクリーンショットを確認・整理するには\n写真ライブラリへのアクセスを許可してください。",
+  "openSettings": "設定を開く",
+  "@screenshotDeletedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotDeleteReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotDeleteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotTotalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "screenshotLimitedAccessDescription": "選択した写真のみにアクセスしています。すべてのスクリーンショットを表示するには、写真を追加してください。",
+  "addPhotos": "追加",
+  "screenshotEmptyTitle": "整理するスクリーンショットはありません",
+  "screenshotEmptyDescription": "写真ライブラリにスクリーンショットがないか、\n現在アクセスできるスクリーンショットがありません。"
+}

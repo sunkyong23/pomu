@@ -2,10 +2,29 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/duplicate_history_service.dart';
 import '../../services/duplicate_result_cache_service.dart';
 import '../../services/duplicate_summary_service.dart';
 import 'album_name_settings_screen.dart';
+
+extension _SettingsL10n on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+}
+
+String _currentLanguageName(BuildContext context) {
+  switch (Localizations.localeOf(context).languageCode) {
+    case 'en':
+      return 'English';
+    case 'ja':
+      return '日本語';
+    case 'zh':
+      return '简体中文';
+    case 'ko':
+    default:
+      return '한국어';
+  }
+}
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -57,8 +76,8 @@ class SettingsScreen extends StatelessWidget {
 
                 const SizedBox(height: 18),
 
-                const Text(
-                  '검사 결과를 초기화할까요?',
+                Text(
+                  dialogContext.l10n.settingsResetDialogTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 21,
@@ -70,9 +89,8 @@ class SettingsScreen extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                const Text(
-                  '저장된 중복 그룹과 처리 완료 기록을\n'
-                  '초기화하고 처음부터 다시 검사해요.',
+                Text(
+                  dialogContext.l10n.settingsResetDialogDescription,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -91,21 +109,24 @@ class SettingsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: PomuColors.divider),
                   ),
-                  child: const Column(
+                  child: Column(
                     children: [
                       _ResetNoticeRow(
                         icon: Icons.refresh_rounded,
-                        text: '이전에 처리한 그룹도 다시 나타날 수 있어요.',
+                        text: dialogContext
+                            .l10n
+                            .settingsResetNoticeResolvedGroups,
                       ),
                       SizedBox(height: 12),
                       _ResetNoticeRow(
                         icon: Icons.photo_outlined,
-                        text: '아이폰 사진은 삭제되거나 변경되지 않아요.',
+                        text: dialogContext.l10n.settingsResetNoticePhotosSafe,
                       ),
                       SizedBox(height: 12),
                       _ResetNoticeRow(
                         icon: Icons.lock_outline_rounded,
-                        text: '구매 기록과 무료 이용 기록은 유지돼요.',
+                        text:
+                            dialogContext.l10n.settingsResetNoticePurchaseKept,
                       ),
                     ],
                   ),
@@ -128,8 +149,8 @@ class SettingsScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(17),
                       ),
                     ),
-                    child: const Text(
-                      '검사 결과 초기화',
+                    child: Text(
+                      dialogContext.l10n.settingsResetAction,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w900,
@@ -153,8 +174,8 @@ class SettingsScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    child: const Text(
-                      '취소',
+                    child: Text(
+                      dialogContext.l10n.cancel,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -182,7 +203,7 @@ class SettingsScreen extends StatelessWidget {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: const Text('중복 사진 검사 결과를 초기화했어요.'),
+            content: Text(context.l10n.settingsResetSuccess),
             behavior: SnackBarBehavior.floating,
             backgroundColor: PomuColors.textPrimary,
             shape: RoundedRectangleBorder(
@@ -197,7 +218,7 @@ class SettingsScreen extends StatelessWidget {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: const Text('초기화하지 못했어요. 잠시 후 다시 시도해주세요.'),
+            content: Text(context.l10n.settingsResetFailure),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red,
             shape: RoundedRectangleBorder(
@@ -216,8 +237,8 @@ class SettingsScreen extends StatelessWidget {
         backgroundColor: PomuColors.background,
         surfaceTintColor: PomuColors.background,
         elevation: 0,
-        title: const Text(
-          '설정',
+        title: Text(
+          context.l10n.settingsTitle,
           style: TextStyle(
             color: PomuColors.textPrimary,
             fontSize: 22,
@@ -234,9 +255,9 @@ class SettingsScreen extends StatelessWidget {
           PomuSpacing.xxl,
         ),
         children: [
-          const _SettingsSectionHeader(
-            title: '사진 정리',
-            subtitle: '저장된 검사 결과를 관리해요.',
+          _SettingsSectionHeader(
+            title: context.l10n.settingsPhotoCleanupSectionTitle,
+            subtitle: context.l10n.settingsPhotoCleanupSectionSubtitle,
           ),
 
           const SizedBox(height: PomuSpacing.md),
@@ -245,8 +266,8 @@ class SettingsScreen extends StatelessWidget {
             children: [
               _SettingsTile(
                 icon: Icons.restart_alt_rounded,
-                title: '중복 사진 검사 결과 초기화',
-                subtitle: '저장된 결과와 처리 완료 기록을 지우고 다시 검사해요.',
+                title: context.l10n.settingsResetDuplicateTitle,
+                subtitle: context.l10n.settingsResetDuplicateSubtitle,
                 onTap: () {
                   _showClearDuplicateResultDialog(context);
                 },
@@ -256,9 +277,9 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: PomuSpacing.xl),
 
-          const _SettingsSectionHeader(
-            title: '앨범',
-            subtitle: '자동 생성되는 앨범 이름을 설정해요.',
+          _SettingsSectionHeader(
+            title: context.l10n.settingsAlbumSectionTitle,
+            subtitle: context.l10n.settingsAlbumSectionSubtitle,
           ),
 
           const SizedBox(height: PomuSpacing.md),
@@ -267,8 +288,8 @@ class SettingsScreen extends StatelessWidget {
             children: [
               _SettingsTile(
                 icon: Icons.photo_album_rounded,
-                title: '자동 분류 앨범 이름',
-                subtitle: '사진 자동 분류에 사용할 앨범 이름을 변경해요.',
+                title: context.l10n.settingsAutoAlbumNameTitle,
+                subtitle: context.l10n.settingsAutoAlbumNameSubtitle,
                 onTap: () {
                   _openAlbumNameSettings(context);
                 },
@@ -278,60 +299,60 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: PomuSpacing.xl),
 
-          const _SettingsSectionHeader(
-            title: '앱 설정',
-            subtitle: 'Pomu의 기본 설정을 확인해요.',
+          _SettingsSectionHeader(
+            title: context.l10n.settingsAppSectionTitle,
+            subtitle: context.l10n.settingsAppSectionSubtitle,
           ),
 
           const SizedBox(height: PomuSpacing.md),
 
-          const _SettingsGroup(
+          _SettingsGroup(
             children: [
               _SettingsTile(
                 icon: Icons.language_rounded,
-                title: '언어',
-                subtitle: '현재 아이폰의 언어 설정을 사용해요.',
-                trailingText: '한국어',
+                title: context.l10n.settingsLanguageTitle,
+                subtitle: context.l10n.settingsLanguageSubtitle,
+                trailingText: _currentLanguageName(context),
               ),
             ],
           ),
 
           const SizedBox(height: PomuSpacing.xl),
 
-          const _SettingsSectionHeader(
-            title: '앱 정보',
-            subtitle: 'Pomu에 대한 정보를 확인해요.',
+          _SettingsSectionHeader(
+            title: context.l10n.settingsInfoSectionTitle,
+            subtitle: context.l10n.settingsInfoSectionSubtitle,
           ),
 
           const SizedBox(height: PomuSpacing.md),
 
-          const _SettingsGroup(
+          _SettingsGroup(
             children: [
               _SettingsTile(
                 icon: Icons.shield_outlined,
-                title: '개인정보 처리방침',
-                subtitle: '개인정보 처리 내용을 확인해요.',
+                title: context.l10n.settingsPrivacyPolicyTitle,
+                subtitle: context.l10n.settingsPrivacyPolicySubtitle,
                 enabled: false,
               ),
               _SettingsDivider(),
               _SettingsTile(
                 icon: Icons.description_outlined,
-                title: '이용약관',
-                subtitle: '서비스 이용약관을 확인해요.',
+                title: context.l10n.settingsTermsTitle,
+                subtitle: context.l10n.settingsTermsSubtitle,
                 enabled: false,
               ),
               _SettingsDivider(),
               _SettingsTile(
                 icon: Icons.mail_outline_rounded,
-                title: '문의하기',
-                subtitle: '앱 이용 중 궁금한 점을 문의해요.',
+                title: context.l10n.settingsContactTitle,
+                subtitle: context.l10n.settingsContactSubtitle,
                 enabled: false,
               ),
               _SettingsDivider(),
               _SettingsTile(
                 icon: Icons.info_outline_rounded,
-                title: '앱 버전',
-                subtitle: 'Pomu',
+                title: context.l10n.settingsAppVersionTitle,
+                subtitle: context.l10n.appName,
                 trailingText: '1.0.0',
               ),
             ],
@@ -498,8 +519,8 @@ class _SettingsTile extends StatelessWidget {
                     color: PomuColors.background,
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  child: const Text(
-                    '준비 중',
+                  child: Text(
+                    context.l10n.comingSoon,
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,

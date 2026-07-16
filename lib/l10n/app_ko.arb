@@ -1,0 +1,336 @@
+{
+  "@@locale": "ko",
+  "appName": "Pomu",
+  "duplicateCleanupTitle": "중복 사진 정리",
+  "later": "나중에",
+  "restorePurchase": "구매 복원",
+  "oneTimePurchase": "구독이 아닌 일회성 구매예요.",
+  "paymentThroughApple": "결제는 Apple ID를 통해 진행됩니다.",
+  "duplicateIntroTitle": "비슷하게 보이는 사진을\n먼저 후보로 찾아볼게요.",
+  "duplicateIntroDescription": "지금은 삭제하지 않고, 보관할 사진과 삭제 후보만 보여줘요.",
+  "duplicateSavingShort": "결과 저장 중...",
+  "duplicateAnalyzingShort": "분석 중...",
+  "duplicateScanAgain": "다시 검사하기",
+  "duplicateFindCandidates": "중복 후보 찾기",
+  "loading": "불러오는 중...",
+  "duplicateLoadMore": "중복 후보 더 보기",
+  "duplicateRestoringLastResult": "마지막 검사 결과를 불러오고 있어요.",
+  "duplicateSavingResult": "검사 결과 저장 중...",
+  "duplicateReanalyzing": "중복 사진 다시 분석 중...",
+  "duplicateSavingSafely": "검사 결과를 안전하게 저장하고 있어요.",
+  "duplicateFindingCandidates": "중복 후보를 찾고 있어요.",
+  "duplicateContinueSoon": "잠시 후 바로 정리를 계속할 수 있어요.",
+  "duplicateMayTakeTime": "사진이 많을수록 조금 시간이 걸릴 수 있어요.",
+  "duplicateKeeperMinimum": "보관할 사진은 최소 1장 필요해요.",
+  "purchaseCompletedContinueDelete": "구매가 완료됐어요. 삭제를 계속 진행할게요.",
+  "deleteCanceledOrFailed": "삭제가 취소되었거나 실패했어요.",
+  "deletePreparation": "삭제 준비",
+  "deletedPhotosMoveToRecentlyDeleted": "삭제한 사진은 최근 삭제된 항목으로 이동해요.",
+  "cancel": "취소",
+  "unableToCheckSize": "용량을 확인하지 못했어요",
+  "noPhotosToDelete": "삭제할 사진 없음",
+  "keep": "✓ 보관",
+  "deleteCandidate": "삭제 후보",
+  "noRemainingDuplicateCandidates": "현재 남아 있는 중복 후보가 없어요",
+  "noAnalysisResult": "아직 분석 결과가 없어요",
+  "scanAgainIfNewPhotos": "새로운 사진이 추가되었다면\n다시 검사해주세요.",
+  "tapFindCandidatesGuide": "중복 후보 찾기를 눌러\n사진 보관함을 검사해주세요.",
+  "duplicateSavingWait": "검사 결과를 저장하고 있어요. 잠시만 기다려주세요.",
+  "duplicateAnalyzingWait": "중복 사진을 분석하고 있어요. 잠시만 기다려주세요.",
+  "duplicateLoadLastResultError": "마지막 검사 결과를 불러오지 못했어요: {error}",
+  "@duplicateLoadLastResultError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateLoadMoreError": "중복 후보를 더 불러오지 못했어요: {error}",
+  "@duplicateLoadMoreError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateAnalysisError": "중복 사진 분석 중 문제가 발생했어요: {error}",
+  "@duplicateAnalysisError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateSaveDeleteResultError": "삭제 결과를 저장하는 중 문제가 발생했어요: {error}",
+  "@duplicateSaveDeleteResultError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateProgress": "{percent}% · {current} / {total} 그룹 분석 중",
+  "@duplicateProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateSummaryPartial": "전체 중복 후보 {total}개 그룹\n현재 {visible}개 표시 중 · 삭제 후보 {deleteCount}장",
+  "@duplicateSummaryPartial": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateSummaryFull": "중복 후보 {total}개 그룹\n삭제 후보 {deleteCount}장",
+  "@duplicateSummaryFull": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "freeDeleteCompleted": "{count}장의 사진을 삭제했어요. 첫 무료 정리를 사용했어요.",
+  "@freeDeleteCompleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteMovedToRecentlyDeleted": "{count}장의 사진을 최근 삭제된 항목으로 이동했어요.",
+  "@deleteMovedToRecentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteCandidatesReview": "삭제 후보 {count}장을 다시 확인해주세요.",
+  "@deleteCandidatesReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "estimatedSpace": "예상 확보 공간 {size}",
+  "@estimatedSpace": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteCount": "{count}장 삭제",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateCandidateCount": "중복 후보 {count}장",
+  "@duplicateCandidateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "keeperAndDeleteCount": "보관 {keepCount}장 · 삭제 후보 {deleteCount}장",
+  "@keeperAndDeleteCount": {
+    "placeholders": {
+      "keepCount": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "deletePreparationCount": "삭제 준비 ({count}장)",
+  "@deletePreparationCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeHeroTitle": "아이폰 사진을 정리하고\n저장공간을 되찾아보세요",
+  "homeHeroSubtitle": "중복 사진과 불필요한 파일을 찾아\n안전하게 정리할 수 있어요.",
+  "homeCleanupSectionTitle": "정리하기",
+  "homeCleanupSectionSubtitle": "저장공간을 차지하는 사진과 영상을 확인해요.",
+  "homeScreenshotCleanupTitle": "스크린샷 정리",
+  "homeScreenshotCleanupDescription": "오래된 스크린샷을 한곳에서 확인하고 정리해요.",
+  "homeLargeVideoCleanupTitle": "큰 동영상 정리",
+  "homeLargeVideoCleanupDescription": "저장공간을 많이 차지하는 동영상을 용량순으로 확인해요.",
+  "homeAlbumSectionTitle": "앨범 만들기",
+  "homeAlbumSectionSubtitle": "사진을 원하는 기준으로 묶어 앨범을 만들어요.",
+  "homeDateTimeAlbumTitle": "기간·시간별 앨범 만들기",
+  "homeDateTimeAlbumDescription": "원하는 날짜와 시간대를 골라 앨범을 만들어요.",
+  "homeAutoClassificationTitle": "사진 자동 분류",
+  "homeAutoClassificationDescription": "사진을 분석해 주제별 앨범으로 정리해요.",
+  "available": "사용 가능",
+  "beta": "Beta",
+  "settings": "설정",
+  "analysisComplete": "분석 완료",
+  "availableNow": "지금 사용 가능",
+  "homeDuplicateLoading": "중복 사진 정보를 불러오고 있어요.",
+  "homeDuplicateBeforeScanDescription": "사진 보관함에서 중복 사진을 찾아\n확보할 수 있는 공간을 확인해보세요.",
+  "homeDuplicateCleanDescription": "현재 정리할 중복 사진이 없어요.\n사진 보관함이 깔끔해요.",
+  "homeDuplicateHasCandidatesDescription": "비슷한 사진을 찾아 정리해요.",
+  "homeFindDuplicates": "중복 사진 찾아보기",
+  "homeCleanDuplicates": "중복 사진 정리하기",
+  "homeStartFirstScan": "첫 검사를 시작해보세요",
+  "homeFirstScanDescription": "사진을 삭제하지 않고\n중복 후보만 먼저 찾아드려요.",
+  "homeNoDuplicatesTitle": "정리할 중복 사진이 없어요",
+  "homeNoDuplicatesDescription": "지금 사진 보관함은 깔끔한 상태예요.",
+  "homeGroupCount": "{count}개 그룹",
+  "homeDeleteCandidateCount": "삭제 후보 {count}장",
+  "homeReclaimableBeforeDelete": "확보 용량은 삭제 전에 확인할 수 있어요.",
+  "@homeGroupCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@homeDeleteCandidateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "설정",
+  "settingsPhotoCleanupSectionTitle": "사진 정리",
+  "settingsPhotoCleanupSectionSubtitle": "저장된 검사 결과를 관리해요.",
+  "settingsResetDuplicateTitle": "중복 사진 검사 결과 초기화",
+  "settingsResetDuplicateSubtitle": "저장된 결과와 처리 완료 기록을 지우고 다시 검사해요.",
+  "settingsAlbumSectionTitle": "앨범",
+  "settingsAlbumSectionSubtitle": "자동 생성되는 앨범 이름을 설정해요.",
+  "settingsAutoAlbumNameTitle": "자동 분류 앨범 이름",
+  "settingsAutoAlbumNameSubtitle": "사진 자동 분류에 사용할 앨범 이름을 변경해요.",
+  "settingsAppSectionTitle": "앱 설정",
+  "settingsAppSectionSubtitle": "Pomu의 기본 설정을 확인해요.",
+  "settingsLanguageTitle": "언어",
+  "settingsLanguageSubtitle": "현재 아이폰의 앱 언어 설정을 사용해요.",
+  "settingsInfoSectionTitle": "앱 정보",
+  "settingsInfoSectionSubtitle": "Pomu에 대한 정보를 확인해요.",
+  "settingsPrivacyPolicyTitle": "개인정보 처리방침",
+  "settingsPrivacyPolicySubtitle": "개인정보 처리 내용을 확인해요.",
+  "settingsTermsTitle": "이용약관",
+  "settingsTermsSubtitle": "서비스 이용약관을 확인해요.",
+  "settingsContactTitle": "문의하기",
+  "settingsContactSubtitle": "앱 이용 중 궁금한 점을 문의해요.",
+  "settingsAppVersionTitle": "앱 버전",
+  "comingSoon": "준비 중",
+  "settingsResetDialogTitle": "검사 결과를 초기화할까요?",
+  "settingsResetDialogDescription": "저장된 중복 그룹과 처리 완료 기록을\n초기화하고 처음부터 다시 검사해요.",
+  "settingsResetNoticeResolvedGroups": "이전에 처리한 그룹도 다시 나타날 수 있어요.",
+  "settingsResetNoticePhotosSafe": "아이폰 사진은 삭제되거나 변경되지 않아요.",
+  "settingsResetNoticePurchaseKept": "구매 기록과 무료 이용 기록은 유지돼요.",
+  "settingsResetAction": "검사 결과 초기화",
+  "settingsResetSuccess": "중복 사진 검사 결과를 초기화했어요.",
+  "settingsResetFailure": "초기화하지 못했어요. 잠시 후 다시 시도해주세요.",
+  "purchaseLifetimeBadge": "한 번 구매로 영구 이용",
+  "purchaseTitle": "중복 사진 정리를\n계속 이용해보세요",
+  "purchaseDescription": "첫 번째 중복 그룹은 무료로 정리했어요.\n이제 제한 없이 계속 정리할 수 있어요.",
+  "purchaseLoadingProduct": "상품 정보 확인 중",
+  "purchaseOneTimeNoExtraCharge": "일회성 결제 · 추가 결제 없음",
+  "purchaseBenefitLifetimeTitle": "영구 이용",
+  "purchaseBenefitLifetimeDescription": "한 번만 결제",
+  "purchaseBenefitUnlimitedTitle": "무제한 정리",
+  "purchaseBenefitUnlimitedDescription": "그룹 개수 제한 없음",
+  "purchaseBenefitRestoreTitle": "구매 복원",
+  "purchaseBenefitRestoreDescription": "재설치 후에도 복원",
+  "purchaseBenefitNoSubscriptionTitle": "구독 없음",
+  "purchaseBenefitNoSubscriptionDescription": "매달 결제하지 않아요",
+  "purchaseLoadFailed": "상품 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
+  "purchaseReloadProduct": "상품 정보 다시 불러오기",
+  "purchaseRestoring": "구매 내역을 확인하고 있어요.",
+  "purchaseRestoringShort": "구매 내역 확인 중...",
+  "purchaseWithPrice": "{price}으로 영구 이용",
+  "@purchaseWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "screenshotLoadFailed": "스크린샷을 불러오지 못했어요.",
+  "screenshotDeleteFailed": "스크린샷을 삭제하지 못했어요.",
+  "screenshotDeletedSuccess": "{count}장의 스크린샷을 최근 삭제된 항목으로 이동했어요.",
+  "screenshotDeletePreparationTitle": "스크린샷 삭제 준비",
+  "screenshotDeleteReview": "선택한 스크린샷 {count}장을 확인해주세요.",
+  "screenshotMoveToRecentlyDeleted": "삭제한 항목은 사진 앱의 최근 삭제된 항목으로 이동해요.",
+  "screenshotDeselectAll": "선택 해제",
+  "screenshotSelectAll": "전체 선택",
+  "deleting": "삭제 중...",
+  "screenshotSelectToDelete": "삭제할 스크린샷을 선택해주세요",
+  "screenshotDeleteSelected": "선택한 {count}장 삭제",
+  "screenshotTotalCount": "스크린샷 {count}장",
+  "screenshotSelectToDeleteWithPeriod": "삭제할 스크린샷을 선택해주세요.",
+  "screenshotSelectedCount": "{count}장을 선택했어요.",
+  "photoPermissionRequiredTitle": "사진 접근 권한이 필요해요",
+  "screenshotPermissionDescription": "스크린샷을 확인하고 정리하려면\n사진 보관함 접근을 허용해주세요.",
+  "openSettings": "설정 열기",
+  "@screenshotDeletedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotDeleteReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotDeleteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotTotalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "screenshotLimitedAccessDescription": "선택한 사진만 접근 중이에요. 모든 스크린샷을 보려면 접근 사진을 추가해주세요.",
+  "addPhotos": "추가",
+  "screenshotEmptyTitle": "정리할 스크린샷이 없어요",
+  "screenshotEmptyDescription": "현재 사진 보관함에 스크린샷이 없거나\n접근 가능한 스크린샷이 없어요."
+}

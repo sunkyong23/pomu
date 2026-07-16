@@ -1,0 +1,336 @@
+{
+  "@@locale": "en",
+  "appName": "Pomu",
+  "duplicateCleanupTitle": "Duplicate Photo Cleanup",
+  "later": "Not now",
+  "restorePurchase": "Restore Purchase",
+  "oneTimePurchase": "This is a one-time purchase, not a subscription.",
+  "paymentThroughApple": "Payment is processed through your Apple ID.",
+  "duplicateIntroTitle": "Let’s find photos\nthat look alike first.",
+  "duplicateIntroDescription": "Nothing is deleted yet. Review which photos to keep and which are deletion candidates.",
+  "duplicateSavingShort": "Saving results...",
+  "duplicateAnalyzingShort": "Analyzing...",
+  "duplicateScanAgain": "Scan Again",
+  "duplicateFindCandidates": "Find Duplicates",
+  "loading": "Loading...",
+  "duplicateLoadMore": "Show More Duplicates",
+  "duplicateRestoringLastResult": "Loading your latest scan results.",
+  "duplicateSavingResult": "Saving Scan Results...",
+  "duplicateReanalyzing": "Reanalyzing Duplicate Photos...",
+  "duplicateSavingSafely": "Safely saving your scan results.",
+  "duplicateFindingCandidates": "Finding duplicate candidates.",
+  "duplicateContinueSoon": "You can continue cleaning up shortly.",
+  "duplicateMayTakeTime": "This may take a little longer if you have many photos.",
+  "duplicateKeeperMinimum": "Keep at least one photo.",
+  "purchaseCompletedContinueDelete": "Purchase complete. Continuing with deletion.",
+  "deleteCanceledOrFailed": "Deletion was canceled or failed.",
+  "deletePreparation": "Review Deletion",
+  "deletedPhotosMoveToRecentlyDeleted": "Deleted photos are moved to Recently Deleted.",
+  "cancel": "Cancel",
+  "unableToCheckSize": "Unable to check size",
+  "noPhotosToDelete": "No Photos to Delete",
+  "keep": "✓ Keep",
+  "deleteCandidate": "Delete",
+  "noRemainingDuplicateCandidates": "No duplicate candidates remain",
+  "noAnalysisResult": "No scan results yet",
+  "scanAgainIfNewPhotos": "Scan again if you’ve added new photos.",
+  "tapFindCandidatesGuide": "Tap Find Duplicates to scan your photo library.",
+  "duplicateSavingWait": "Saving scan results. Please wait.",
+  "duplicateAnalyzingWait": "Analyzing duplicate photos. Please wait.",
+  "duplicateLoadLastResultError": "Couldn’t load the latest scan result: {error}",
+  "@duplicateLoadLastResultError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateLoadMoreError": "Couldn’t load more duplicate candidates: {error}",
+  "@duplicateLoadMoreError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateAnalysisError": "A problem occurred while analyzing duplicate photos: {error}",
+  "@duplicateAnalysisError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateSaveDeleteResultError": "A problem occurred while saving deletion results: {error}",
+  "@duplicateSaveDeleteResultError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateProgress": "{percent}% · {current} / {total} groups analyzed",
+  "@duplicateProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateSummaryPartial": "{total} duplicate groups total\nShowing {visible} · {deleteCount} deletion candidates",
+  "@duplicateSummaryPartial": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateSummaryFull": "{total} duplicate groups\n{deleteCount} deletion candidates",
+  "@duplicateSummaryFull": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "freeDeleteCompleted": "Deleted {count} photos. Your free cleanup has been used.",
+  "@freeDeleteCompleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteMovedToRecentlyDeleted": "Moved {count} photos to Recently Deleted.",
+  "@deleteMovedToRecentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteCandidatesReview": "Review {count} photos selected for deletion.",
+  "@deleteCandidatesReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "estimatedSpace": "Estimated space saved: {size}",
+  "@estimatedSpace": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteCount": "Delete {count}",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateCandidateCount": "{count} duplicate candidates",
+  "@duplicateCandidateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "keeperAndDeleteCount": "Keep {keepCount} · Delete {deleteCount}",
+  "@keeperAndDeleteCount": {
+    "placeholders": {
+      "keepCount": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "deletePreparationCount": "Review Deletion ({count})",
+  "@deletePreparationCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeHeroTitle": "Clean up your iPhone photos\nand free up storage",
+  "homeHeroSubtitle": "Find duplicate photos and unnecessary files,\nthen clean them up safely.",
+  "homeCleanupSectionTitle": "Clean Up",
+  "homeCleanupSectionSubtitle": "Review photos and videos taking up storage.",
+  "homeScreenshotCleanupTitle": "Screenshot Cleanup",
+  "homeScreenshotCleanupDescription": "Review and remove old screenshots in one place.",
+  "homeLargeVideoCleanupTitle": "Large Video Cleanup",
+  "homeLargeVideoCleanupDescription": "Find videos using the most storage, sorted by size.",
+  "homeAlbumSectionTitle": "Create Albums",
+  "homeAlbumSectionSubtitle": "Group photos by the criteria you choose.",
+  "homeDateTimeAlbumTitle": "Create Album by Date & Time",
+  "homeDateTimeAlbumDescription": "Choose a date range and time of day to create an album.",
+  "homeAutoClassificationTitle": "Automatic Photo Sorting",
+  "homeAutoClassificationDescription": "Analyze photos and organize them into themed albums.",
+  "available": "Available",
+  "beta": "Beta",
+  "settings": "Settings",
+  "analysisComplete": "Scan Complete",
+  "availableNow": "Available Now",
+  "homeDuplicateLoading": "Loading duplicate photo information.",
+  "homeDuplicateBeforeScanDescription": "Find duplicate photos in your library\nand see how much space you could free.",
+  "homeDuplicateCleanDescription": "There are no duplicate photos to clean up.\nYour photo library looks tidy.",
+  "homeDuplicateHasCandidatesDescription": "Find and clean up similar photos.",
+  "homeFindDuplicates": "Find Duplicate Photos",
+  "homeCleanDuplicates": "Clean Up Duplicates",
+  "homeStartFirstScan": "Start Your First Scan",
+  "homeFirstScanDescription": "Nothing will be deleted.\nWe’ll find duplicate candidates first.",
+  "homeNoDuplicatesTitle": "No Duplicates to Clean Up",
+  "homeNoDuplicatesDescription": "Your photo library is currently tidy.",
+  "homeGroupCount": "{count} groups",
+  "homeDeleteCandidateCount": "{count} deletion candidates",
+  "homeReclaimableBeforeDelete": "You can review the estimated space before deleting.",
+  "@homeGroupCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@homeDeleteCandidateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "Settings",
+  "settingsPhotoCleanupSectionTitle": "Photo Cleanup",
+  "settingsPhotoCleanupSectionSubtitle": "Manage saved scan results.",
+  "settingsResetDuplicateTitle": "Reset Duplicate Scan Results",
+  "settingsResetDuplicateSubtitle": "Clear saved results and completed-group history, then scan again.",
+  "settingsAlbumSectionTitle": "Albums",
+  "settingsAlbumSectionSubtitle": "Choose names for automatically created albums.",
+  "settingsAutoAlbumNameTitle": "Automatic Sorting Album Names",
+  "settingsAutoAlbumNameSubtitle": "Change the album names used for automatic photo sorting.",
+  "settingsAppSectionTitle": "App Settings",
+  "settingsAppSectionSubtitle": "Review Pomu’s basic settings.",
+  "settingsLanguageTitle": "Language",
+  "settingsLanguageSubtitle": "Uses the language selected for Pomu in iPhone Settings.",
+  "settingsInfoSectionTitle": "App Information",
+  "settingsInfoSectionSubtitle": "View information about Pomu.",
+  "settingsPrivacyPolicyTitle": "Privacy Policy",
+  "settingsPrivacyPolicySubtitle": "Review how personal information is handled.",
+  "settingsTermsTitle": "Terms of Use",
+  "settingsTermsSubtitle": "Review the terms for using the service.",
+  "settingsContactTitle": "Contact Us",
+  "settingsContactSubtitle": "Ask a question about using the app.",
+  "settingsAppVersionTitle": "App Version",
+  "comingSoon": "Coming Soon",
+  "settingsResetDialogTitle": "Reset scan results?",
+  "settingsResetDialogDescription": "Clear saved duplicate groups and completed-group history,\nthen start a fresh scan.",
+  "settingsResetNoticeResolvedGroups": "Previously completed groups may appear again.",
+  "settingsResetNoticePhotosSafe": "Photos on your iPhone will not be deleted or changed.",
+  "settingsResetNoticePurchaseKept": "Purchase history and free-use history will be kept.",
+  "settingsResetAction": "Reset Scan Results",
+  "settingsResetSuccess": "Duplicate photo scan results were reset.",
+  "settingsResetFailure": "Couldn’t reset the results. Please try again shortly.",
+  "purchaseLifetimeBadge": "Lifetime access with one purchase",
+  "purchaseTitle": "Keep using\nDuplicate Photo Cleanup",
+  "purchaseDescription": "Your first duplicate group was cleaned up for free.\nContinue without limits.",
+  "purchaseLoadingProduct": "Checking product information",
+  "purchaseOneTimeNoExtraCharge": "One-time payment · No extra charges",
+  "purchaseBenefitLifetimeTitle": "Lifetime Access",
+  "purchaseBenefitLifetimeDescription": "Pay only once",
+  "purchaseBenefitUnlimitedTitle": "Unlimited Cleanup",
+  "purchaseBenefitUnlimitedDescription": "No group limit",
+  "purchaseBenefitRestoreTitle": "Restore Purchase",
+  "purchaseBenefitRestoreDescription": "Restore after reinstalling",
+  "purchaseBenefitNoSubscriptionTitle": "No Subscription",
+  "purchaseBenefitNoSubscriptionDescription": "No monthly payments",
+  "purchaseLoadFailed": "Couldn’t load the product information. Please try again shortly.",
+  "purchaseReloadProduct": "Reload Product Information",
+  "purchaseRestoring": "Checking your purchase history.",
+  "purchaseRestoringShort": "Checking purchases...",
+  "purchaseWithPrice": "Get lifetime access for {price}",
+  "@purchaseWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "screenshotLoadFailed": "Couldn’t load your screenshots.",
+  "screenshotDeleteFailed": "Couldn’t delete the screenshots.",
+  "screenshotDeletedSuccess": "Moved {count} screenshots to Recently Deleted.",
+  "screenshotDeletePreparationTitle": "Review Screenshot Deletion",
+  "screenshotDeleteReview": "Review the {count} selected screenshots.",
+  "screenshotMoveToRecentlyDeleted": "Deleted items will be moved to Recently Deleted in Photos.",
+  "screenshotDeselectAll": "Deselect All",
+  "screenshotSelectAll": "Select All",
+  "deleting": "Deleting...",
+  "screenshotSelectToDelete": "Select screenshots to delete",
+  "screenshotDeleteSelected": "Delete {count} Selected",
+  "screenshotTotalCount": "{count} screenshots",
+  "screenshotSelectToDeleteWithPeriod": "Select screenshots to delete.",
+  "screenshotSelectedCount": "{count} selected.",
+  "photoPermissionRequiredTitle": "Photo Access Required",
+  "screenshotPermissionDescription": "Allow access to your photo library\nto review and clean up screenshots.",
+  "openSettings": "Open Settings",
+  "@screenshotDeletedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotDeleteReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotDeleteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotTotalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "screenshotLimitedAccessDescription": "Pomu can access only selected photos. Add more photos to view all screenshots.",
+  "addPhotos": "Add",
+  "screenshotEmptyTitle": "No Screenshots to Clean Up",
+  "screenshotEmptyDescription": "There are no screenshots in your library,\nor none are currently accessible."
+}

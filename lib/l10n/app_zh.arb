@@ -1,0 +1,336 @@
+{
+  "@@locale": "zh",
+  "appName": "Pomu",
+  "duplicateCleanupTitle": "清理重复照片",
+  "later": "稍后",
+  "restorePurchase": "恢复购买",
+  "oneTimePurchase": "这是一次性购买，不是订阅。",
+  "paymentThroughApple": "付款将通过 Apple ID 进行。",
+  "duplicateIntroTitle": "先帮你找出\n看起来相似的照片。",
+  "duplicateIntroDescription": "现在不会删除任何照片，只会显示保留照片和删除候选。",
+  "duplicateSavingShort": "正在保存结果...",
+  "duplicateAnalyzingShort": "正在分析...",
+  "duplicateScanAgain": "重新扫描",
+  "duplicateFindCandidates": "查找重复照片",
+  "loading": "正在加载...",
+  "duplicateLoadMore": "查看更多重复照片",
+  "duplicateRestoringLastResult": "正在加载上次扫描结果。",
+  "duplicateSavingResult": "正在保存扫描结果...",
+  "duplicateReanalyzing": "正在重新分析重复照片...",
+  "duplicateSavingSafely": "正在安全保存扫描结果。",
+  "duplicateFindingCandidates": "正在查找重复候选。",
+  "duplicateContinueSoon": "稍后即可继续整理。",
+  "duplicateMayTakeTime": "照片较多时可能需要一些时间。",
+  "duplicateKeeperMinimum": "至少保留一张照片。",
+  "purchaseCompletedContinueDelete": "购买完成，将继续删除。",
+  "deleteCanceledOrFailed": "删除已取消或失败。",
+  "deletePreparation": "确认删除",
+  "deletedPhotosMoveToRecentlyDeleted": "删除的照片会移到“最近删除”。",
+  "cancel": "取消",
+  "unableToCheckSize": "无法检查容量",
+  "noPhotosToDelete": "没有可删除的照片",
+  "keep": "✓ 保留",
+  "deleteCandidate": "删除候选",
+  "noRemainingDuplicateCandidates": "没有剩余的重复候选",
+  "noAnalysisResult": "暂无分析结果",
+  "scanAgainIfNewPhotos": "添加新照片后请重新扫描。",
+  "tapFindCandidatesGuide": "点击“查找重复照片”扫描照片图库。",
+  "duplicateSavingWait": "正在保存扫描结果，请稍候。",
+  "duplicateAnalyzingWait": "正在分析重复照片，请稍候。",
+  "duplicateLoadLastResultError": "无法加载上次扫描结果：{error}",
+  "@duplicateLoadLastResultError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateLoadMoreError": "无法加载更多重复候选：{error}",
+  "@duplicateLoadMoreError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateAnalysisError": "分析重复照片时出现问题：{error}",
+  "@duplicateAnalysisError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateSaveDeleteResultError": "保存删除结果时出现问题：{error}",
+  "@duplicateSaveDeleteResultError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicateProgress": "{percent}% · 正在分析 {current} / {total} 组",
+  "@duplicateProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateSummaryPartial": "共 {total} 组重复候选\n当前显示 {visible} 组 · 删除候选 {deleteCount} 张",
+  "@duplicateSummaryPartial": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "visible": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateSummaryFull": "{total} 组重复候选\n删除候选 {deleteCount} 张",
+  "@duplicateSummaryFull": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "freeDeleteCompleted": "已删除 {count} 张照片，并使用了首次免费整理。",
+  "@freeDeleteCompleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteMovedToRecentlyDeleted": "已将 {count} 张照片移到“最近删除”。",
+  "@deleteMovedToRecentlyDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteCandidatesReview": "请再次确认要删除的 {count} 张照片。",
+  "@deleteCandidatesReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "estimatedSpace": "预计可释放空间：{size}",
+  "@estimatedSpace": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteCount": "删除 {count} 张",
+  "@deleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateCandidateCount": "{count} 张重复候选",
+  "@duplicateCandidateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "keeperAndDeleteCount": "保留 {keepCount} 张 · 删除候选 {deleteCount} 张",
+  "@keeperAndDeleteCount": {
+    "placeholders": {
+      "keepCount": {
+        "type": "int"
+      },
+      "deleteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "deletePreparationCount": "确认删除（{count} 张）",
+  "@deletePreparationCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeHeroTitle": "整理 iPhone 照片，\n释放更多存储空间",
+  "homeHeroSubtitle": "查找重复照片和不需要的文件，\n安全地完成整理。",
+  "homeCleanupSectionTitle": "清理",
+  "homeCleanupSectionSubtitle": "查看占用存储空间的照片和视频。",
+  "homeScreenshotCleanupTitle": "清理截图",
+  "homeScreenshotCleanupDescription": "集中查看并清理旧截图。",
+  "homeLargeVideoCleanupTitle": "清理大视频",
+  "homeLargeVideoCleanupDescription": "按大小查看最占空间的视频。",
+  "homeAlbumSectionTitle": "创建相册",
+  "homeAlbumSectionSubtitle": "按照你选择的条件将照片整理成相册。",
+  "homeDateTimeAlbumTitle": "按日期与时间创建相册",
+  "homeDateTimeAlbumDescription": "选择日期范围和时间段来创建相册。",
+  "homeAutoClassificationTitle": "照片自动分类",
+  "homeAutoClassificationDescription": "分析照片并整理到不同主题相册中。",
+  "available": "可用",
+  "beta": "测试版",
+  "settings": "设置",
+  "analysisComplete": "分析完成",
+  "availableNow": "现在可用",
+  "homeDuplicateLoading": "正在加载重复照片信息。",
+  "homeDuplicateBeforeScanDescription": "在照片图库中查找重复照片，\n查看可以释放多少空间。",
+  "homeDuplicateCleanDescription": "目前没有需要清理的重复照片。\n你的照片图库很整洁。",
+  "homeDuplicateHasCandidatesDescription": "查找并清理相似照片。",
+  "homeFindDuplicates": "查找重复照片",
+  "homeCleanDuplicates": "清理重复照片",
+  "homeStartFirstScan": "开始首次扫描",
+  "homeFirstScanDescription": "不会删除任何照片，\n我们会先找出重复候选。",
+  "homeNoDuplicatesTitle": "没有需要清理的重复照片",
+  "homeNoDuplicatesDescription": "你的照片图库目前很整洁。",
+  "homeGroupCount": "{count} 组",
+  "homeDeleteCandidateCount": "{count} 张删除候选",
+  "homeReclaimableBeforeDelete": "删除前可以查看预计可释放空间。",
+  "@homeGroupCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@homeDeleteCandidateCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsTitle": "设置",
+  "settingsPhotoCleanupSectionTitle": "照片清理",
+  "settingsPhotoCleanupSectionSubtitle": "管理已保存的扫描结果。",
+  "settingsResetDuplicateTitle": "重置重复照片扫描结果",
+  "settingsResetDuplicateSubtitle": "清除已保存的结果和已处理记录，然后重新扫描。",
+  "settingsAlbumSectionTitle": "相册",
+  "settingsAlbumSectionSubtitle": "设置自动创建的相册名称。",
+  "settingsAutoAlbumNameTitle": "自动分类相册名称",
+  "settingsAutoAlbumNameSubtitle": "更改照片自动分类使用的相册名称。",
+  "settingsAppSectionTitle": "应用设置",
+  "settingsAppSectionSubtitle": "查看 Pomu 的基本设置。",
+  "settingsLanguageTitle": "语言",
+  "settingsLanguageSubtitle": "使用 iPhone 设置中为 Pomu 选择的语言。",
+  "settingsInfoSectionTitle": "应用信息",
+  "settingsInfoSectionSubtitle": "查看有关 Pomu 的信息。",
+  "settingsPrivacyPolicyTitle": "隐私政策",
+  "settingsPrivacyPolicySubtitle": "查看个人信息的处理方式。",
+  "settingsTermsTitle": "使用条款",
+  "settingsTermsSubtitle": "查看服务使用条款。",
+  "settingsContactTitle": "联系我们",
+  "settingsContactSubtitle": "咨询应用使用中的问题。",
+  "settingsAppVersionTitle": "应用版本",
+  "comingSoon": "即将推出",
+  "settingsResetDialogTitle": "要重置扫描结果吗？",
+  "settingsResetDialogDescription": "清除已保存的重复组和已处理记录，\n然后从头开始重新扫描。",
+  "settingsResetNoticeResolvedGroups": "之前处理过的组可能会再次出现。",
+  "settingsResetNoticePhotosSafe": "iPhone 中的照片不会被删除或更改。",
+  "settingsResetNoticePurchaseKept": "购买记录和免费使用记录会保留。",
+  "settingsResetAction": "重置扫描结果",
+  "settingsResetSuccess": "已重置重复照片扫描结果。",
+  "settingsResetFailure": "无法重置结果，请稍后再试。",
+  "purchaseLifetimeBadge": "一次购买，永久使用",
+  "purchaseTitle": "继续使用\n重复照片清理",
+  "purchaseDescription": "首次重复照片组已免费清理。\n现在可以无限制继续整理。",
+  "purchaseLoadingProduct": "正在检查商品信息",
+  "purchaseOneTimeNoExtraCharge": "一次性付款 · 无额外费用",
+  "purchaseBenefitLifetimeTitle": "永久使用",
+  "purchaseBenefitLifetimeDescription": "只需付款一次",
+  "purchaseBenefitUnlimitedTitle": "无限清理",
+  "purchaseBenefitUnlimitedDescription": "不限制照片组数量",
+  "purchaseBenefitRestoreTitle": "恢复购买",
+  "purchaseBenefitRestoreDescription": "重新安装后仍可恢复",
+  "purchaseBenefitNoSubscriptionTitle": "无需订阅",
+  "purchaseBenefitNoSubscriptionDescription": "无需每月付款",
+  "purchaseLoadFailed": "无法加载商品信息，请稍后重试。",
+  "purchaseReloadProduct": "重新加载商品信息",
+  "purchaseRestoring": "正在检查购买记录。",
+  "purchaseRestoringShort": "正在检查购买记录...",
+  "purchaseWithPrice": "以 {price} 永久使用",
+  "@purchaseWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "screenshotLoadFailed": "无法加载截图。",
+  "screenshotDeleteFailed": "无法删除截图。",
+  "screenshotDeletedSuccess": "已将 {count} 张截图移到“最近删除”。",
+  "screenshotDeletePreparationTitle": "确认删除截图",
+  "screenshotDeleteReview": "请确认选中的 {count} 张截图。",
+  "screenshotMoveToRecentlyDeleted": "删除的项目会移到“照片”中的“最近删除”。",
+  "screenshotDeselectAll": "取消全选",
+  "screenshotSelectAll": "全选",
+  "deleting": "正在删除...",
+  "screenshotSelectToDelete": "请选择要删除的截图",
+  "screenshotDeleteSelected": "删除选中的 {count} 张",
+  "screenshotTotalCount": "{count} 张截图",
+  "screenshotSelectToDeleteWithPeriod": "请选择要删除的截图。",
+  "screenshotSelectedCount": "已选择 {count} 张。",
+  "photoPermissionRequiredTitle": "需要照片访问权限",
+  "screenshotPermissionDescription": "如需查看并清理截图，\n请允许访问照片图库。",
+  "openSettings": "打开设置",
+  "@screenshotDeletedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotDeleteReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotDeleteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotTotalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@screenshotSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "screenshotLimitedAccessDescription": "Pomu 目前只能访问所选照片。如需查看所有截图，请添加更多照片。",
+  "addPhotos": "添加",
+  "screenshotEmptyTitle": "没有需要清理的截图",
+  "screenshotEmptyDescription": "照片图库中没有截图，\n或当前没有可访问的截图。"
+}

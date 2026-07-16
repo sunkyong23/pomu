@@ -5,6 +5,11 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
+import '../../l10n/app_localizations.dart';
+
+extension _ScreenshotCleanupL10n on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+}
 
 class ScreenshotCleanupScreen extends StatefulWidget {
   const ScreenshotCleanupScreen({super.key});
@@ -127,7 +132,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
         _isLoading = false;
       });
 
-      _showSnackBar('스크린샷을 불러오지 못했어요.');
+      _showSnackBar(context.l10n.screenshotLoadFailed);
     }
   }
 
@@ -189,7 +194,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
 
     if (!mounted) return;
 
-    final readableSize = _formatBytes(totalBytes);
+    final readableSize = _formatBytes(context, totalBytes);
 
     await showModalBottomSheet<void>(
       context: context,
@@ -224,8 +229,8 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
                   ),
                 ),
                 const SizedBox(height: PomuSpacing.lg),
-                const Text(
-                  '스크린샷 삭제 준비',
+                Text(
+                  sheetContext.l10n.screenshotDeletePreparationTitle,
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -235,7 +240,9 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '선택한 스크린샷 ${selectedAssets.length}장을 확인해주세요.',
+                  sheetContext.l10n.screenshotDeleteReview(
+                    selectedAssets.length,
+                  ),
                   style: const TextStyle(
                     fontSize: 14,
                     color: PomuColors.textSecondary,
@@ -258,7 +265,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
                       const SizedBox(width: PomuSpacing.sm),
                       Expanded(
                         child: Text(
-                          '예상 확보 공간 $readableSize',
+                          sheetContext.l10n.estimatedSpace(readableSize),
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
@@ -285,8 +292,8 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
                   ),
                 ),
                 const SizedBox(height: PomuSpacing.lg),
-                const Text(
-                  '삭제한 항목은 사진 앱의 최근 삭제된 항목으로 이동해요.',
+                Text(
+                  sheetContext.l10n.screenshotMoveToRecentlyDeleted,
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.4,
@@ -301,7 +308,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
                         onPressed: () {
                           Navigator.of(sheetContext).pop();
                         },
-                        child: const Text('취소'),
+                        child: Text(sheetContext.l10n.cancel),
                       ),
                     ),
                     const SizedBox(width: PomuSpacing.sm),
@@ -313,7 +320,9 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
                           await _deleteSelectedAssets(selectedAssets);
                         },
                         icon: const Icon(Icons.delete_outline_rounded),
-                        label: Text('${selectedAssets.length}장 삭제'),
+                        label: Text(
+                          sheetContext.l10n.deleteCount(selectedAssets.length),
+                        ),
                       ),
                     ),
                   ],
@@ -341,7 +350,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
       if (!mounted) return;
 
       if (deletedIds.isEmpty) {
-        _showSnackBar('삭제가 취소되었거나 실패했어요.');
+        _showSnackBar(context.l10n.deleteCanceledOrFailed);
 
         setState(() {
           _isDeleting = false;
@@ -359,7 +368,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
         _isDeleting = false;
       });
 
-      _showSnackBar('${deletedIds.length}장의 스크린샷을 최근 삭제된 항목으로 이동했어요.');
+      _showSnackBar(context.l10n.screenshotDeletedSuccess(deletedIds.length));
     } catch (error, stackTrace) {
       debugPrint('❌ 스크린샷 삭제 실패: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -370,7 +379,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
         _isDeleting = false;
       });
 
-      _showSnackBar('스크린샷을 삭제하지 못했어요.');
+      _showSnackBar(context.l10n.screenshotDeleteFailed);
     }
   }
 
@@ -392,9 +401,9 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
     return totalBytes;
   }
 
-  String _formatBytes(int bytes) {
+  String _formatBytes(BuildContext context, int bytes) {
     if (bytes <= 0) {
-      return '확인 불가';
+      return context.l10n.unableToCheckSize;
     }
 
     final kb = bytes / 1024;
@@ -494,8 +503,8 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
       appBar: AppBar(
         backgroundColor: PomuColors.background,
         elevation: 0,
-        title: const Text(
-          '스크린샷 정리',
+        title: Text(
+          context.l10n.homeScreenshotCleanupTitle,
           style: TextStyle(
             color: PomuColors.textPrimary,
             fontWeight: FontWeight.w800,
@@ -506,7 +515,9 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
             TextButton(
               onPressed: _isDeleting ? null : _toggleSelectAll,
               child: Text(
-                _isAllSelected ? '선택 해제' : '전체 선택',
+                _isAllSelected
+                    ? context.l10n.screenshotDeselectAll
+                    : context.l10n.screenshotSelectAll,
                 style: const TextStyle(
                   fontWeight: FontWeight.w800,
                   color: PomuColors.primary,
@@ -515,12 +526,12 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
             ),
         ],
       ),
-      body: _buildBody(),
-      bottomNavigationBar: _buildBottomBar(),
+      body: _buildBody(context),
+      bottomNavigationBar: _buildBottomBar(context),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext context) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: PomuColors.primary),
@@ -603,7 +614,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
     );
   }
 
-  Widget? _buildBottomBar() {
+  Widget? _buildBottomBar(BuildContext context) {
     if (_isLoading || _permissionDenied || _screenshots.isEmpty) {
       return null;
     }
@@ -639,10 +650,10 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
               : const Icon(Icons.delete_outline_rounded),
           label: Text(
             _isDeleting
-                ? '삭제 중...'
+                ? context.l10n.deleting
                 : selectedCount == 0
-                ? '삭제할 스크린샷을 선택해주세요'
-                : '선택한 $selectedCount장 삭제',
+                ? context.l10n.screenshotSelectToDelete
+                : context.l10n.screenshotDeleteSelected(selectedCount),
           ),
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(54),
@@ -698,7 +709,7 @@ class _ScreenshotHeaderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '스크린샷 $totalCount장',
+                  context.l10n.screenshotTotalCount(totalCount),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -708,8 +719,8 @@ class _ScreenshotHeaderCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   selectedCount == 0
-                      ? '삭제할 스크린샷을 선택해주세요.'
-                      : '$selectedCount장을 선택했어요.',
+                      ? context.l10n.screenshotSelectToDeleteWithPeriod
+                      : context.l10n.screenshotSelectedCount(selectedCount),
                   style: const TextStyle(
                     fontSize: 13,
                     color: PomuColors.textSecondary,
@@ -741,9 +752,9 @@ class _LimitedAccessCard extends StatelessWidget {
         children: [
           const Icon(Icons.info_outline_rounded, color: PomuColors.primary),
           const SizedBox(width: PomuSpacing.sm),
-          const Expanded(
+          Expanded(
             child: Text(
-              '선택한 사진만 접근 중이에요. 모든 스크린샷을 보려면 접근 사진을 추가해주세요.',
+              context.l10n.screenshotLimitedAccessDescription,
               style: TextStyle(
                 fontSize: 13,
                 height: 1.4,
@@ -751,7 +762,7 @@ class _LimitedAccessCard extends StatelessWidget {
               ),
             ),
           ),
-          TextButton(onPressed: onTap, child: const Text('추가')),
+          TextButton(onPressed: onTap, child: Text(context.l10n.addPhotos)),
         ],
       ),
     );
@@ -896,19 +907,19 @@ class _EmptyScreenshotView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: PomuSpacing.md),
-            const Text(
-              '정리할 스크린샷이 없어요',
-              style: TextStyle(
+            Text(
+              context.l10n.screenshotEmptyTitle,
+              style: const TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.w800,
                 color: PomuColors.textPrimary,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              '현재 사진 보관함에 스크린샷이 없거나\n접근 가능한 스크린샷이 없어요.',
+            Text(
+              context.l10n.screenshotEmptyDescription,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 height: 1.45,
                 color: PomuColors.textSecondary,
@@ -940,8 +951,8 @@ class _PermissionDeniedView extends StatelessWidget {
               color: PomuColors.primary,
             ),
             const SizedBox(height: PomuSpacing.md),
-            const Text(
-              '사진 접근 권한이 필요해요',
+            Text(
+              context.l10n.photoPermissionRequiredTitle,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -949,8 +960,8 @@ class _PermissionDeniedView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '스크린샷을 확인하고 정리하려면\n사진 보관함 접근을 허용해주세요.',
+            Text(
+              context.l10n.screenshotPermissionDescription,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -961,7 +972,7 @@ class _PermissionDeniedView extends StatelessWidget {
             const SizedBox(height: PomuSpacing.lg),
             ElevatedButton(
               onPressed: onOpenSettings,
-              child: const Text('설정 열기'),
+              child: Text(context.l10n.openSettings),
             ),
           ],
         ),

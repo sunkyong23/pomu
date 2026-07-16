@@ -7,6 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
 import '../../core/widgets/buttons/pomu_primary_button.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/duplicate_photo_group.dart';
 import '../../services/duplicate_detector_service.dart';
 import '../../services/duplicate_history_service.dart';
@@ -14,6 +15,10 @@ import '../../services/duplicate_result_cache_service.dart';
 import '../../services/duplicate_summary_service.dart';
 import '../../services/purchase_access_service.dart';
 import '../purchase/duplicate_cleanup_purchase_sheet.dart';
+
+extension _DuplicateCandidatesL10n on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+}
 
 class DuplicateCandidatesScreen extends StatefulWidget {
   const DuplicateCandidatesScreen({super.key});
@@ -96,9 +101,13 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('마지막 검사 결과를 불러오지 못했어요: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.duplicateLoadLastResultError(e.toString()),
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -154,9 +163,11 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
         _isLoadingMore = false;
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('중복 후보를 더 불러오지 못했어요: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.duplicateLoadMoreError(e.toString())),
+        ),
+      );
     }
   }
 
@@ -220,9 +231,11 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
         _isSavingResult = false;
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('중복 사진 분석 중 문제가 발생했어요: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.duplicateAnalysisError(e.toString())),
+        ),
+      );
     }
   }
 
@@ -311,7 +324,11 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('삭제 결과를 저장하는 중 문제가 발생했어요: $error')),
+        SnackBar(
+          content: Text(
+            context.l10n.duplicateSaveDeleteResultError(error.toString()),
+          ),
+        ),
       );
     }
   }
@@ -331,8 +348,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
 
   void _handleBlockedBack() {
     final message = _isSavingResult
-        ? '검사 결과를 저장하고 있어요. 잠시만 기다려주세요.'
-        : '중복 사진을 분석하고 있어요. 잠시만 기다려주세요.';
+        ? context.l10n.duplicateSavingWait
+        : context.l10n.duplicateAnalyzingWait;
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -341,6 +358,12 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    final l10n = AppLocalizations.of(context);
+
+    debugPrint('🌍 Flutter locale: $locale');
+    debugPrint('🌍 Localized title: ${l10n.duplicateCleanupTitle}');
+    debugPrint('🌍 Flutter locale: ${Localizations.localeOf(context)}');
     return PopScope(
       canPop: !_isBusy,
       onPopInvokedWithResult: (didPop, result) {
@@ -353,8 +376,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
         appBar: AppBar(
           backgroundColor: PomuColors.background,
           elevation: 0,
-          title: const Text(
-            '중복 사진 정리',
+          title: Text(
+            context.l10n.duplicateCleanupTitle,
             style: TextStyle(
               color: PomuColors.textPrimary,
               fontWeight: FontWeight.w800,
@@ -364,8 +387,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
         body: ListView(
           padding: const EdgeInsets.all(PomuSpacing.lg),
           children: [
-            const Text(
-              '비슷하게 보이는 사진을\n먼저 후보로 찾아볼게요.',
+            Text(
+              context.l10n.duplicateIntroTitle,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
@@ -375,8 +398,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
               ),
             ),
             const SizedBox(height: PomuSpacing.md),
-            const Text(
-              '지금은 삭제하지 않고, 보관할 사진과 삭제 후보만 보여줘요.',
+            Text(
+              context.l10n.duplicateIntroDescription,
               style: TextStyle(
                 fontSize: 15,
                 color: PomuColors.textSecondary,
@@ -387,12 +410,12 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
 
             PomuPrimaryButton(
               text: _isSavingResult
-                  ? '결과 저장 중...'
+                  ? context.l10n.duplicateSavingShort
                   : _isLoading
-                  ? '분석 중...'
+                  ? context.l10n.duplicateAnalyzingShort
                   : _savedSummary.hasScanned
-                  ? '다시 검사하기'
-                  : '중복 후보 찾기',
+                  ? context.l10n.duplicateScanAgain
+                  : context.l10n.duplicateFindCandidates,
               icon: _isSavingResult
                   ? Icons.save_rounded
                   : Icons.cleaning_services_rounded,
@@ -455,7 +478,11 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
                             ),
                           )
                         : const Icon(Icons.expand_more_rounded),
-                    label: Text(_isLoadingMore ? '불러오는 중...' : '중복 후보 더 보기'),
+                    label: Text(
+                      _isLoadingMore
+                          ? context.l10n.loading
+                          : context.l10n.duplicateLoadMore,
+                    ),
                   ),
                 ),
                 const SizedBox(height: PomuSpacing.md),
@@ -484,7 +511,7 @@ class _RestoreLoadingCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: PomuColors.divider),
       ),
-      child: const Row(
+      child: Row(
         children: [
           SizedBox(
             width: 22,
@@ -497,7 +524,7 @@ class _RestoreLoadingCard extends StatelessWidget {
           SizedBox(width: PomuSpacing.md),
           Expanded(
             child: Text(
-              '마지막 검사 결과를 불러오고 있어요.',
+              context.l10n.duplicateRestoringLastResult,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -539,7 +566,9 @@ class _ProgressCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isSavingResult ? '검사 결과 저장 중...' : '중복 사진 다시 분석 중...',
+            isSavingResult
+                ? context.l10n.duplicateSavingResult
+                : context.l10n.duplicateReanalyzing,
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
@@ -557,10 +586,10 @@ class _ProgressCard extends StatelessWidget {
           const SizedBox(height: PomuSpacing.md),
           Text(
             isSavingResult
-                ? '검사 결과를 안전하게 저장하고 있어요.'
+                ? context.l10n.duplicateSavingSafely
                 : hasProgress
-                ? '$percent% · $current / $total 그룹 분석 중'
-                : '중복 후보를 찾고 있어요.',
+                ? context.l10n.duplicateProgress(percent, current, total)
+                : context.l10n.duplicateFindingCandidates,
             style: const TextStyle(
               fontSize: 14,
               color: PomuColors.textSecondary,
@@ -572,8 +601,8 @@ class _ProgressCard extends StatelessWidget {
 
           Text(
             isSavingResult
-                ? '잠시 후 바로 정리를 계속할 수 있어요.'
-                : '사진이 많을수록 조금 시간이 걸릴 수 있어요.',
+                ? context.l10n.duplicateContinueSoon
+                : context.l10n.duplicateMayTakeTime,
             style: const TextStyle(
               fontSize: 13,
               color: PomuColors.textSecondary,
@@ -619,11 +648,15 @@ class _SummaryCard extends StatelessWidget {
           Expanded(
             child: Text(
               isPartiallyLoaded
-                  ? '전체 중복 후보 $totalGroupCount개 그룹\n'
-                        '현재 $visibleGroupCount개 표시 중 · '
-                        '삭제 후보 $deleteCandidateCount장'
-                  : '중복 후보 $totalGroupCount개 그룹\n'
-                        '삭제 후보 $deleteCandidateCount장',
+                  ? context.l10n.duplicateSummaryPartial(
+                      totalGroupCount,
+                      visibleGroupCount,
+                      deleteCandidateCount,
+                    )
+                  : context.l10n.duplicateSummaryFull(
+                      totalGroupCount,
+                      deleteCandidateCount,
+                    ),
               style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
@@ -687,9 +720,9 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
     setState(() {
       if (_keeperAssetIds.contains(asset.id)) {
         if (_keeperAssetIds.length == 1) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('보관할 사진은 최소 1장 필요해요.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.duplicateKeeperMinimum)),
+          );
           return;
         }
 
@@ -776,9 +809,9 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
 
       if (!mounted || !purchased) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('구매가 완료됐어요. 삭제를 계속 진행할게요.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.purchaseCompletedContinueDelete)),
+      );
     }
 
     if (!mounted) return;
@@ -809,9 +842,9 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
     if (!mounted) return;
 
     if (deletedIds.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('삭제가 취소되었거나 실패했어요.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.deleteCanceledOrFailed)),
+      );
       return;
     }
 
@@ -832,10 +865,8 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
       SnackBar(
         content: Text(
           wasFreeDelete
-              ? '${deletedIds.length}장의 사진을 삭제했어요. '
-                    '첫 무료 정리를 사용했어요.'
-              : '${deletedIds.length}장의 사진을 '
-                    '최근 삭제된 항목으로 이동했어요.',
+              ? context.l10n.freeDeleteCompleted(deletedIds.length)
+              : context.l10n.deleteMovedToRecentlyDeleted(deletedIds.length),
         ),
       ),
     );
@@ -856,7 +887,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
 
     if (!mounted) return;
 
-    final readableSize = _formatBytes(totalBytes);
+    final readableSize = _formatBytes(context, totalBytes);
 
     await showModalBottomSheet<void>(
       context: context,
@@ -874,8 +905,8 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '삭제 준비',
+                Text(
+                  sheetContext.l10n.deletePreparation,
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -884,7 +915,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '삭제 후보 ${deleteAssets.length}장을 다시 확인해주세요.',
+                  sheetContext.l10n.deleteCandidatesReview(deleteAssets.length),
                   style: const TextStyle(
                     fontSize: 14,
                     color: PomuColors.textSecondary,
@@ -899,7 +930,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Text(
-                    '예상 확보 공간 $readableSize',
+                    sheetContext.l10n.estimatedSpace(readableSize),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -947,8 +978,8 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                   ),
                 ),
                 const SizedBox(height: PomuSpacing.lg),
-                const Text(
-                  '삭제한 사진은 최근 삭제된 항목으로 이동해요.',
+                Text(
+                  sheetContext.l10n.deletedPhotosMoveToRecentlyDeleted,
                   style: TextStyle(
                     fontSize: 13,
                     color: PomuColors.textSecondary,
@@ -962,7 +993,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                         onPressed: () {
                           Navigator.of(sheetContext).pop();
                         },
-                        child: const Text('취소'),
+                        child: Text(sheetContext.l10n.cancel),
                       ),
                     ),
                     const SizedBox(width: PomuSpacing.sm),
@@ -973,7 +1004,9 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                           await _deleteAssets(deleteAssets);
                         },
                         icon: const Icon(Icons.delete_outline_rounded),
-                        label: Text('${deleteAssets.length}장 삭제'),
+                        label: Text(
+                          sheetContext.l10n.deleteCount(deleteAssets.length),
+                        ),
                       ),
                     ),
                   ],
@@ -1019,8 +1052,8 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
     }
   }
 
-  String _formatBytes(int bytes) {
-    if (bytes <= 0) return '용량을 확인하지 못했어요';
+  String _formatBytes(BuildContext context, int bytes) {
+    if (bytes <= 0) return context.l10n.unableToCheckSize;
 
     final mb = bytes / (1024 * 1024);
 
@@ -1054,7 +1087,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '중복 후보 ${widget.group.count}장',
+            context.l10n.duplicateCandidateCount(widget.group.count),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
@@ -1063,7 +1096,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
           ),
           const SizedBox(height: 4),
           Text(
-            '보관 $keeperCount장 · 삭제 후보 $selectedCount장',
+            context.l10n.keeperAndDeleteCount(keeperCount, selectedCount),
             style: const TextStyle(
               fontSize: 13,
               color: PomuColors.textSecondary,
@@ -1109,10 +1142,10 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
             icon: const Icon(Icons.delete_outline_rounded),
             label: Text(
               selectedCount == 0
-                  ? '삭제할 사진 없음'
+                  ? context.l10n.noPhotosToDelete
                   : widget.isBusy
-                  ? '결과 저장 중...'
-                  : '삭제 준비 ($selectedCount장)',
+                  ? context.l10n.duplicateSavingShort
+                  : context.l10n.deletePreparationCount(selectedCount),
             ),
           ),
         ],
@@ -1188,7 +1221,7 @@ class _SelectableThumbnailTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
-                isKeeper ? '✓ 보관' : '삭제 후보',
+                isKeeper ? context.l10n.keep : context.l10n.deleteCandidate,
                 style: const TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w900,
@@ -1229,7 +1262,9 @@ class _EmptyCard extends StatelessWidget {
           ),
           const SizedBox(height: PomuSpacing.sm),
           Text(
-            hasScanned ? '현재 남아 있는 중복 후보가 없어요' : '아직 분석 결과가 없어요',
+            hasScanned
+                ? context.l10n.noRemainingDuplicateCandidates
+                : context.l10n.noAnalysisResult,
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 17,
@@ -1240,8 +1275,8 @@ class _EmptyCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             hasScanned
-                ? '새로운 사진이 추가되었다면\n다시 검사해주세요.'
-                : '중복 후보 찾기를 눌러\n사진 보관함을 검사해주세요.',
+                ? context.l10n.scanAgainIfNewPhotos
+                : context.l10n.tapFindCandidatesGuide,
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 14,
