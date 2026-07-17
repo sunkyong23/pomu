@@ -1,16 +1,63 @@
+const supportedLanguages = ['ko', 'en', 'ja', 'zh'];
 
-const buttons = document.querySelectorAll('[data-set-lang]');
-const blocks = document.querySelectorAll('[data-lang]');
-function setLang(lang) {
-  blocks.forEach(el => el.classList.toggle('active', el.dataset.lang === lang));
-  buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.setLang === lang));
-  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
-  localStorage.setItem('pomu_lang', lang);
+function getInitialLanguage() {
+  const params = new URLSearchParams(window.location.search);
+  const queryLanguage = params.get('lang');
+
+  if (queryLanguage && supportedLanguages.includes(queryLanguage)) {
+    return queryLanguage;
+  }
+
+  const savedLanguage = localStorage.getItem('pomu-language');
+
+  if (savedLanguage && supportedLanguages.includes(savedLanguage)) {
+    return savedLanguage;
+  }
+
+  const browserLanguage = navigator.language.toLowerCase();
+
+  if (browserLanguage.startsWith('ko')) return 'ko';
+  if (browserLanguage.startsWith('ja')) return 'ja';
+  if (browserLanguage.startsWith('zh')) return 'zh';
+
+  return 'en';
 }
-const supported = ['ko','en','ja','zh'];
-const saved = localStorage.getItem('pomu_lang');
-const browser = (navigator.language || 'en').toLowerCase();
-let initial = saved || (browser.startsWith('ko') ? 'ko' : browser.startsWith('ja') ? 'ja' : browser.startsWith('zh') ? 'zh' : 'en');
-if (!supported.includes(initial)) initial = 'en';
-buttons.forEach(btn => btn.addEventListener('click', () => setLang(btn.dataset.setLang)));
-setLang(initial);
+
+function applyLanguage(language) {
+  const safeLanguage = supportedLanguages.includes(language)
+    ? language
+    : 'en';
+
+  document.documentElement.lang = safeLanguage;
+
+  document.querySelectorAll('[data-lang]').forEach((element) => {
+    element.hidden = element.dataset.lang !== safeLanguage;
+  });
+
+  document.querySelectorAll('[data-set-lang]').forEach((button) => {
+    const isActive = button.dataset.setLang === safeLanguage;
+
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+
+  localStorage.setItem('pomu-language', safeLanguage);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyLanguage(getInitialLanguage());
+
+  document.querySelectorAll('[data-set-lang]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const language = button.dataset.setLang;
+
+      if (!supportedLanguages.includes(language)) return;
+
+      applyLanguage(language);
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', language);
+      window.history.replaceState({}, '', url);
+    });
+  });
+});
