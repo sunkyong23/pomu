@@ -39,8 +39,13 @@ function applyLanguage(language) {
   document.querySelectorAll('[data-lang]').forEach((element) => {
     const shouldShow = element.dataset.lang === safeLanguage;
 
-    element.hidden = !shouldShow;
-    element.style.display = shouldShow ? 'block' : 'none';
+   if (shouldShow) {
+  element.hidden = false;
+  element.style.setProperty('display', 'block', 'important');
+} else {
+  element.hidden = true;
+  element.style.setProperty('display', 'none', 'important');
+}
   });
 
   document.querySelectorAll('[data-set-lang]').forEach((button) => {
