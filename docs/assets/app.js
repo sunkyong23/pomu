@@ -4,13 +4,19 @@ function getInitialLanguage() {
   const params = new URLSearchParams(window.location.search);
   const queryLanguage = params.get('lang');
 
-  if (queryLanguage && supportedLanguages.includes(queryLanguage)) {
+  if (
+    queryLanguage &&
+    supportedLanguages.includes(queryLanguage)
+  ) {
     return queryLanguage;
   }
 
   const savedLanguage = localStorage.getItem('pomu-language');
 
-  if (savedLanguage && supportedLanguages.includes(savedLanguage)) {
+  if (
+    savedLanguage &&
+    supportedLanguages.includes(savedLanguage)
+  ) {
     return savedLanguage;
   }
 
@@ -31,7 +37,10 @@ function applyLanguage(language) {
   document.documentElement.lang = safeLanguage;
 
   document.querySelectorAll('[data-lang]').forEach((element) => {
-    element.hidden = element.dataset.lang !== safeLanguage;
+    const shouldShow = element.dataset.lang === safeLanguage;
+
+    element.hidden = !shouldShow;
+    element.style.display = shouldShow ? 'block' : 'none';
   });
 
   document.querySelectorAll('[data-set-lang]').forEach((button) => {
@@ -45,13 +54,17 @@ function applyLanguage(language) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  applyLanguage(getInitialLanguage());
+  const initialLanguage = getInitialLanguage();
+
+  applyLanguage(initialLanguage);
 
   document.querySelectorAll('[data-set-lang]').forEach((button) => {
     button.addEventListener('click', () => {
       const language = button.dataset.setLang;
 
-      if (!supportedLanguages.includes(language)) return;
+      if (!supportedLanguages.includes(language)) {
+        return;
+      }
 
       applyLanguage(language);
 
