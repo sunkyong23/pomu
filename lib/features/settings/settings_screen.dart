@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
@@ -33,6 +34,23 @@ class SettingsScreen extends StatelessWidget {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const AlbumNameSettingsScreen()));
+  }
+
+  Future<void> _openWebPage(BuildContext context, String page) async {
+    final languageCode = Localizations.localeOf(context).languageCode;
+
+    final lang = switch (languageCode) {
+      'ko' => 'ko',
+      'ja' => 'ja',
+      'zh' => 'zh',
+      _ => 'en',
+    };
+
+    final uri = Uri.https('sunkyong23.github.io', '/pomu/$page', {
+      'lang': lang,
+    });
+
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   Future<void> _showClearDuplicateResultDialog(BuildContext context) async {
@@ -332,21 +350,21 @@ class SettingsScreen extends StatelessWidget {
                 icon: Icons.shield_outlined,
                 title: context.l10n.settingsPrivacyPolicyTitle,
                 subtitle: context.l10n.settingsPrivacyPolicySubtitle,
-                enabled: false,
+                onTap: () => _openWebPage(context, 'privacy.html'),
               ),
               _SettingsDivider(),
               _SettingsTile(
                 icon: Icons.description_outlined,
                 title: context.l10n.settingsTermsTitle,
                 subtitle: context.l10n.settingsTermsSubtitle,
-                enabled: false,
+                onTap: () => _openWebPage(context, 'terms.html'),
               ),
               _SettingsDivider(),
               _SettingsTile(
                 icon: Icons.mail_outline_rounded,
                 title: context.l10n.settingsContactTitle,
                 subtitle: context.l10n.settingsContactSubtitle,
-                enabled: false,
+                onTap: () => _openWebPage(context, 'support.html'),
               ),
               _SettingsDivider(),
               _SettingsTile(
@@ -418,10 +436,9 @@ class _SettingsGroup extends StatelessWidget {
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final VoidCallback? onTap;
   final String? trailingText;
-  final bool enabled;
 
   const _SettingsTile({
     required this.icon,
@@ -429,12 +446,11 @@ class _SettingsTile extends StatelessWidget {
     required this.subtitle,
     this.onTap,
     this.trailingText,
-    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final canTap = enabled && onTap != null;
+    final canTap = onTap != null;
 
     return Material(
       color: Colors.transparent,
@@ -449,18 +465,10 @@ class _SettingsTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: enabled
-                      ? PomuColors.primaryLight
-                      : PomuColors.background,
+                  color: PomuColors.primaryLight,
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Icon(
-                  icon,
-                  size: 22,
-                  color: enabled
-                      ? PomuColors.primary
-                      : PomuColors.textSecondary,
-                ),
+                child: Icon(icon, size: 22, color: PomuColors.primary),
               ),
 
               const SizedBox(width: PomuSpacing.md),
@@ -471,24 +479,24 @@ class _SettingsTile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: enabled
-                            ? PomuColors.textPrimary
-                            : PomuColors.textSecondary,
+                        color: PomuColors.textPrimary,
                         letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        height: 1.4,
-                        color: PomuColors.textSecondary,
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          height: 1.4,
+                          color: PomuColors.textSecondary,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -508,25 +516,6 @@ class _SettingsTile extends StatelessWidget {
                 const Icon(
                   Icons.chevron_right_rounded,
                   color: PomuColors.textSecondary,
-                )
-              else if (!enabled)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: PomuColors.background,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    context.l10n.comingSoon,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: PomuColors.textSecondary,
-                    ),
-                  ),
                 ),
             ],
           ),
