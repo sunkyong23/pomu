@@ -20,6 +20,8 @@ extension _DuplicateCandidatesL10n on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 }
 
+enum _DuplicateGroupSortOption { newest, oldest, mostDuplicates }
+
 class DuplicateCandidatesScreen extends StatefulWidget {
   const DuplicateCandidatesScreen({super.key});
 
@@ -54,6 +56,58 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
 
   bool get _isBusy => _isLoading || _isSavingResult;
   bool get _hasMoreCachedGroups => _cachedGroupOffset < _totalCachedGroupCount;
+
+  DateTime _getNewestGroupDate(DuplicatePhotoGroup group) {
+    if (group.assets.isEmpty) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+
+    return group.assets
+        .map((asset) => asset.createDateTime)
+        .reduce((a, b) => a.isAfter(b) ? a : b);
+  }
+
+  DateTime _getOldestGroupDate(DuplicatePhotoGroup group) {
+    if (group.assets.isEmpty) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+
+    return group.assets
+        .map((asset) => asset.createDateTime)
+        .reduce((a, b) => a.isBefore(b) ? a : b);
+  }
+
+  void _sortGroups(
+    List<DuplicatePhotoGroup> groups,
+    _DuplicateGroupSortOption sortOption,
+  ) {
+    switch (sortOption) {
+      case _DuplicateGroupSortOption.newest:
+        groups.sort((a, b) {
+          return _getNewestGroupDate(b).compareTo(_getNewestGroupDate(a));
+        });
+        break;
+
+      case _DuplicateGroupSortOption.oldest:
+        groups.sort((a, b) {
+          return _getOldestGroupDate(a).compareTo(_getOldestGroupDate(b));
+        });
+        break;
+
+      case _DuplicateGroupSortOption.mostDuplicates:
+        groups.sort((a, b) {
+          final countCompare = b.count.compareTo(a.count);
+
+          if (countCompare != 0) {
+            return countCompare;
+          }
+
+          // 중복 개수가 같으면 최신 그룹을 먼저 표시해요.
+          return _getNewestGroupDate(b).compareTo(_getNewestGroupDate(a));
+        });
+        break;
+    }
+  }
 
   @override
   void initState() {
@@ -171,7 +225,112 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
     }
   }
 
-  Future<void> _scan() async {
+  Future<void> _showScanSortSheet() async {
+    if (_isBusy || _isInitializing) return;
+
+    var selectedOption = _DuplicateGroupSortOption.mostDuplicates;
+
+    final result = await showModalBottomSheet<_DuplicateGroupSortOption>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: const EdgeInsets.all(PomuSpacing.lg),
+              decoration: const BoxDecoration(
+                color: PomuColors.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '결과 순서를 선택해주세요',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: PomuColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      '선택한 순서대로 중복 그룹을 정리해 보여드려요.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: PomuColors.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: PomuSpacing.lg),
+                    _ScanSortOptionTile(
+                      title: '중복 사진이 많은 순',
+                      description: '사진 수가 많은 그룹부터 표시',
+                      icon: Icons.filter_9_plus_rounded,
+                      option: _DuplicateGroupSortOption.mostDuplicates,
+                      selectedOption: selectedOption,
+                      onChanged: (option) {
+                        setSheetState(() {
+                          selectedOption = option;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: PomuSpacing.sm),
+                    _ScanSortOptionTile(
+                      title: '최신 사진부터',
+                      description: '최근에 촬영한 사진이 포함된 그룹부터 표시',
+                      icon: Icons.schedule_rounded,
+                      option: _DuplicateGroupSortOption.newest,
+                      selectedOption: selectedOption,
+                      onChanged: (option) {
+                        setSheetState(() {
+                          selectedOption = option;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: PomuSpacing.sm),
+                    _ScanSortOptionTile(
+                      title: '오래된 사진부터',
+                      description: '오래전에 촬영한 사진이 포함된 그룹부터 표시',
+                      icon: Icons.history_rounded,
+                      option: _DuplicateGroupSortOption.oldest,
+                      selectedOption: selectedOption,
+                      onChanged: (option) {
+                        setSheetState(() {
+                          selectedOption = option;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: PomuSpacing.xl),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(sheetContext).pop(selectedOption);
+                        },
+                        icon: const Icon(Icons.search_rounded),
+                        label: const Text('이 순서로 검사 시작'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (!mounted || result == null) return;
+
+    await _scan(result);
+  }
+
+  Future<void> _scan(_DuplicateGroupSortOption sortOption) async {
     if (_isBusy || _isInitializing) return;
 
     setState(() {
@@ -203,9 +362,15 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
         return !_resolvedGroupKeys.contains(key);
       }).toList();
 
+      // 전체 결과를 사용자가 검사 전에 선택한 기준으로 먼저 정렬해요.
+      _sortGroups(filteredGroups, sortOption);
+
+      // 화면에는 첫 100개만 보여주고, 캐시에는 전체 결과를 저장해요.
+      final initialVisibleGroups = filteredGroups.take(_cachePageSize).toList();
+
       // 사진 분석은 끝났지만 캐시와 대시보드 저장은 아직 진행 중이에요.
       setState(() {
-        _groups = filteredGroups;
+        _groups = initialVisibleGroups;
         _isLoading = false;
         _isSavingResult = true;
       });
@@ -221,7 +386,7 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
         _savedSummary = updatedSummary;
         _isSavingResult = false;
         _totalCachedGroupCount = filteredGroups.length;
-        _cachedGroupOffset = filteredGroups.length;
+        _cachedGroupOffset = initialVisibleGroups.length;
       });
     } catch (e) {
       if (!mounted) return;
@@ -419,7 +584,7 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
               icon: _isSavingResult
                   ? Icons.save_rounded
                   : Icons.cleaning_services_rounded,
-              onPressed: _isBusy || _isInitializing ? null : _scan,
+              onPressed: _isBusy || _isInitializing ? null : _showScanSortSheet,
             ),
 
             const SizedBox(height: PomuSpacing.xl),
@@ -444,6 +609,7 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
                 totalGroupCount: _savedSummary.groupCount,
                 deleteCandidateCount: _savedSummary.deleteCandidateCount,
               ),
+
               const SizedBox(height: PomuSpacing.lg),
 
               ..._groups.map(
@@ -492,6 +658,105 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
             if (!_isBusy && !_isInitializing && _groups.isEmpty)
               _EmptyCard(hasScanned: _savedSummary.hasScanned),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScanSortOptionTile extends StatelessWidget {
+  final String title;
+  final String description;
+  final IconData icon;
+  final _DuplicateGroupSortOption option;
+  final _DuplicateGroupSortOption selectedOption;
+  final ValueChanged<_DuplicateGroupSortOption> onChanged;
+
+  const _ScanSortOptionTile({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.option,
+    required this.selectedOption,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = option == selectedOption;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          onChanged(option);
+        },
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          width: double.infinity,
+          padding: const EdgeInsets.all(PomuSpacing.md),
+          decoration: BoxDecoration(
+            color: isSelected ? PomuColors.primaryLight : PomuColors.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isSelected ? PomuColors.primary : PomuColors.divider,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? PomuColors.primary
+                      : PomuColors.primaryLight,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(
+                  icon,
+                  color: isSelected ? Colors.white : PomuColors.primary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: PomuSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: PomuColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: PomuColors.textSecondary,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                isSelected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_off_rounded,
+                color: isSelected
+                    ? PomuColors.primary
+                    : PomuColors.textSecondary,
+              ),
+            ],
+          ),
         ),
       ),
     );
