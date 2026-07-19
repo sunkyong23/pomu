@@ -535,5 +535,15 @@
   "purchaseErrorVerificationFailed": "購入を確認できませんでした。",
   "purchaseErrorFailed": "購入を完了できませんでした。",
   "purchaseErrorRestoreFailed": "購入を復元できませんでした。",
-  "purchaseErrorCompletionFailed": "購入完了処理中に問題が発生しました。"
+  "purchaseErrorCompletionFailed": "購入完了処理中に問題が発生しました。",
+
+  "duplicateSortSheetTitle": "結果の表示順を選択してください",
+  "duplicateSortSheetDescription": "選択した順番で重複グループを整理して表示します。",
+  "duplicateSortMostTitle": "重複写真が多い順",
+  "duplicateSortMostDescription": "写真の枚数が多いグループから表示",
+  "duplicateSortNewestTitle": "新しい写真から",
+  "duplicateSortNewestDescription": "最近撮影した写真を含むグループから表示",
+  "duplicateSortOldestTitle": "古い写真から",
+  "duplicateSortOldestDescription": "以前に撮影した写真を含むグループから表示",
+  "duplicateSortStartButton": "この順番でスキャンを開始"
 }

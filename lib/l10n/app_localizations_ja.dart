@@ -851,4 +851,31 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get purchaseErrorCompletionFailed => '購入完了処理中に問題が発生しました。';
+
+  @override
+  String get duplicateSortSheetTitle => '結果の表示順を選択してください';
+
+  @override
+  String get duplicateSortSheetDescription => '選択した順番で重複グループを整理して表示します。';
+
+  @override
+  String get duplicateSortMostTitle => '重複写真が多い順';
+
+  @override
+  String get duplicateSortMostDescription => '写真の枚数が多いグループから表示';
+
+  @override
+  String get duplicateSortNewestTitle => '新しい写真から';
+
+  @override
+  String get duplicateSortNewestDescription => '最近撮影した写真を含むグループから表示';
+
+  @override
+  String get duplicateSortOldestTitle => '古い写真から';
+
+  @override
+  String get duplicateSortOldestDescription => '以前に撮影した写真を含むグループから表示';
+
+  @override
+  String get duplicateSortStartButton => 'この順番でスキャンを開始';
 }

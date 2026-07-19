@@ -535,5 +535,15 @@
   "purchaseErrorVerificationFailed": "无法验证购买。",
   "purchaseErrorFailed": "无法完成购买。",
   "purchaseErrorRestoreFailed": "无法恢复购买。",
-  "purchaseErrorCompletionFailed": "完成购买时出现问题。"
+  "purchaseErrorCompletionFailed": "完成购买时出现问题。",
+
+   "duplicateSortSheetTitle": "请选择结果排序方式",
+  "duplicateSortSheetDescription": "重复照片组将按照您选择的顺序显示。",
+  "duplicateSortMostTitle": "重复照片最多优先",
+  "duplicateSortMostDescription": "优先显示照片数量较多的组",
+  "duplicateSortNewestTitle": "最新照片优先",
+  "duplicateSortNewestDescription": "优先显示包含最近拍摄照片的组",
+  "duplicateSortOldestTitle": "最旧照片优先",
+  "duplicateSortOldestDescription": "优先显示包含较早拍摄照片的组",
+  "duplicateSortStartButton": "按此顺序开始扫描"
 }

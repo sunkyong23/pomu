@@ -535,5 +535,15 @@
   "purchaseErrorVerificationFailed": "구매 확인에 실패했어요.",
   "purchaseErrorFailed": "결제를 완료하지 못했어요.",
   "purchaseErrorRestoreFailed": "구매 내역을 복원하지 못했어요.",
-  "purchaseErrorCompletionFailed": "구매 완료 처리 중 문제가 발생했어요."
+  "purchaseErrorCompletionFailed": "구매 완료 처리 중 문제가 발생했어요.",
+
+  "duplicateSortSheetTitle": "결과 순서를 선택해주세요",
+  "duplicateSortSheetDescription": "선택한 순서대로 중복 그룹을 정리해 보여드려요.",
+  "duplicateSortMostTitle": "중복 사진이 많은 순",
+  "duplicateSortMostDescription": "사진 수가 많은 그룹부터 표시",
+  "duplicateSortNewestTitle": "최신 사진부터",
+  "duplicateSortNewestDescription": "최근에 촬영한 사진이 포함된 그룹부터 표시",
+  "duplicateSortOldestTitle": "오래된 사진부터",
+  "duplicateSortOldestDescription": "오래전에 촬영한 사진이 포함된 그룹부터 표시",
+  "duplicateSortStartButton": "이 순서로 검사 시작"
 }

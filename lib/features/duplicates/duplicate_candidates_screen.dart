@@ -249,8 +249,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '결과 순서를 선택해주세요',
+                    Text(
+                      context.l10n.duplicateSortSheetTitle,
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
@@ -258,8 +258,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      '선택한 순서대로 중복 그룹을 정리해 보여드려요.',
+                    Text(
+                      context.l10n.duplicateSortSheetDescription,
                       style: TextStyle(
                         fontSize: 14,
                         color: PomuColors.textSecondary,
@@ -268,8 +268,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
                     ),
                     const SizedBox(height: PomuSpacing.lg),
                     _ScanSortOptionTile(
-                      title: '중복 사진이 많은 순',
-                      description: '사진 수가 많은 그룹부터 표시',
+                      title: context.l10n.duplicateSortMostTitle,
+                      description: context.l10n.duplicateSortMostDescription,
                       icon: Icons.filter_9_plus_rounded,
                       option: _DuplicateGroupSortOption.mostDuplicates,
                       selectedOption: selectedOption,
@@ -281,8 +281,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
                     ),
                     const SizedBox(height: PomuSpacing.sm),
                     _ScanSortOptionTile(
-                      title: '최신 사진부터',
-                      description: '최근에 촬영한 사진이 포함된 그룹부터 표시',
+                      title: context.l10n.duplicateSortNewestTitle,
+                      description: context.l10n.duplicateSortNewestDescription,
                       icon: Icons.schedule_rounded,
                       option: _DuplicateGroupSortOption.newest,
                       selectedOption: selectedOption,
@@ -294,8 +294,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
                     ),
                     const SizedBox(height: PomuSpacing.sm),
                     _ScanSortOptionTile(
-                      title: '오래된 사진부터',
-                      description: '오래전에 촬영한 사진이 포함된 그룹부터 표시',
+                      title: context.l10n.duplicateSortOldestTitle,
+                      description: context.l10n.duplicateSortOldestDescription,
                       icon: Icons.history_rounded,
                       option: _DuplicateGroupSortOption.oldest,
                       selectedOption: selectedOption,
@@ -313,7 +313,7 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
                           Navigator.of(sheetContext).pop(selectedOption);
                         },
                         icon: const Icon(Icons.search_rounded),
-                        label: const Text('이 순서로 검사 시작'),
+                        label: Text(context.l10n.duplicateSortStartButton),
                       ),
                     ),
                   ],

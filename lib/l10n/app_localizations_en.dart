@@ -905,4 +905,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get purchaseErrorCompletionFailed =>
       'Something went wrong while completing the purchase.';
+
+  @override
+  String get duplicateSortSheetTitle => 'Choose the result order';
+
+  @override
+  String get duplicateSortSheetDescription =>
+      'Duplicate groups will be shown in the order you select.';
+
+  @override
+  String get duplicateSortMostTitle => 'Most duplicates first';
+
+  @override
+  String get duplicateSortMostDescription =>
+      'Show groups with the most photos first';
+
+  @override
+  String get duplicateSortNewestTitle => 'Newest photos first';
+
+  @override
+  String get duplicateSortNewestDescription =>
+      'Show groups containing the most recently taken photos first';
+
+  @override
+  String get duplicateSortOldestTitle => 'Oldest photos first';
+
+  @override
+  String get duplicateSortOldestDescription =>
+      'Show groups containing the oldest photos first';
+
+  @override
+  String get duplicateSortStartButton => 'Start scan in this order';
 }

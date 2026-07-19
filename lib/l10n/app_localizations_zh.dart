@@ -843,4 +843,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get purchaseErrorCompletionFailed => '完成购买时出现问题。';
+
+  @override
+  String get duplicateSortSheetTitle => '请选择结果排序方式';
+
+  @override
+  String get duplicateSortSheetDescription => '重复照片组将按照您选择的顺序显示。';
+
+  @override
+  String get duplicateSortMostTitle => '重复照片最多优先';
+
+  @override
+  String get duplicateSortMostDescription => '优先显示照片数量较多的组';
+
+  @override
+  String get duplicateSortNewestTitle => '最新照片优先';
+
+  @override
+  String get duplicateSortNewestDescription => '优先显示包含最近拍摄照片的组';
+
+  @override
+  String get duplicateSortOldestTitle => '最旧照片优先';
+
+  @override
+  String get duplicateSortOldestDescription => '优先显示包含较早拍摄照片的组';
+
+  @override
+  String get duplicateSortStartButton => '按此顺序开始扫描';
 }

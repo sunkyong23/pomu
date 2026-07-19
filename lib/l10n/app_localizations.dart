@@ -1625,6 +1625,60 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'구매 완료 처리 중 문제가 발생했어요.'**
   String get purchaseErrorCompletionFailed;
+
+  /// No description provided for @duplicateSortSheetTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'결과 순서를 선택해주세요'**
+  String get duplicateSortSheetTitle;
+
+  /// No description provided for @duplicateSortSheetDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택한 순서대로 중복 그룹을 정리해 보여드려요.'**
+  String get duplicateSortSheetDescription;
+
+  /// No description provided for @duplicateSortMostTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'중복 사진이 많은 순'**
+  String get duplicateSortMostTitle;
+
+  /// No description provided for @duplicateSortMostDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 수가 많은 그룹부터 표시'**
+  String get duplicateSortMostDescription;
+
+  /// No description provided for @duplicateSortNewestTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'최신 사진부터'**
+  String get duplicateSortNewestTitle;
+
+  /// No description provided for @duplicateSortNewestDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'최근에 촬영한 사진이 포함된 그룹부터 표시'**
+  String get duplicateSortNewestDescription;
+
+  /// No description provided for @duplicateSortOldestTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'오래된 사진부터'**
+  String get duplicateSortOldestTitle;
+
+  /// No description provided for @duplicateSortOldestDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'오래전에 촬영한 사진이 포함된 그룹부터 표시'**
+  String get duplicateSortOldestDescription;
+
+  /// No description provided for @duplicateSortStartButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 순서로 검사 시작'**
+  String get duplicateSortStartButton;
 }
 
 class _AppLocalizationsDelegate

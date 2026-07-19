@@ -855,4 +855,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get purchaseErrorCompletionFailed => '구매 완료 처리 중 문제가 발생했어요.';
+
+  @override
+  String get duplicateSortSheetTitle => '결과 순서를 선택해주세요';
+
+  @override
+  String get duplicateSortSheetDescription => '선택한 순서대로 중복 그룹을 정리해 보여드려요.';
+
+  @override
+  String get duplicateSortMostTitle => '중복 사진이 많은 순';
+
+  @override
+  String get duplicateSortMostDescription => '사진 수가 많은 그룹부터 표시';
+
+  @override
+  String get duplicateSortNewestTitle => '최신 사진부터';
+
+  @override
+  String get duplicateSortNewestDescription => '최근에 촬영한 사진이 포함된 그룹부터 표시';
+
+  @override
+  String get duplicateSortOldestTitle => '오래된 사진부터';
+
+  @override
+  String get duplicateSortOldestDescription => '오래전에 촬영한 사진이 포함된 그룹부터 표시';
+
+  @override
+  String get duplicateSortStartButton => '이 순서로 검사 시작';
 }

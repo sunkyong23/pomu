@@ -535,5 +535,15 @@
   "purchaseErrorVerificationFailed": "Couldn’t verify the purchase.",
   "purchaseErrorFailed": "Couldn’t complete the purchase.",
   "purchaseErrorRestoreFailed": "Couldn’t restore your purchase.",
-  "purchaseErrorCompletionFailed": "Something went wrong while completing the purchase."
+  "purchaseErrorCompletionFailed": "Something went wrong while completing the purchase.",
+
+  "duplicateSortSheetTitle": "Choose the result order",
+  "duplicateSortSheetDescription": "Duplicate groups will be shown in the order you select.",
+  "duplicateSortMostTitle": "Most duplicates first",
+  "duplicateSortMostDescription": "Show groups with the most photos first",
+  "duplicateSortNewestTitle": "Newest photos first",
+  "duplicateSortNewestDescription": "Show groups containing the most recently taken photos first",
+  "duplicateSortOldestTitle": "Oldest photos first",
+  "duplicateSortOldestDescription": "Show groups containing the oldest photos first",
+  "duplicateSortStartButton": "Start scan in this order"
 }
