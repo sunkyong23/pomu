@@ -98,8 +98,8 @@ class ScanService {
   /// 사진 로딩 → AI 분석 → 앨범 생성의 전체 흐름을 실행합니다.
   ///
   /// 마지막 스캔 시간은 모든 과정이 정상적으로 완료된 뒤에만 저장합니다.
-  /// 중간에 오류가 발생하면 저장하지 않으므로 다음 실행에서 누락 없이
-  /// 다시 분석할 수 있습니다.
+  /// 중간에 오류가 발생하거나 앨범 생성에 실패하면 저장하지 않으므로,
+  /// 다음 실행에서 누락 없이 다시 분석할 수 있습니다.
   Future<ScanResult> startOrganizing({ScanProgressCallback? onProgress}) async {
     final scanStartedAt = DateTime.now();
 
@@ -172,12 +172,18 @@ class ScanService {
       ),
     );
 
+    var albumsCreatedSuccessfully = true;
+
     if (albums.isNotEmpty) {
-      await _albumService.createAlbums(albums);
+      albumsCreatedSuccessfully = await _albumService.createAlbums(albums);
     }
 
-    // AI 분석과 앨범 생성이 모두 성공한 경우에만 저장합니다.
-    // 디버그 빌드도 실제 사용자 흐름과 동일하게 동작합니다.
+    if (!albumsCreatedSuccessfully) {
+      _log('⚠️ 앨범 생성 실패: 마지막 스캔 시간을 저장하지 않습니다.');
+
+      throw StateError('AI 분석은 완료되었지만 사진 앨범 생성에 실패했습니다.');
+    }
+
     await saveLastScan(scanStartedAt);
     _log('💾 마지막 스캔 시간 저장 완료: $scanStartedAt');
 

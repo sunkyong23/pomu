@@ -17,6 +17,7 @@
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		CE57C5512FFA3338004F3C16 /* PomuDuplicateHashPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE57C5502FFA3338004F3C16 /* PomuDuplicateHashPlugin.swift */; };
 		CEB7A44530035E6900523E46 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB7A44430035E6900523E46 /* StoreKit.framework */; };
+		CEB7A452300D085200523E46 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CEB7A450300D085200523E46 /* InfoPlist.strings */; };
 		D20AE9B9D6A91A821E9C9141 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F130F15886D25D60105DF26 /* Pods_RunnerTests.framework */; };
 		E684BFD24325934036D600EA /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57F2A4B311E740B10C3CF786 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
@@ -81,6 +82,10 @@
 		CEB7A44D300935D500523E46 /* en-IN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en-IN"; path = "en-IN.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
 		CEB7A44E300935E100523E46 /* en-AU */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en-AU"; path = "en-AU.lproj/Main.strings"; sourceTree = "<group>"; };
 		CEB7A44F300935E100523E46 /* en-AU */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en-AU"; path = "en-AU.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		CEB7A451300D085200523E46 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CEB7A453300D09C400523E46 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CEB7A454300D09CD00523E46 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CEB7A455300D09D000523E46 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		F781C630D8B432F89ABEE1DA /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -159,6 +164,7 @@
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				CEB7A450300D085200523E46 /* InfoPlist.strings */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -291,6 +297,7 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				CEB7A452300D085200523E46 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -321,13 +328,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -342,13 +345,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -471,6 +470,17 @@
 				CEB7A44F300935E100523E46 /* en-AU */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		CEB7A450300D085200523E46 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CEB7A451300D085200523E46 /* en */,
+				CEB7A453300D09C400523E46 /* ko */,
+				CEB7A454300D09CD00523E46 /* ja */,
+				CEB7A455300D09D000523E46 /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

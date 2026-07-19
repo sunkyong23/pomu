@@ -23,7 +23,26 @@ class PhotoPermissionScreen extends StatefulWidget {
 class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
   final PhotoPermissionService _permissionService = PhotoPermissionService();
 
-  bool _isLoading = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkExistingPermission();
+  }
+
+  Future<void> _checkExistingPermission() async {
+    final state = await _permissionService.getPermissionState();
+
+    if (!mounted) return;
+
+    if (_permissionService.hasAccess(state)) {
+      _openHome();
+      return;
+    }
+
+    setState(() => _isLoading = false);
+  }
 
   Future<void> _requestPermission() async {
     if (_isLoading) return;
@@ -34,16 +53,20 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
 
     if (!mounted) return;
 
-    setState(() => _isLoading = false);
-
-    if (state.hasAccess) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+    if (_permissionService.hasAccess(state)) {
+      _openHome();
       return;
     }
 
+    setState(() => _isLoading = false);
+
     await _showPermissionDialog();
+  }
+
+  void _openHome() {
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
   }
 
   Future<void> _showPermissionDialog() async {
@@ -53,14 +76,14 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
         return AlertDialog(
           title: Text(
             dialogContext.l10n.permissionDialogTitle,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.w800,
               color: PomuColors.textPrimary,
             ),
           ),
           content: Text(
             dialogContext.l10n.permissionDialogDescription,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 15,
               height: 1.5,
               color: PomuColors.textSecondary,
@@ -109,7 +132,7 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
               Text(
                 context.l10n.permissionTitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                   color: PomuColors.textPrimary,
@@ -123,7 +146,7 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
               Text(
                 context.l10n.permissionDescription,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   height: 1.5,
                   color: PomuColors.textSecondary,
@@ -151,7 +174,7 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
                         children: [
                           Text(
                             context.l10n.permissionPrivacyTitle,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: PomuColors.textPrimary,
@@ -160,7 +183,7 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
                           const SizedBox(height: 4),
                           Text(
                             context.l10n.permissionPrivacyDescription,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 13,
                               height: 1.45,
                               color: PomuColors.textSecondary,
@@ -192,7 +215,10 @@ class _PhotoPermissionScreenState extends State<PhotoPermissionScreen> {
               Text(
                 context.l10n.permissionBottomDescription,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: PomuColors.textSecondary),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: PomuColors.textSecondary,
+                ),
               ),
 
               const SizedBox(height: PomuSpacing.sm),

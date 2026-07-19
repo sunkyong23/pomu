@@ -13,7 +13,10 @@ class AlbumService {
   final AlbumSettingsService _albumSettingsService = AlbumSettingsService();
 
   /// 앞으로 사용할 메인 함수
-  Future<void> createAlbums(List<AlbumDefinition> albums) async {
+  ///
+  /// 모든 앨범 생성에 성공하면 true,
+  /// 하나라도 실패하면 false를 반환합니다.
+  Future<bool> createAlbums(List<AlbumDefinition> albums) async {
     for (final album in albums) {
       if (album.isEmpty) continue;
 
@@ -22,16 +25,20 @@ class AlbumService {
         photos: album.photos,
       );
 
-      debugPrint(
-        success
-            ? '✅ Added ${album.photoCount} photos to ${album.albumName}'
-            : '⚠️ Failed to add photos to ${album.albumName}',
-      );
+      if (!success) {
+        debugPrint('⚠️ Failed to add photos to ${album.albumName}');
+
+        return false;
+      }
+
+      debugPrint('✅ Added ${album.photoCount} photos to ${album.albumName}');
     }
+
+    return true;
   }
 
   /// 기존 코드 호환용
-  Future<void> createAlbumsForCategories(
+  Future<bool> createAlbumsForCategories(
     Map<PhotoCategory, List<AssetEntity>> categorizedPhotos,
   ) async {
     final albums = <AlbumDefinition>[];
@@ -55,6 +62,6 @@ class AlbumService {
       );
     }
 
-    await createAlbums(albums);
+    return createAlbums(albums);
   }
 }

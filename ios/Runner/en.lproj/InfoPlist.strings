@@ -1,0 +1,2 @@
+"NSPhotoLibraryUsageDescription" = "Pomu needs access to your photo library to find and organize duplicate photos, screenshots, and large videos.";
+"NSPhotoLibraryAddUsageDescription" = "Pomu needs permission to add organized photos to albums in Apple Photos.";
