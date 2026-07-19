@@ -27,6 +27,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
 
   final List<_VideoEntry> _videos = [];
   final Set<String> _selectedIds = {};
+  final Map<String, Future<Uint8List?>> _thumbnailFutures = {};
 
   bool _isLoading = true;
   bool _isDeleting = false;
@@ -39,6 +40,16 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
   void initState() {
     super.initState();
     _loadVideos();
+  }
+
+  Future<Uint8List?> _getThumbnailFuture(AssetEntity asset) {
+    return _thumbnailFutures.putIfAbsent(
+      asset.id,
+      () => asset.thumbnailDataWithSize(
+        const ThumbnailSize(320, 260),
+        quality: 85,
+      ),
+    );
   }
 
   Future<void> _loadVideos() async {
@@ -80,6 +91,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
 
         setState(() {
           _videos.clear();
+          _thumbnailFutures.clear();
           _selectedIds.clear();
           _isLoading = false;
         });
@@ -145,14 +157,16 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
 
       if (!mounted) return;
 
+      final loadedAssetIds = entries.map((entry) => entry.asset.id).toSet();
+
       setState(() {
         _videos
           ..clear()
           ..addAll(entries);
 
-        _selectedIds.removeWhere(
-          (id) => !_videos.any((entry) => entry.asset.id == id),
-        );
+        _thumbnailFutures.removeWhere((id, _) => !loadedAssetIds.contains(id));
+
+        _selectedIds.removeWhere((id) => !loadedAssetIds.contains(id));
 
         _isLoading = false;
       });
@@ -393,6 +407,10 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
       setState(() {
         _videos.removeWhere((entry) => deletedIdSet.contains(entry.asset.id));
 
+        for (final id in deletedIdSet) {
+          _thumbnailFutures.remove(id);
+        }
+
         _selectedIds.removeAll(deletedIdSet);
         _isDeleting = false;
       });
@@ -597,6 +615,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
 
                   return _VideoListTile(
                     entry: entry,
+                    thumbnailFuture: _getThumbnailFuture(entry.asset),
                     isSelected: _selectedIds.contains(entry.asset.id),
                     formatBytes: (bytes) => _formatBytes(context, bytes),
                     formatDuration: _formatDuration,
@@ -833,6 +852,7 @@ class _VideoSummaryCard extends StatelessWidget {
 
 class _VideoListTile extends StatelessWidget {
   final _VideoEntry entry;
+  final Future<Uint8List?> thumbnailFuture;
   final bool isSelected;
 
   final String Function(int bytes) formatBytes;
@@ -844,6 +864,7 @@ class _VideoListTile extends StatelessWidget {
 
   const _VideoListTile({
     required this.entry,
+    required this.thumbnailFuture,
     required this.isSelected,
     required this.formatBytes,
     required this.formatDuration,
@@ -883,10 +904,7 @@ class _VideoListTile extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(14),
                       child: FutureBuilder<Uint8List?>(
-                        future: asset.thumbnailDataWithSize(
-                          const ThumbnailSize(320, 260),
-                          quality: 85,
-                        ),
+                        future: thumbnailFuture,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData || snapshot.data == null) {
                             return Container(color: PomuColors.primaryLight);
@@ -895,6 +913,8 @@ class _VideoListTile extends StatelessWidget {
                           return Image.memory(
                             snapshot.data!,
                             fit: BoxFit.cover,
+                            gaplessPlayback: true,
+                            filterQuality: FilterQuality.medium,
                           );
                         },
                       ),
