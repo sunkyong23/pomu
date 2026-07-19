@@ -642,5 +642,16 @@
   "autoClassificationNextScanTitle": "次回からは新しい写真だけを確認します",
   "autoClassificationNextScanDescription": "初回の解析後は、新しく追加された写真だけを解析するため、よりすばやく整理できます。",
   "autoClassificationStartButton": "写真の自動分類を開始",
-  "autoClassificationStartNotice": "写真の枚数によっては解析に時間がかかる場合があります。"
+  "autoClassificationStartNotice": "写真の枚数によっては解析に時間がかかる場合があります。",
+
+"duplicateCalculatingSpace": "空き容量を計算しています...",
+  "duplicateDeleteAllAction": "すべて削除",
+"deleteSelectedPhotosCount": "{count}枚を削除",
+"@deleteSelectedPhotosCount": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+}
 }

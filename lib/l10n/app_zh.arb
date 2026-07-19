@@ -642,5 +642,16 @@
   "autoClassificationNextScanTitle": "以后只分析新照片",
   "autoClassificationNextScanDescription": "首次分析完成后，只会分析新添加的照片，因此整理速度会更快。",
   "autoClassificationStartButton": "开始自动分类照片",
-  "autoClassificationStartNotice": "根据照片数量不同，分析可能需要一些时间。"
+  "autoClassificationStartNotice": "根据照片数量不同，分析可能需要一些时间。",
+
+"duplicateCalculatingSpace": "正在计算预计可释放空间...",
+  "duplicateDeleteAllAction": "全部删除",
+"deleteSelectedPhotosCount": "删除 {count} 张照片",
+"@deleteSelectedPhotosCount": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+}
 }

@@ -1859,6 +1859,24 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'사진 수에 따라 분석에 시간이 걸릴 수 있어요.'**
   String get autoClassificationStartNotice;
+
+  /// No description provided for @duplicateCalculatingSpace.
+  ///
+  /// In ko, this message translates to:
+  /// **'예상 확보 공간 계산 중...'**
+  String get duplicateCalculatingSpace;
+
+  /// No description provided for @duplicateDeleteAllAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 삭제'**
+  String get duplicateDeleteAllAction;
+
+  /// No description provided for @deleteSelectedPhotosCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장 삭제하기'**
+  String deleteSelectedPhotosCount(int count);
 }
 
 class _AppLocalizationsDelegate

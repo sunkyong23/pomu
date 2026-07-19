@@ -642,5 +642,16 @@
   "autoClassificationNextScanTitle": "Only new photos are checked next time",
   "autoClassificationNextScanDescription": "After the first analysis, Pomu analyzes only newly added photos for faster organization.",
   "autoClassificationStartButton": "Start Auto Photo Sorting",
-  "autoClassificationStartNotice": "Analysis time may vary depending on the number of photos."
+  "autoClassificationStartNotice": "Analysis time may vary depending on the number of photos.",
+
+"duplicateCalculatingSpace": "Calculating estimated space...",
+  "duplicateDeleteAllAction": "Delete All",
+"deleteSelectedPhotosCount": "Delete {count} Photos",
+"@deleteSelectedPhotosCount": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+}
 }

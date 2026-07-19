@@ -991,4 +991,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get autoClassificationStartNotice => '写真の枚数によっては解析に時間がかかる場合があります。';
+
+  @override
+  String get duplicateCalculatingSpace => '空き容量を計算しています...';
+
+  @override
+  String get duplicateDeleteAllAction => 'すべて削除';
+
+  @override
+  String deleteSelectedPhotosCount(int count) {
+    return '$count枚を削除';
+  }
 }

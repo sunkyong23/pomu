@@ -1323,11 +1323,12 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
   }
 
   Future<void> _showDeletePreviewSheet(List<AssetEntity> deleteAssets) async {
-    final totalBytes = await _calculateTotalFileSize(deleteAssets);
+    final totalBytesFuture = Future<int>.delayed(
+      const Duration(milliseconds: 400),
+      () => _calculateTotalFileSize(deleteAssets),
+    );
 
     if (!mounted) return;
-
-    final readableSize = _formatBytes(context, totalBytes);
 
     await showModalBottomSheet<void>(
       context: context,
@@ -1369,13 +1370,47 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                     color: PomuColors.primaryLight,
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: Text(
-                    sheetContext.l10n.estimatedSpace(readableSize),
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: PomuColors.textPrimary,
-                    ),
+                  child: FutureBuilder<int>(
+                    future: totalBytesFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return Row(
+                          children: [
+                            const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: PomuColors.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              sheetContext.l10n.duplicateCalculatingSpace,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: PomuColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      final readableSize = _formatBytes(
+                        sheetContext,
+                        snapshot.data ?? 0,
+                      );
+
+                      return Text(
+                        sheetContext.l10n.estimatedSpace(readableSize),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: PomuColors.textPrimary,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: PomuSpacing.md),
@@ -1538,29 +1573,41 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                   ),
                 ),
               ),
-              IconButton(
+
+              const SizedBox(width: 8),
+
+              TextButton(
                 onPressed: widget.isBusy
                     ? null
                     : _handleDeleteEntireGroupRequest,
-                tooltip: context.l10n.duplicateDeleteEntireTooltip,
-                style: IconButton.styleFrom(
-                  backgroundColor: PomuColors.primary.withValues(alpha: 0.10),
-                  foregroundColor: PomuColors.primary,
-                  disabledBackgroundColor: PomuColors.primary.withValues(
-                    alpha: 0.05,
+                style: TextButton.styleFrom(
+                  foregroundColor: PomuColors.textSecondary,
+                  disabledForegroundColor: PomuColors.textSecondary.withValues(
+                    alpha: 0.35,
                   ),
-                  disabledForegroundColor: PomuColors.primary.withValues(
-                    alpha: 0.30,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
                   ),
-                  minimumSize: const Size(40, 40),
-                  padding: EdgeInsets.zero,
-                  shape: const CircleBorder(),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
                 ),
-                icon: const Icon(Icons.delete_outline_rounded, size: 21),
+                child: Text(
+                  context.l10n.duplicateDeleteAllAction,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
+
           const SizedBox(height: 4),
+
           Text(
             context.l10n.keeperAndDeleteCount(keeperCount, selectedCount),
             style: const TextStyle(
@@ -1568,7 +1615,9 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
               color: PomuColors.textSecondary,
             ),
           ),
+
           const SizedBox(height: PomuSpacing.md),
+
           SizedBox(
             height: 106,
             child: ListView.separated(
@@ -1594,24 +1643,58 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
               },
             ),
           ),
-          const SizedBox(height: PomuSpacing.md),
-          OutlinedButton.icon(
-            onPressed: selectedCount == 0 || widget.isBusy
-                ? null
-                : () {
-                    final deleteAssets = widget.group.assets
-                        .where((asset) => !_keeperAssetIds.contains(asset.id))
-                        .toList();
 
-                    _handleDeleteRequest(deleteAssets);
-                  },
-            icon: const Icon(Icons.delete_outline_rounded),
-            label: Text(
-              selectedCount == 0
-                  ? context.l10n.noPhotosToDelete
-                  : widget.isBusy
-                  ? context.l10n.duplicateSavingShort
-                  : context.l10n.deletePreparationCount(selectedCount),
+          const SizedBox(height: PomuSpacing.md),
+
+          const Divider(height: 1, thickness: 1, color: PomuColors.divider),
+
+          const SizedBox(height: PomuSpacing.md),
+
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton.icon(
+              onPressed: selectedCount == 0 || widget.isBusy
+                  ? null
+                  : () {
+                      final deleteAssets = widget.group.assets
+                          .where((asset) => !_keeperAssetIds.contains(asset.id))
+                          .toList();
+
+                      _handleDeleteRequest(deleteAssets);
+                    },
+              style: FilledButton.styleFrom(
+                backgroundColor: PomuColors.primaryLight,
+                foregroundColor: PomuColors.primary,
+                disabledBackgroundColor: PomuColors.primaryLight.withValues(
+                  alpha: 0.55,
+                ),
+                disabledForegroundColor: PomuColors.primary.withValues(
+                  alpha: 0.45,
+                ),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: PomuSpacing.md),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: PomuColors.primary.withValues(alpha: 0.18),
+                  ),
+                ),
+              ),
+              icon: const Icon(Icons.delete_outline_rounded, size: 20),
+              label: Text(
+                selectedCount == 0
+                    ? context.l10n.noPhotosToDelete
+                    : widget.isBusy
+                    ? context.l10n.duplicateSavingShort
+                    : context.l10n.deleteSelectedPhotosCount(selectedCount),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
           ),
         ],

@@ -981,4 +981,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get autoClassificationStartNotice => '根据照片数量不同，分析可能需要一些时间。';
+
+  @override
+  String get duplicateCalculatingSpace => '正在计算预计可释放空间...';
+
+  @override
+  String get duplicateDeleteAllAction => '全部删除';
+
+  @override
+  String deleteSelectedPhotosCount(int count) {
+    return '删除 $count 张照片';
+  }
 }

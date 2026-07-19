@@ -1055,4 +1055,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get autoClassificationStartNotice =>
       'Analysis time may vary depending on the number of photos.';
+
+  @override
+  String get duplicateCalculatingSpace => 'Calculating estimated space...';
+
+  @override
+  String get duplicateDeleteAllAction => 'Delete All';
+
+  @override
+  String deleteSelectedPhotosCount(int count) {
+    return 'Delete $count Photos';
+  }
 }

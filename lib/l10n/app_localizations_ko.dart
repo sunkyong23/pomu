@@ -995,4 +995,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get autoClassificationStartNotice => '사진 수에 따라 분석에 시간이 걸릴 수 있어요.';
+
+  @override
+  String get duplicateCalculatingSpace => '예상 확보 공간 계산 중...';
+
+  @override
+  String get duplicateDeleteAllAction => '전체 삭제';
+
+  @override
+  String deleteSelectedPhotosCount(int count) {
+    return '$count장 삭제하기';
+  }
 }
