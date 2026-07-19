@@ -371,7 +371,7 @@ class SettingsScreen extends StatelessWidget {
                 icon: Icons.info_outline_rounded,
                 title: context.l10n.settingsAppVersionTitle,
                 subtitle: context.l10n.appName,
-                trailingText: '1.0.4',
+                trailingText: '1.0.5',
               ),
             ],
           ),

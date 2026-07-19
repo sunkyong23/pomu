@@ -24,6 +24,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
 
   final List<AssetEntity> _screenshots = [];
   final Set<String> _selectedAssetIds = {};
+  final Map<String, Future<Uint8List?>> _thumbnailFutures = {};
 
   bool _isLoading = true;
   bool _isDeleting = false;
@@ -34,6 +35,16 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
   void initState() {
     super.initState();
     _loadScreenshots();
+  }
+
+  Future<Uint8List?> _getThumbnailFuture(AssetEntity asset) {
+    return _thumbnailFutures.putIfAbsent(
+      asset.id,
+      () => asset.thumbnailDataWithSize(
+        const ThumbnailSize(360, 360),
+        quality: 88,
+      ),
+    );
   }
 
   Future<void> _loadScreenshots() async {
@@ -596,6 +607,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
 
                   return _ScreenshotTile(
                     asset: asset,
+                    thumbnailFuture: _getThumbnailFuture(asset),
                     isSelected: isSelected,
                     onTap: () => _toggleSelection(asset),
                     onLongPress: () => _showPhotoPreview(asset),
@@ -771,12 +783,14 @@ class _LimitedAccessCard extends StatelessWidget {
 
 class _ScreenshotTile extends StatelessWidget {
   final AssetEntity asset;
+  final Future<Uint8List?> thumbnailFuture;
   final bool isSelected;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
   const _ScreenshotTile({
     required this.asset,
+    required this.thumbnailFuture,
     required this.isSelected,
     required this.onTap,
     required this.onLongPress,
@@ -793,16 +807,18 @@ class _ScreenshotTile extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: FutureBuilder<Uint8List?>(
-              future: asset.thumbnailDataWithSize(
-                const ThumbnailSize(360, 360),
-                quality: 88,
-              ),
+              future: thumbnailFuture,
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
                   return Container(color: PomuColors.primaryLight);
                 }
 
-                return Image.memory(snapshot.data!, fit: BoxFit.cover);
+                return Image.memory(
+                  snapshot.data!,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                  filterQuality: FilterQuality.medium,
+                );
               },
             ),
           ),
