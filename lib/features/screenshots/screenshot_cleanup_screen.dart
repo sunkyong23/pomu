@@ -91,6 +91,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
 
         setState(() {
           _screenshots.clear();
+          _thumbnailFutures.clear();
           _selectedAssetIds.clear();
           _isLoading = false;
         });
@@ -124,6 +125,10 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
         _screenshots
           ..clear()
           ..addAll(loadedScreenshots);
+
+        _thumbnailFutures.removeWhere(
+          (id, _) => !loadedScreenshots.any((asset) => asset.id == id),
+        );
 
         _selectedAssetIds.removeWhere(
           (id) => !_screenshots.any((asset) => asset.id == id),
@@ -375,7 +380,12 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
       setState(() {
         _screenshots.removeWhere((asset) => deletedIdSet.contains(asset.id));
 
+        for (final id in deletedIdSet) {
+          _thumbnailFutures.remove(id);
+        }
+
         _selectedAssetIds.removeAll(deletedIdSet);
+
         _isDeleting = false;
       });
 
