@@ -1236,7 +1236,13 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
 
     if (!mounted || confirmed != true) return;
 
-    await _handleDeleteRequest(widget.group.assets);
+    await _handleDeleteEntireGroup(widget.group.assets);
+  }
+
+  Future<void> _handleDeleteEntireGroup(List<AssetEntity> deleteAssets) async {
+    if (deleteAssets.isEmpty || widget.isBusy) return;
+
+    await _deleteAssets(deleteAssets);
   }
 
   Future<void> _handleDeleteRequest(List<AssetEntity> deleteAssets) async {
@@ -1301,6 +1307,10 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
         .map((asset) => asset.id)
         .toList();
 
+    final summaryDeletedCount = remainingAssetIds.isEmpty
+        ? widget.group.deleteCandidateCount
+        : deletedIds.length;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -1319,14 +1329,15 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
       _resetKeeperSelection();
     });
 
-    await widget.onDeleted(remainingAssetIds, deletedIds.length, deletedBytes);
+    await widget.onDeleted(
+      remainingAssetIds,
+      summaryDeletedCount,
+      deletedBytes,
+    );
   }
 
   Future<void> _showDeletePreviewSheet(List<AssetEntity> deleteAssets) async {
-    final totalBytesFuture = Future<int>.delayed(
-      const Duration(milliseconds: 400),
-      () => _calculateTotalFileSize(deleteAssets),
-    );
+    final totalBytesFuture = _calculateTotalFileSize(deleteAssets);
 
     if (!mounted) return;
 
@@ -1495,11 +1506,13 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
   }
 
   Future<int> _calculateTotalFileSize(List<AssetEntity> assets) async {
-    final sizes = await Future.wait<int>(
-      assets.map(_tryGetAssetFileSizeForGroup),
-    );
+    var totalBytes = 0;
 
-    return sizes.fold<int>(0, (sum, size) => sum + size);
+    for (final asset in assets) {
+      totalBytes += await _tryGetAssetFileSizeForGroup(asset);
+    }
+
+    return totalBytes;
   }
 
   Future<int> _tryGetAssetFileSizeForGroup(AssetEntity asset) async {
