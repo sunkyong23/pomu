@@ -1005,4 +1005,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanRetry => 'Try again';
+
+  @override
+  String get autoClassificationIntroAppBarTitle => 'Auto Photo Sorting';
+
+  @override
+  String get autoClassificationIntroTitle =>
+      'Organize your photos into\ntopic-based albums';
+
+  @override
+  String get autoClassificationIntroDescription =>
+      'Pomu analyzes photos on your device and organizes them into albums such as pets, people, food, and scenery.';
+
+  @override
+  String get autoClassificationWarningTitle =>
+      'The first analysis may take a while';
+
+  @override
+  String get autoClassificationWarningDescription =>
+      'The more photos you have, the longer the analysis may take. It\'s best to keep the app open while analysis is in progress.';
+
+  @override
+  String get autoClassificationPrivacyTitle =>
+      'Photos are analyzed only on your device';
+
+  @override
+  String get autoClassificationPrivacyDescription =>
+      'Your photos are never sent to or uploaded to an external server.';
+
+  @override
+  String get autoClassificationAlbumTitle =>
+      'Albums are created in Apple Photos';
+
+  @override
+  String get autoClassificationAlbumDescription =>
+      'When analysis is complete, topic-based albums are automatically created in the Apple Photos app.';
+
+  @override
+  String get autoClassificationNextScanTitle =>
+      'Only new photos are checked next time';
+
+  @override
+  String get autoClassificationNextScanDescription =>
+      'After the first analysis, Pomu analyzes only newly added photos for faster organization.';
+
+  @override
+  String get autoClassificationStartButton => 'Start Auto Photo Sorting';
+
+  @override
+  String get autoClassificationStartNotice =>
+      'Analysis time may vary depending on the number of photos.';
 }

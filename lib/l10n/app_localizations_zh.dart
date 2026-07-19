@@ -938,4 +938,47 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scanRetry => '重试';
+
+  @override
+  String get autoClassificationIntroAppBarTitle => '照片自动分类';
+
+  @override
+  String get autoClassificationIntroTitle => '自动将照片整理到\n不同主题相册';
+
+  @override
+  String get autoClassificationIntroDescription =>
+      'Pomu 会在设备本地分析照片，并自动整理到宠物、人物、食物、风景等主题相册中。';
+
+  @override
+  String get autoClassificationWarningTitle => '首次分析可能需要一些时间';
+
+  @override
+  String get autoClassificationWarningDescription =>
+      '照片越多，分析所需时间越长。分析过程中建议不要关闭应用。';
+
+  @override
+  String get autoClassificationPrivacyTitle => '照片仅在设备本地分析';
+
+  @override
+  String get autoClassificationPrivacyDescription => '照片不会上传或发送到任何外部服务器。';
+
+  @override
+  String get autoClassificationAlbumTitle => '自动创建 Apple 照片相册';
+
+  @override
+  String get autoClassificationAlbumDescription =>
+      '分析完成后，将自动在 Apple 照片中创建对应主题相册。';
+
+  @override
+  String get autoClassificationNextScanTitle => '以后只分析新照片';
+
+  @override
+  String get autoClassificationNextScanDescription =>
+      '首次分析完成后，只会分析新添加的照片，因此整理速度会更快。';
+
+  @override
+  String get autoClassificationStartButton => '开始自动分类照片';
+
+  @override
+  String get autoClassificationStartNotice => '根据照片数量不同，分析可能需要一些时间。';
 }

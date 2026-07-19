@@ -433,6 +433,9 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
   Future<void> _showVideoPreview(_VideoEntry entry) async {
     _showSnackBar(context.l10n.videoLoadingOriginal);
 
+    final sizeText = _formatBytes(context, entry.sizeBytes);
+    final dateText = _formatDate(entry.asset.createDateTime);
+
     final file = await entry.asset.originFile;
 
     if (!mounted) return;
@@ -444,17 +447,22 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
       return;
     }
 
+    final exists = await file.exists();
+    final length = await file.length();
+
+    if (!mounted) return;
+
     debugPrint('🎬 동영상 경로: ${file.path}');
-    debugPrint('🎬 파일 존재: ${await file.exists()}');
-    debugPrint('🎬 파일 크기: ${await file.length()}');
+    debugPrint('🎬 파일 존재: $exists');
+    debugPrint('🎬 파일 크기: $length');
 
     await Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => _VideoPreviewScreen(
           file: file,
-          sizeText: _formatBytes(context, entry.sizeBytes),
-          dateText: _formatDate(entry.asset.createDateTime),
+          sizeText: sizeText,
+          dateText: dateText,
         ),
       ),
     );

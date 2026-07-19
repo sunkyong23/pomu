@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../models/photo_category.dart';
 import '../../models/photo_tag.dart';
 import 'vision_service.dart';
@@ -71,7 +73,9 @@ class CategoryMapper {
       );
     }
 
-    print('🧮 Category scores: ${scores.map((k, v) => MapEntry(k.name, v))}');
+    debugPrint(
+      '🧮 Category scores: ${scores.map((k, v) => MapEntry(k.name, v))}',
+    );
 
     for (final entry in scores.entries) {
       if (entry.value >= _thresholdFor(entry.key)) {
@@ -123,7 +127,7 @@ class CategoryMapper {
     addIfMatched(PhotoTag.receipt, ['receipt', 'invoice', 'bill']);
     addIfMatched(PhotoTag.document, ['document', 'paper', 'text', 'form']);
 
-    print('🏷️ Photo tags: ${tags.map((e) => e.name).toList()}');
+    debugPrint('🏷️ Photo tags: ${tags.map((e) => e.name).toList()}');
 
     return tags.toList();
   }

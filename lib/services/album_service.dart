@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../models/album_definition.dart';
@@ -21,7 +22,7 @@ class AlbumService {
         photos: album.photos,
       );
 
-      print(
+      debugPrint(
         success
             ? '✅ Added ${album.photoCount} photos to ${album.albumName}'
             : '⚠️ Failed to add photos to ${album.albumName}',
@@ -33,7 +34,7 @@ class AlbumService {
   Future<void> createAlbumsForCategories(
     Map<PhotoCategory, List<AssetEntity>> categorizedPhotos,
   ) async {
-    final List<AlbumDefinition> albums = [];
+    final albums = <AlbumDefinition>[];
 
     for (final entry in categorizedPhotos.entries) {
       final category = entry.key;

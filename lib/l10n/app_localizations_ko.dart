@@ -951,4 +951,48 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get scanRetry => '다시 시도';
+
+  @override
+  String get autoClassificationIntroAppBarTitle => '사진 자동 분류';
+
+  @override
+  String get autoClassificationIntroTitle => '사진을 주제별 앨범으로\n자동 정리해드릴게요';
+
+  @override
+  String get autoClassificationIntroDescription =>
+      'Pomu가 사진을 기기 안에서 분석해 반려동물, 사람, 음식, 풍경 등 주제별 앨범으로 정리해요.';
+
+  @override
+  String get autoClassificationWarningTitle => '첫 분석은 시간이 오래 걸릴 수 있어요';
+
+  @override
+  String get autoClassificationWarningDescription =>
+      '사진이 많을수록 분석 시간이 길어질 수 있어요. 분석 중에는 앱을 종료하지 않는 것이 좋아요.';
+
+  @override
+  String get autoClassificationPrivacyTitle => '사진은 기기 안에서만 분석돼요';
+
+  @override
+  String get autoClassificationPrivacyDescription =>
+      '사진은 외부 서버로 전송되거나 업로드되지 않아요.';
+
+  @override
+  String get autoClassificationAlbumTitle => 'Apple 사진 앱에 앨범을 만들어요';
+
+  @override
+  String get autoClassificationAlbumDescription =>
+      '분석이 끝나면 주제별 앨범이 Apple 사진 앱에 자동으로 생성돼요.';
+
+  @override
+  String get autoClassificationNextScanTitle => '다음부터는 새 사진만 확인해요';
+
+  @override
+  String get autoClassificationNextScanDescription =>
+      '첫 분석이 끝난 뒤에는 새로 추가된 사진만 분석해 더 빠르게 정리해요.';
+
+  @override
+  String get autoClassificationStartButton => '사진 자동 분류 시작하기';
+
+  @override
+  String get autoClassificationStartNotice => '사진 수에 따라 분석에 시간이 걸릴 수 있어요.';
 }

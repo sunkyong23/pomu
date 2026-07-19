@@ -629,5 +629,18 @@
   },
   "scanOrganizeFailedTitle": "写真を整理できませんでした",
   "scanOrganizeFailedDescription": "写真の整理中に問題が発生しました。しばらくしてからもう一度お試しください。",
-  "scanRetry": "もう一度試す"
+  "scanRetry": "もう一度試す",
+  "autoClassificationIntroAppBarTitle": "写真の自動分類",
+  "autoClassificationIntroTitle": "写真をテーマ別アルバムに\n自動で整理します",
+  "autoClassificationIntroDescription": "Pomuが端末内で写真を解析し、ペット、人物、食べ物、風景などのテーマ別アルバムに整理します。",
+  "autoClassificationWarningTitle": "初回の解析には時間がかかる場合があります",
+  "autoClassificationWarningDescription": "写真が多いほど解析時間が長くなることがあります。解析中はアプリを終了しないことをおすすめします。",
+  "autoClassificationPrivacyTitle": "写真は端末内だけで解析されます",
+  "autoClassificationPrivacyDescription": "写真が外部サーバーへ送信またはアップロードされることはありません。",
+  "autoClassificationAlbumTitle": "Apple写真アプリにアルバムを作成します",
+  "autoClassificationAlbumDescription": "解析が完了すると、テーマ別アルバムがApple写真アプリに自動で作成されます。",
+  "autoClassificationNextScanTitle": "次回からは新しい写真だけを確認します",
+  "autoClassificationNextScanDescription": "初回の解析後は、新しく追加された写真だけを解析するため、よりすばやく整理できます。",
+  "autoClassificationStartButton": "写真の自動分類を開始",
+  "autoClassificationStartNotice": "写真の枚数によっては解析に時間がかかる場合があります。"
 }

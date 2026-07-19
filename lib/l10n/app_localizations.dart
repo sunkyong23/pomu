@@ -1781,6 +1781,84 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'다시 시도'**
   String get scanRetry;
+
+  /// No description provided for @autoClassificationIntroAppBarTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 자동 분류'**
+  String get autoClassificationIntroAppBarTitle;
+
+  /// No description provided for @autoClassificationIntroTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 주제별 앨범으로\n자동 정리해드릴게요'**
+  String get autoClassificationIntroTitle;
+
+  /// No description provided for @autoClassificationIntroDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'Pomu가 사진을 기기 안에서 분석해 반려동물, 사람, 음식, 풍경 등 주제별 앨범으로 정리해요.'**
+  String get autoClassificationIntroDescription;
+
+  /// No description provided for @autoClassificationWarningTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 분석은 시간이 오래 걸릴 수 있어요'**
+  String get autoClassificationWarningTitle;
+
+  /// No description provided for @autoClassificationWarningDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진이 많을수록 분석 시간이 길어질 수 있어요. 분석 중에는 앱을 종료하지 않는 것이 좋아요.'**
+  String get autoClassificationWarningDescription;
+
+  /// No description provided for @autoClassificationPrivacyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진은 기기 안에서만 분석돼요'**
+  String get autoClassificationPrivacyTitle;
+
+  /// No description provided for @autoClassificationPrivacyDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진은 외부 서버로 전송되거나 업로드되지 않아요.'**
+  String get autoClassificationPrivacyDescription;
+
+  /// No description provided for @autoClassificationAlbumTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'Apple 사진 앱에 앨범을 만들어요'**
+  String get autoClassificationAlbumTitle;
+
+  /// No description provided for @autoClassificationAlbumDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'분석이 끝나면 주제별 앨범이 Apple 사진 앱에 자동으로 생성돼요.'**
+  String get autoClassificationAlbumDescription;
+
+  /// No description provided for @autoClassificationNextScanTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'다음부터는 새 사진만 확인해요'**
+  String get autoClassificationNextScanTitle;
+
+  /// No description provided for @autoClassificationNextScanDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 분석이 끝난 뒤에는 새로 추가된 사진만 분석해 더 빠르게 정리해요.'**
+  String get autoClassificationNextScanDescription;
+
+  /// No description provided for @autoClassificationStartButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 자동 분류 시작하기'**
+  String get autoClassificationStartButton;
+
+  /// No description provided for @autoClassificationStartNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 수에 따라 분석에 시간이 걸릴 수 있어요.'**
+  String get autoClassificationStartNotice;
 }
 
 class _AppLocalizationsDelegate
