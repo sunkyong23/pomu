@@ -878,4 +878,24 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get duplicateSortStartButton => 'この順番でスキャンを開始';
+
+  @override
+  String get duplicateDeleteEntireTooltip => 'このグループをすべて削除';
+
+  @override
+  String get duplicateDeleteEntireTitle => 'このグループの写真をすべて削除しますか？';
+
+  @override
+  String duplicateDeleteEntireDescription(int photoCount) {
+    return 'このグループの写真$photoCount枚がすべて、Apple写真の「最近削除した項目」に移動します。';
+  }
+
+  @override
+  String get duplicateDeleteEntireWarning =>
+      '「残す」に選択した写真も一緒に削除されます。\nこの操作はPomuでは取り消せません。';
+
+  @override
+  String duplicateDeleteEntireButton(int photoCount) {
+    return '$photoCount枚をすべて削除';
+  }
 }

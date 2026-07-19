@@ -1679,6 +1679,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'이 순서로 검사 시작'**
   String get duplicateSortStartButton;
+
+  /// No description provided for @duplicateDeleteEntireTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 그룹 전체 삭제'**
+  String get duplicateDeleteEntireTooltip;
+
+  /// No description provided for @duplicateDeleteEntireTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 그룹의 사진을 모두 삭제할까요?'**
+  String get duplicateDeleteEntireTitle;
+
+  /// No description provided for @duplicateDeleteEntireDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 그룹의 사진 {photoCount}장이 모두 Apple 사진의 ‘최근 삭제된 항목’으로 이동합니다.'**
+  String duplicateDeleteEntireDescription(int photoCount);
+
+  /// No description provided for @duplicateDeleteEntireWarning.
+  ///
+  /// In ko, this message translates to:
+  /// **'보관으로 선택한 사진도 함께 삭제됩니다.\n포무에서는 이 작업을 되돌릴 수 없습니다.'**
+  String get duplicateDeleteEntireWarning;
+
+  /// No description provided for @duplicateDeleteEntireButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'{photoCount}장 모두 삭제'**
+  String duplicateDeleteEntireButton(int photoCount);
 }
 
 class _AppLocalizationsDelegate

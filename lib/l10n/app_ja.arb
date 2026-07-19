@@ -545,5 +545,25 @@
   "duplicateSortNewestDescription": "最近撮影した写真を含むグループから表示",
   "duplicateSortOldestTitle": "古い写真から",
   "duplicateSortOldestDescription": "以前に撮影した写真を含むグループから表示",
-  "duplicateSortStartButton": "この順番でスキャンを開始"
+  "duplicateSortStartButton": "この順番でスキャンを開始",
+
+  "duplicateDeleteEntireTooltip": "このグループをすべて削除",
+"duplicateDeleteEntireTitle": "このグループの写真をすべて削除しますか？",
+"duplicateDeleteEntireDescription": "このグループの写真{photoCount}枚がすべて、Apple写真の「最近削除した項目」に移動します。",
+"@duplicateDeleteEntireDescription": {
+  "placeholders": {
+    "photoCount": {
+      "type": "int"
+    }
+  }
+},
+"duplicateDeleteEntireWarning": "「残す」に選択した写真も一緒に削除されます。\nこの操作はPomuでは取り消せません。",
+"duplicateDeleteEntireButton": "{photoCount}枚をすべて削除",
+"@duplicateDeleteEntireButton": {
+  "placeholders": {
+    "photoCount": {
+      "type": "int"
+    }
+  }
+}
 }

@@ -936,4 +936,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get duplicateSortStartButton => 'Start scan in this order';
+
+  @override
+  String get duplicateDeleteEntireTooltip => 'Delete entire group';
+
+  @override
+  String get duplicateDeleteEntireTitle => 'Delete all photos in this group?';
+
+  @override
+  String duplicateDeleteEntireDescription(int photoCount) {
+    return 'All $photoCount photos in this group will be moved to Recently Deleted in Apple Photos.';
+  }
+
+  @override
+  String get duplicateDeleteEntireWarning =>
+      'Photos marked as Keep will also be deleted.\nThis action cannot be undone in Pomu.';
+
+  @override
+  String duplicateDeleteEntireButton(int photoCount) {
+    return 'Delete all $photoCount';
+  }
 }

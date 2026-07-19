@@ -545,5 +545,25 @@
   "duplicateSortNewestDescription": "优先显示包含最近拍摄照片的组",
   "duplicateSortOldestTitle": "最旧照片优先",
   "duplicateSortOldestDescription": "优先显示包含较早拍摄照片的组",
-  "duplicateSortStartButton": "按此顺序开始扫描"
+  "duplicateSortStartButton": "按此顺序开始扫描",
+
+  "duplicateDeleteEntireTooltip": "删除整个分组",
+"duplicateDeleteEntireTitle": "要删除此分组中的所有照片吗？",
+"duplicateDeleteEntireDescription": "此分组中的全部 {photoCount} 张照片将移至 Apple 照片的“最近删除”中。",
+"@duplicateDeleteEntireDescription": {
+  "placeholders": {
+    "photoCount": {
+      "type": "int"
+    }
+  }
+},
+"duplicateDeleteEntireWarning": "标记为“保留”的照片也会一起删除。\n此操作无法在 Pomu 中撤销。",
+"duplicateDeleteEntireButton": "删除全部 {photoCount} 张",
+"@duplicateDeleteEntireButton": {
+  "placeholders": {
+    "photoCount": {
+      "type": "int"
+    }
+  }
+}
 }

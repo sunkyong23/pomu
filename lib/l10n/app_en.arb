@@ -545,5 +545,25 @@
   "duplicateSortNewestDescription": "Show groups containing the most recently taken photos first",
   "duplicateSortOldestTitle": "Oldest photos first",
   "duplicateSortOldestDescription": "Show groups containing the oldest photos first",
-  "duplicateSortStartButton": "Start scan in this order"
+  "duplicateSortStartButton": "Start scan in this order",
+
+  "duplicateDeleteEntireTooltip": "Delete entire group",
+"duplicateDeleteEntireTitle": "Delete all photos in this group?",
+"duplicateDeleteEntireDescription": "All {photoCount} photos in this group will be moved to Recently Deleted in Apple Photos.",
+"@duplicateDeleteEntireDescription": {
+  "placeholders": {
+    "photoCount": {
+      "type": "int"
+    }
+  }
+},
+"duplicateDeleteEntireWarning": "Photos marked as Keep will also be deleted.\nThis action cannot be undone in Pomu.",
+"duplicateDeleteEntireButton": "Delete all {photoCount}",
+"@duplicateDeleteEntireButton": {
+  "placeholders": {
+    "photoCount": {
+      "type": "int"
+    }
+  }
+}
 }

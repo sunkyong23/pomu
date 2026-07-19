@@ -882,4 +882,24 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get duplicateSortStartButton => '이 순서로 검사 시작';
+
+  @override
+  String get duplicateDeleteEntireTooltip => '이 그룹 전체 삭제';
+
+  @override
+  String get duplicateDeleteEntireTitle => '이 그룹의 사진을 모두 삭제할까요?';
+
+  @override
+  String duplicateDeleteEntireDescription(int photoCount) {
+    return '이 그룹의 사진 $photoCount장이 모두 Apple 사진의 ‘최근 삭제된 항목’으로 이동합니다.';
+  }
+
+  @override
+  String get duplicateDeleteEntireWarning =>
+      '보관으로 선택한 사진도 함께 삭제됩니다.\n포무에서는 이 작업을 되돌릴 수 없습니다.';
+
+  @override
+  String duplicateDeleteEntireButton(int photoCount) {
+    return '$photoCount장 모두 삭제';
+  }
 }

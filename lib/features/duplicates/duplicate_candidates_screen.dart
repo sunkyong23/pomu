@@ -3,6 +3,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
@@ -39,6 +41,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
 
   static const int _cachePageSize = 100;
 
+  static const String _sortOptionPreferenceKey = 'duplicate_group_sort_option';
+
   bool _isLoading = false;
   bool _isSavingResult = false;
   bool _isInitializing = true;
@@ -51,6 +55,9 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
 
   List<DuplicatePhotoGroup> _groups = [];
   DuplicateSummary _savedSummary = const DuplicateSummary.empty();
+
+  _DuplicateGroupSortOption _savedSortOption =
+      _DuplicateGroupSortOption.mostDuplicates;
 
   final Set<String> _resolvedGroupKeys = {};
 
@@ -112,12 +119,47 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
   @override
   void initState() {
     super.initState();
+    _loadSavedSortOption();
     _loadInitialData();
   }
 
   String _buildGroupKeyFromIds(List<String> ids) {
     final sorted = [...ids]..sort();
     return sorted.join('|');
+  }
+
+  Future<void> _loadSavedSortOption() async {
+    final preferences = await SharedPreferences.getInstance();
+    final savedValue = preferences.getString(_sortOptionPreferenceKey);
+
+    if (savedValue == null) return;
+
+    var matchedOption = _DuplicateGroupSortOption.mostDuplicates;
+
+    for (final option in _DuplicateGroupSortOption.values) {
+      if (option.name == savedValue) {
+        matchedOption = option;
+        break;
+      }
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _savedSortOption = matchedOption;
+    });
+  }
+
+  Future<void> _saveSortOption(_DuplicateGroupSortOption sortOption) async {
+    final preferences = await SharedPreferences.getInstance();
+
+    await preferences.setString(_sortOptionPreferenceKey, sortOption.name);
+
+    if (!mounted) return;
+
+    setState(() {
+      _savedSortOption = sortOption;
+    });
   }
 
   Future<void> _loadInitialData() async {
@@ -228,7 +270,7 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
   Future<void> _showScanSortSheet() async {
     if (_isBusy || _isInitializing) return;
 
-    var selectedOption = _DuplicateGroupSortOption.mostDuplicates;
+    var selectedOption = _savedSortOption;
 
     final result = await showModalBottomSheet<_DuplicateGroupSortOption>(
       context: context,
@@ -326,6 +368,10 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
     );
 
     if (!mounted || result == null) return;
+
+    await _saveSortOption(result);
+
+    if (!mounted) return;
 
     await _scan(result);
   }
@@ -998,70 +1044,199 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
     });
   }
 
-  void _showPhotoPreview(AssetEntity asset) {
+  Future<void> _showGroupPhotoViewer({required int initialIndex}) async {
     if (widget.isBusy) return;
 
-    showDialog<void>(
-      context: context,
-      barrierColor: Colors.black,
-      builder: (dialogContext) {
-        return GestureDetector(
-          onTap: () => Navigator.of(dialogContext).pop(),
-          child: Scaffold(
-            backgroundColor: Colors.black,
-            body: SafeArea(
-              child: Stack(
-                children: [
-                  Center(
-                    child: FutureBuilder(
-                      future: asset.thumbnailDataWithSize(
-                        const ThumbnailSize(1600, 1600),
-                        quality: 95,
-                      ),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == null) {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          );
-                        }
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (viewerContext) {
+          return _DuplicateGroupViewerScreen(
+            assets: widget.group.assets,
+            initialIndex: initialIndex,
+            initialKeeperAssetIds: _keeperAssetIds,
+            onKeeperSelectionChanged: (updatedKeeperAssetIds) {
+              if (!mounted) return;
 
-                        return GestureDetector(
-                          onTap: () {},
-                          child: InteractiveViewer(
-                            minScale: 1,
-                            maxScale: 5,
-                            child: Image.memory(
-                              snapshot.data!,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        );
-                      },
+              setState(() {
+                _keeperAssetIds = updatedKeeperAssetIds;
+              });
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _handleDeleteEntireGroupRequest() async {
+    if (widget.isBusy) return;
+
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        final photoCount = widget.group.assets.length;
+
+        return Container(
+          padding: const EdgeInsets.all(PomuSpacing.lg),
+          decoration: const BoxDecoration(
+            color: PomuColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: PomuColors.divider,
+                      borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  Positioned(
-                    right: 12,
-                    top: 12,
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop();
-                      },
-                      icon: const Icon(
-                        Icons.close_rounded,
-                        color: Colors.white,
-                        size: 30,
+                ),
+                const SizedBox(height: PomuSpacing.lg),
+
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: PomuColors.primary.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: PomuColors.primary,
+                    size: 25,
+                  ),
+                ),
+
+                const SizedBox(height: PomuSpacing.md),
+
+                Text(
+                  sheetContext.l10n.duplicateDeleteEntireTitle,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: PomuColors.textPrimary,
+                    height: 1.25,
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                Text(
+                  sheetContext.l10n.duplicateDeleteEntireDescription(
+                    photoCount,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: PomuColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+
+                const SizedBox(height: PomuSpacing.md),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(PomuSpacing.md),
+                  decoration: BoxDecoration(
+                    color: PomuColors.primary.withValues(alpha: 0.07),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: PomuColors.primary.withValues(alpha: 0.12),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.info_outline_rounded,
+                        color: PomuColors.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          sheetContext.l10n.duplicateDeleteEntireWarning,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: PomuColors.textSecondary,
+                            height: 1.45,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: PomuSpacing.lg),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(sheetContext).pop(false);
+                        },
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(52),
+                          foregroundColor: PomuColors.textPrimary,
+                          side: const BorderSide(color: PomuColors.divider),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Text(sheetContext.l10n.cancel),
                       ),
                     ),
-                  ),
-                ],
-              ),
+
+                    const SizedBox(width: PomuSpacing.sm),
+
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(sheetContext).pop(true);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(52),
+                          backgroundColor: PomuColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          size: 20,
+                        ),
+                        label: Text(
+                          sheetContext.l10n.duplicateDeleteEntireButton(
+                            photoCount,
+                          ),
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );
       },
     );
+
+    if (!mounted || confirmed != true) return;
+
+    await _handleDeleteRequest(widget.group.assets);
   }
 
   Future<void> _handleDeleteRequest(List<AssetEntity> deleteAssets) async {
@@ -1351,13 +1526,39 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.l10n.duplicateCandidateCount(widget.group.count),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: PomuColors.textPrimary,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.l10n.duplicateCandidateCount(widget.group.count),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: PomuColors.textPrimary,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: widget.isBusy
+                    ? null
+                    : _handleDeleteEntireGroupRequest,
+                tooltip: context.l10n.duplicateDeleteEntireTooltip,
+                style: IconButton.styleFrom(
+                  backgroundColor: PomuColors.primary.withValues(alpha: 0.10),
+                  foregroundColor: PomuColors.primary,
+                  disabledBackgroundColor: PomuColors.primary.withValues(
+                    alpha: 0.05,
+                  ),
+                  disabledForegroundColor: PomuColors.primary.withValues(
+                    alpha: 0.30,
+                  ),
+                  minimumSize: const Size(40, 40),
+                  padding: EdgeInsets.zero,
+                  shape: const CircleBorder(),
+                ),
+                icon: const Icon(Icons.delete_outline_rounded, size: 21),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -1384,7 +1585,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                   onTap: widget.isBusy ? null : () => _toggleKeeper(asset),
                   onLongPress: widget.isBusy
                       ? null
-                      : () => _showPhotoPreview(asset),
+                      : () => _showGroupPhotoViewer(initialIndex: index),
                   child: _SelectableThumbnailTile(
                     asset: asset,
                     isKeeper: isKeeper,
@@ -1414,6 +1615,386 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DuplicateGroupViewerScreen extends StatefulWidget {
+  final List<AssetEntity> assets;
+  final int initialIndex;
+  final Set<String> initialKeeperAssetIds;
+  final ValueChanged<Set<String>> onKeeperSelectionChanged;
+
+  const _DuplicateGroupViewerScreen({
+    required this.assets,
+    required this.initialIndex,
+    required this.initialKeeperAssetIds,
+    required this.onKeeperSelectionChanged,
+  });
+
+  @override
+  State<_DuplicateGroupViewerScreen> createState() =>
+      _DuplicateGroupViewerScreenState();
+}
+
+class _DuplicateGroupViewerScreenState
+    extends State<_DuplicateGroupViewerScreen> {
+  late final PageController _pageController;
+  late Set<String> _keeperAssetIds;
+  late List<TransformationController> _transformationControllers;
+
+  final Map<int, Future<Uint8List?>> _imageFutures = {};
+
+  int _currentIndex = 0;
+  bool _isCurrentPageZoomed = false;
+
+  AssetEntity get _currentAsset => widget.assets[_currentIndex];
+  bool get _isCurrentKeeper => _keeperAssetIds.contains(_currentAsset.id);
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+    _keeperAssetIds = {...widget.initialKeeperAssetIds};
+    _transformationControllers = List.generate(
+      widget.assets.length,
+      (_) => TransformationController(),
+    );
+
+    for (var i = 0; i < _transformationControllers.length; i++) {
+      _transformationControllers[i].addListener(() => _handleTransform(i));
+    }
+
+    _preloadNearbyImages(_currentIndex);
+  }
+
+  Future<Uint8List?> _loadImage(int index) {
+    return _imageFutures.putIfAbsent(
+      index,
+      () => widget.assets[index].thumbnailDataWithSize(
+        const ThumbnailSize(2200, 2200),
+        quality: 95,
+      ),
+    );
+  }
+
+  void _preloadNearbyImages(int index) {
+    _loadImage(index);
+
+    if (index > 0) {
+      _loadImage(index - 1);
+    }
+
+    if (index < widget.assets.length - 1) {
+      _loadImage(index + 1);
+    }
+  }
+
+  void _handleTransform(int index) {
+    if (index != _currentIndex || !mounted) return;
+
+    final scale = _transformationControllers[index].value.getMaxScaleOnAxis();
+    final nextZoomed = scale > 1.01;
+
+    if (_isCurrentPageZoomed != nextZoomed) {
+      setState(() {
+        _isCurrentPageZoomed = nextZoomed;
+      });
+    }
+  }
+
+  void _updateKeeperSelection(bool keep) {
+    final updated = {..._keeperAssetIds};
+
+    if (keep) {
+      updated.add(_currentAsset.id);
+    } else {
+      if (updated.length == 1 && updated.contains(_currentAsset.id)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.duplicateKeeperMinimum)),
+        );
+        return;
+      }
+
+      updated.remove(_currentAsset.id);
+    }
+
+    HapticFeedback.mediumImpact();
+
+    setState(() {
+      _keeperAssetIds = updated;
+    });
+
+    widget.onKeeperSelectionChanged({...updated});
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    for (final controller in _transformationControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+                  const Spacer(),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${_currentIndex + 1} / ${widget.assets.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _isCurrentKeeper
+                              ? PomuColors.primary.withValues(alpha: 0.95)
+                              : Colors.white.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: _isCurrentKeeper
+                                ? PomuColors.primary
+                                : Colors.white24,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _isCurrentKeeper
+                                  ? Icons.check_circle_rounded
+                                  : Icons.delete_outline_rounded,
+                              color: Colors.white,
+                              size: 15,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              _isCurrentKeeper
+                                  ? context.l10n.keep
+                                  : context.l10n.deleteCandidate,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  const SizedBox(width: 48),
+                ],
+              ),
+            ),
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                physics: _isCurrentPageZoomed
+                    ? const NeverScrollableScrollPhysics()
+                    : const PageScrollPhysics(),
+                itemCount: widget.assets.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                    _isCurrentPageZoomed =
+                        _transformationControllers[index].value
+                            .getMaxScaleOnAxis() >
+                        1.01;
+                  });
+
+                  _preloadNearbyImages(index);
+                },
+                itemBuilder: (context, index) {
+                  final asset = widget.assets[index];
+
+                  return RepaintBoundary(
+                    key: PageStorageKey<String>('duplicate-viewer-${asset.id}'),
+                    child: Center(
+                      child: FutureBuilder<Uint8List?>(
+                        future: _loadImage(index),
+                        builder: (context, snapshot) {
+                          final imageBytes = snapshot.data;
+
+                          if (imageBytes == null) {
+                            return const SizedBox(
+                              width: 28,
+                              height: 28,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            );
+                          }
+
+                          return InteractiveViewer(
+                            key: ValueKey<String>('interactive-${asset.id}'),
+                            transformationController:
+                                _transformationControllers[index],
+                            minScale: 1,
+                            maxScale: 5,
+                            panEnabled: true,
+                            clipBehavior: Clip.none,
+                            boundaryMargin: const EdgeInsets.all(48),
+                            child: Image.memory(
+                              imageBytes,
+                              key: ValueKey<String>('image-${asset.id}'),
+                              fit: BoxFit.contain,
+                              width: double.infinity,
+                              height: double.infinity,
+                              gaplessPlayback: true,
+                              filterQuality: FilterQuality.medium,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(widget.assets.length, (index) {
+                  final selected = index == _currentIndex;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 160),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: selected ? 18 : 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      color: selected ? Colors.white : Colors.white38,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: AnimatedScale(
+                      duration: const Duration(milliseconds: 160),
+                      scale: _isCurrentKeeper ? 1 : 1.03,
+                      child: OutlinedButton.icon(
+                        onPressed: _isCurrentKeeper
+                            ? () => _updateKeeperSelection(false)
+                            : null,
+                        icon: Icon(
+                          Icons.delete_outline_rounded,
+                          color: _isCurrentKeeper
+                              ? Colors.white
+                              : PomuColors.primary,
+                        ),
+                        label: Text(
+                          context.l10n.deleteCandidate,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: _isCurrentKeeper
+                                ? Colors.white
+                                : PomuColors.primary,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: _isCurrentKeeper
+                              ? Colors.transparent
+                              : PomuColors.primary.withValues(alpha: 0.14),
+                          disabledBackgroundColor: PomuColors.primary
+                              .withValues(alpha: 0.14),
+                          disabledForegroundColor: PomuColors.primary,
+                          side: BorderSide(
+                            color: _isCurrentKeeper
+                                ? Colors.white38
+                                : PomuColors.primary,
+                            width: _isCurrentKeeper ? 1.2 : 2,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AnimatedScale(
+                      duration: const Duration(milliseconds: 160),
+                      scale: _isCurrentKeeper ? 1.03 : 1,
+                      child: FilledButton.icon(
+                        onPressed: _isCurrentKeeper
+                            ? null
+                            : () => _updateKeeperSelection(true),
+                        icon: Icon(
+                          Icons.check_circle_rounded,
+                          color: _isCurrentKeeper
+                              ? Colors.white
+                              : Colors.white70,
+                        ),
+                        label: Text(
+                          context.l10n.keep,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: _isCurrentKeeper
+                                ? Colors.white
+                                : Colors.white70,
+                          ),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: _isCurrentKeeper
+                              ? PomuColors.primary
+                              : Colors.white.withValues(alpha: 0.10),
+                          disabledBackgroundColor: PomuColors.primary,
+                          disabledForegroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

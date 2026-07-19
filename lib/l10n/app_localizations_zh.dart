@@ -870,4 +870,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get duplicateSortStartButton => '按此顺序开始扫描';
+
+  @override
+  String get duplicateDeleteEntireTooltip => '删除整个分组';
+
+  @override
+  String get duplicateDeleteEntireTitle => '要删除此分组中的所有照片吗？';
+
+  @override
+  String duplicateDeleteEntireDescription(int photoCount) {
+    return '此分组中的全部 $photoCount 张照片将移至 Apple 照片的“最近删除”中。';
+  }
+
+  @override
+  String get duplicateDeleteEntireWarning =>
+      '标记为“保留”的照片也会一起删除。\n此操作无法在 Pomu 中撤销。';
+
+  @override
+  String duplicateDeleteEntireButton(int photoCount) {
+    return '删除全部 $photoCount 张';
+  }
 }
