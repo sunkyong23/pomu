@@ -80,27 +80,60 @@ class ScanService {
     return DateTime.tryParse(value);
   }
 
-  Future<List<AssetEntity>> loadNewPhotos() async {
+  /// 최초 실행이면 전체 사진을, 이후 실행이면 마지막 성공 시점 이후의
+  /// 새 사진만 불러옵니다.
+  ///
+  /// 사진 보관함 로딩 과정도 실제 개수 기준으로 진행률을 전달합니다.
+  Future<List<AssetEntity>> loadNewPhotos({
+    void Function(int loaded, int total)? onProgress,
+  }) async {
     final lastScan = await getLastScan();
-    return _photoLibraryService.loadPhotosAfter(lastScan);
+
+    return _photoLibraryService.loadPhotosAfter(
+      lastScan,
+      onProgress: onProgress,
+    );
   }
 
+  /// 사진 로딩 → AI 분석 → 앨범 생성의 전체 흐름을 실행합니다.
+  ///
+  /// 마지막 스캔 시간은 모든 과정이 정상적으로 완료된 뒤에만 저장합니다.
+  /// 중간에 오류가 발생하면 저장하지 않으므로 다음 실행에서 누락 없이
+  /// 다시 분석할 수 있습니다.
   Future<ScanResult> startOrganizing({ScanProgressCallback? onProgress}) async {
     final scanStartedAt = DateTime.now();
 
-    onProgress?.call(const ScanProgress(stage: ScanStage.loadingPhotos));
+    onProgress?.call(
+      const ScanProgress(
+        stage: ScanStage.loadingPhotos,
+        completed: 0,
+        total: 0,
+      ),
+    );
 
-    final photos = await loadNewPhotos();
+    final photos = await loadNewPhotos(
+      onProgress: (loaded, total) {
+        onProgress?.call(
+          ScanProgress(
+            stage: ScanStage.loadingPhotos,
+            completed: loaded,
+            total: total,
+          ),
+        );
+      },
+    );
+
     final total = photos.length;
 
     _log('🚀 정리 시작: $total장');
 
     if (photos.isEmpty) {
-      if (!PhotoLibraryService.debugMode) {
-        await saveLastScan(scanStartedAt);
-      }
+      await saveLastScan(scanStartedAt);
+      _log('💾 새 사진 없음: 마지막 스캔 시간 저장 완료');
 
-      onProgress?.call(const ScanProgress(stage: ScanStage.complete));
+      onProgress?.call(
+        const ScanProgress(stage: ScanStage.complete, completed: 0, total: 0),
+      );
 
       return const ScanResult(
         photos: <AssetEntity>[],
@@ -134,8 +167,8 @@ class ScanService {
     onProgress?.call(
       ScanProgress(
         stage: ScanStage.creatingAlbums,
-        completed: total,
-        total: total,
+        completed: 0,
+        total: albums.length,
       ),
     );
 
@@ -143,12 +176,10 @@ class ScanService {
       await _albumService.createAlbums(albums);
     }
 
-    if (!PhotoLibraryService.debugMode) {
-      await saveLastScan(scanStartedAt);
-      _log('💾 마지막 스캔 시간 저장 완료');
-    } else {
-      _log('🧪 Debug mode: 마지막 스캔 시간 저장 생략');
-    }
+    // AI 분석과 앨범 생성이 모두 성공한 경우에만 저장합니다.
+    // 디버그 빌드도 실제 사용자 흐름과 동일하게 동작합니다.
+    await saveLastScan(scanStartedAt);
+    _log('💾 마지막 스캔 시간 저장 완료: $scanStartedAt');
 
     final categorizedPhotos = <PhotoCategory, List<AssetEntity>>{
       for (final album in albums)

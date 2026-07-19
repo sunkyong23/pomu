@@ -6,7 +6,6 @@ import '../../core/widgets/logo/pomu_logo.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/photo_category.dart';
 import '../../services/scan_service.dart';
-import '../home/home_screen.dart';
 
 extension _ScanProgressL10n on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
@@ -219,9 +218,7 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
   }
 
   void _goHome() {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override

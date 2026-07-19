@@ -6,7 +6,7 @@ import '../../core/widgets/logo/pomu_logo.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/duplicate_summary_service.dart';
 import '../duplicates/duplicate_candidates_screen.dart';
-import '../scan/scan_progress_screen.dart';
+import '../scan/auto_classification_intro_screen.dart';
 import '../settings/settings_screen.dart';
 import '../travel/create_travel_album_screen.dart';
 import '../screenshots/screenshot_cleanup_screen.dart';
@@ -75,9 +75,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openAutoClassification(BuildContext context) async {
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const ScanProgressScreen()));
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const AutoClassificationIntroScreen()),
+    );
   }
 
   Future<void> _openSettings(BuildContext context) async {
