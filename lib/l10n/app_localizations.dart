@@ -1709,6 +1709,78 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{photoCount}장 모두 삭제'**
   String duplicateDeleteEntireButton(int photoCount);
+
+  /// AI 사진 분석 완료 수와 전체 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{completed} / {total}'**
+  String scanProcessedCount(int completed, int total);
+
+  /// AI 사진 분석 진행률 퍼센트
+  ///
+  /// In ko, this message translates to:
+  /// **'{percent}%'**
+  String scanProgressPercent(int percent);
+
+  /// AI 사진 분석 남은 사진 수
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장 남음'**
+  String scanRemainingPhotos(int count);
+
+  /// No description provided for @scanCalculatingRemainingTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 시간 계산 중'**
+  String get scanCalculatingRemainingTime;
+
+  /// No description provided for @scanAlmostDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'거의 완료'**
+  String get scanAlmostDone;
+
+  /// No description provided for @scanLessThanOneMinuteRemaining.
+  ///
+  /// In ko, this message translates to:
+  /// **'1분 미만 남음'**
+  String get scanLessThanOneMinuteRemaining;
+
+  /// 분 단위 예상 남은 시간
+  ///
+  /// In ko, this message translates to:
+  /// **'약 {minutes}분 남음'**
+  String scanEstimatedMinutesRemaining(int minutes);
+
+  /// 시간 단위 예상 남은 시간
+  ///
+  /// In ko, this message translates to:
+  /// **'약 {hours}시간 남음'**
+  String scanEstimatedHoursRemaining(int hours);
+
+  /// 시간과 분 단위 예상 남은 시간
+  ///
+  /// In ko, this message translates to:
+  /// **'약 {hours}시간 {minutes}분 남음'**
+  String scanEstimatedHoursMinutesRemaining(int hours, int minutes);
+
+  /// No description provided for @scanOrganizeFailedTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 정리하지 못했어요'**
+  String get scanOrganizeFailedTitle;
+
+  /// No description provided for @scanOrganizeFailedDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 정리하는 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.'**
+  String get scanOrganizeFailedDescription;
+
+  /// No description provided for @scanRetry.
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 시도'**
+  String get scanRetry;
 }
 
 class _AppLocalizationsDelegate

@@ -890,4 +890,52 @@ class AppLocalizationsZh extends AppLocalizations {
   String duplicateDeleteEntireButton(int photoCount) {
     return '删除全部 $photoCount 张';
   }
+
+  @override
+  String scanProcessedCount(int completed, int total) {
+    return '$completed / $total';
+  }
+
+  @override
+  String scanProgressPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String scanRemainingPhotos(int count) {
+    return '剩余$count张';
+  }
+
+  @override
+  String get scanCalculatingRemainingTime => '正在计算剩余时间';
+
+  @override
+  String get scanAlmostDone => '即将完成';
+
+  @override
+  String get scanLessThanOneMinuteRemaining => '剩余不到1分钟';
+
+  @override
+  String scanEstimatedMinutesRemaining(int minutes) {
+    return '预计还需$minutes分钟';
+  }
+
+  @override
+  String scanEstimatedHoursRemaining(int hours) {
+    return '预计还需$hours小时';
+  }
+
+  @override
+  String scanEstimatedHoursMinutesRemaining(int hours, int minutes) {
+    return '预计还需$hours小时$minutes分钟';
+  }
+
+  @override
+  String get scanOrganizeFailedTitle => '无法整理照片';
+
+  @override
+  String get scanOrganizeFailedDescription => '整理照片时出现问题，请稍后重试。';
+
+  @override
+  String get scanRetry => '重试';
 }

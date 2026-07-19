@@ -7,6 +7,28 @@ import 'ai/ai_service.dart';
 import 'album_service.dart';
 import 'photo_library_service.dart';
 
+enum ScanStage { loadingPhotos, analyzingPhotos, creatingAlbums, complete }
+
+class ScanProgress {
+  final ScanStage stage;
+  final int completed;
+  final int total;
+
+  const ScanProgress({required this.stage, this.completed = 0, this.total = 0});
+
+  int get remaining {
+    final value = total - completed;
+    return value < 0 ? 0 : value;
+  }
+
+  double? get fraction {
+    if (total <= 0) return null;
+    return (completed / total).clamp(0.0, 1.0);
+  }
+}
+
+typedef ScanProgressCallback = void Function(ScanProgress progress);
+
 class ScanResult {
   final List<AssetEntity> photos;
   final Map<PhotoCategory, List<AssetEntity>> categorizedPhotos;
@@ -63,16 +85,22 @@ class ScanService {
     return _photoLibraryService.loadPhotosAfter(lastScan);
   }
 
-  Future<ScanResult> startOrganizing() async {
+  Future<ScanResult> startOrganizing({ScanProgressCallback? onProgress}) async {
     final scanStartedAt = DateTime.now();
-    final photos = await loadNewPhotos();
 
-    _log('🚀 정리 시작: ${photos.length}장');
+    onProgress?.call(const ScanProgress(stage: ScanStage.loadingPhotos));
+
+    final photos = await loadNewPhotos();
+    final total = photos.length;
+
+    _log('🚀 정리 시작: $total장');
 
     if (photos.isEmpty) {
       if (!PhotoLibraryService.debugMode) {
         await saveLastScan(scanStartedAt);
       }
+
+      onProgress?.call(const ScanProgress(stage: ScanStage.complete));
 
       return const ScanResult(
         photos: <AssetEntity>[],
@@ -80,9 +108,36 @@ class ScanService {
       );
     }
 
-    final albums = await _aiService.analyzePhotosToAlbums(photos);
+    onProgress?.call(
+      ScanProgress(
+        stage: ScanStage.analyzingPhotos,
+        completed: 0,
+        total: total,
+      ),
+    );
+
+    final albums = await _aiService.analyzePhotosToAlbums(
+      photos,
+      onProgress: (completed, analysisTotal) {
+        onProgress?.call(
+          ScanProgress(
+            stage: ScanStage.analyzingPhotos,
+            completed: completed,
+            total: analysisTotal,
+          ),
+        );
+      },
+    );
 
     _log('📦 앨범 생성 준비 완료: ${albums.length}개');
+
+    onProgress?.call(
+      ScanProgress(
+        stage: ScanStage.creatingAlbums,
+        completed: total,
+        total: total,
+      ),
+    );
 
     if (albums.isNotEmpty) {
       await _albumService.createAlbums(albums);
@@ -101,12 +156,18 @@ class ScanService {
           album.category!: List<AssetEntity>.unmodifiable(album.photos),
     };
 
-    return ScanResult(
+    final result = ScanResult(
       photos: List<AssetEntity>.unmodifiable(photos),
       categorizedPhotos: Map<PhotoCategory, List<AssetEntity>>.unmodifiable(
         categorizedPhotos,
       ),
     );
+
+    onProgress?.call(
+      ScanProgress(stage: ScanStage.complete, completed: total, total: total),
+    );
+
+    return result;
   }
 
   void _log(String message) {

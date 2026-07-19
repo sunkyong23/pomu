@@ -536,7 +536,6 @@
   "purchaseErrorFailed": "Couldn’t complete the purchase.",
   "purchaseErrorRestoreFailed": "Couldn’t restore your purchase.",
   "purchaseErrorCompletionFailed": "Something went wrong while completing the purchase.",
-
   "duplicateSortSheetTitle": "Choose the result order",
   "duplicateSortSheetDescription": "Duplicate groups will be shown in the order you select.",
   "duplicateSortMostTitle": "Most duplicates first",
@@ -546,24 +545,89 @@
   "duplicateSortOldestTitle": "Oldest photos first",
   "duplicateSortOldestDescription": "Show groups containing the oldest photos first",
   "duplicateSortStartButton": "Start scan in this order",
-
   "duplicateDeleteEntireTooltip": "Delete entire group",
-"duplicateDeleteEntireTitle": "Delete all photos in this group?",
-"duplicateDeleteEntireDescription": "All {photoCount} photos in this group will be moved to Recently Deleted in Apple Photos.",
-"@duplicateDeleteEntireDescription": {
-  "placeholders": {
-    "photoCount": {
-      "type": "int"
+  "duplicateDeleteEntireTitle": "Delete all photos in this group?",
+  "duplicateDeleteEntireDescription": "All {photoCount} photos in this group will be moved to Recently Deleted in Apple Photos.",
+  "@duplicateDeleteEntireDescription": {
+    "placeholders": {
+      "photoCount": {
+        "type": "int"
+      }
     }
-  }
-},
-"duplicateDeleteEntireWarning": "Photos marked as Keep will also be deleted.\nThis action cannot be undone in Pomu.",
-"duplicateDeleteEntireButton": "Delete all {photoCount}",
-"@duplicateDeleteEntireButton": {
-  "placeholders": {
-    "photoCount": {
-      "type": "int"
+  },
+  "duplicateDeleteEntireWarning": "Photos marked as Keep will also be deleted.\nThis action cannot be undone in Pomu.",
+  "duplicateDeleteEntireButton": "Delete all {photoCount}",
+  "@duplicateDeleteEntireButton": {
+    "placeholders": {
+      "photoCount": {
+        "type": "int"
+      }
     }
-  }
-}
+  },
+  "scanProcessedCount": "{completed} / {total}",
+  "@scanProcessedCount": {
+    "description": "Number of analyzed photos out of the total",
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "scanProgressPercent": "{percent}%",
+  "@scanProgressPercent": {
+    "description": "AI photo analysis progress percentage",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "scanRemainingPhotos": "{count} remaining",
+  "@scanRemainingPhotos": {
+    "description": "Number of photos remaining to analyze",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanCalculatingRemainingTime": "Calculating remaining time",
+  "scanAlmostDone": "Almost done",
+  "scanLessThanOneMinuteRemaining": "Less than 1 min left",
+  "scanEstimatedMinutesRemaining": "About {minutes} min left",
+  "@scanEstimatedMinutesRemaining": {
+    "description": "Estimated remaining time in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scanEstimatedHoursRemaining": "About {hours} hr left",
+  "@scanEstimatedHoursRemaining": {
+    "description": "Estimated remaining time in hours",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scanEstimatedHoursMinutesRemaining": "About {hours} hr {minutes} min left",
+  "@scanEstimatedHoursMinutesRemaining": {
+    "description": "Estimated remaining time in hours and minutes",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scanOrganizeFailedTitle": "Could not organize photos",
+  "scanOrganizeFailedDescription": "Something went wrong while organizing your photos. Please try again shortly.",
+  "scanRetry": "Try again"
 }

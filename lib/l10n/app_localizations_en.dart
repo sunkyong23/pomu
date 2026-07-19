@@ -956,4 +956,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String duplicateDeleteEntireButton(int photoCount) {
     return 'Delete all $photoCount';
   }
+
+  @override
+  String scanProcessedCount(int completed, int total) {
+    return '$completed / $total';
+  }
+
+  @override
+  String scanProgressPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String scanRemainingPhotos(int count) {
+    return '$count remaining';
+  }
+
+  @override
+  String get scanCalculatingRemainingTime => 'Calculating remaining time';
+
+  @override
+  String get scanAlmostDone => 'Almost done';
+
+  @override
+  String get scanLessThanOneMinuteRemaining => 'Less than 1 min left';
+
+  @override
+  String scanEstimatedMinutesRemaining(int minutes) {
+    return 'About $minutes min left';
+  }
+
+  @override
+  String scanEstimatedHoursRemaining(int hours) {
+    return 'About $hours hr left';
+  }
+
+  @override
+  String scanEstimatedHoursMinutesRemaining(int hours, int minutes) {
+    return 'About $hours hr $minutes min left';
+  }
+
+  @override
+  String get scanOrganizeFailedTitle => 'Could not organize photos';
+
+  @override
+  String get scanOrganizeFailedDescription =>
+      'Something went wrong while organizing your photos. Please try again shortly.';
+
+  @override
+  String get scanRetry => 'Try again';
 }

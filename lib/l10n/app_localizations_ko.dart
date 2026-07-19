@@ -902,4 +902,53 @@ class AppLocalizationsKo extends AppLocalizations {
   String duplicateDeleteEntireButton(int photoCount) {
     return '$photoCount장 모두 삭제';
   }
+
+  @override
+  String scanProcessedCount(int completed, int total) {
+    return '$completed / $total';
+  }
+
+  @override
+  String scanProgressPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String scanRemainingPhotos(int count) {
+    return '$count장 남음';
+  }
+
+  @override
+  String get scanCalculatingRemainingTime => '남은 시간 계산 중';
+
+  @override
+  String get scanAlmostDone => '거의 완료';
+
+  @override
+  String get scanLessThanOneMinuteRemaining => '1분 미만 남음';
+
+  @override
+  String scanEstimatedMinutesRemaining(int minutes) {
+    return '약 $minutes분 남음';
+  }
+
+  @override
+  String scanEstimatedHoursRemaining(int hours) {
+    return '약 $hours시간 남음';
+  }
+
+  @override
+  String scanEstimatedHoursMinutesRemaining(int hours, int minutes) {
+    return '약 $hours시간 $minutes분 남음';
+  }
+
+  @override
+  String get scanOrganizeFailedTitle => '사진을 정리하지 못했어요';
+
+  @override
+  String get scanOrganizeFailedDescription =>
+      '사진을 정리하는 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String get scanRetry => '다시 시도';
 }

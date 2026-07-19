@@ -536,8 +536,7 @@
   "purchaseErrorFailed": "无法完成购买。",
   "purchaseErrorRestoreFailed": "无法恢复购买。",
   "purchaseErrorCompletionFailed": "完成购买时出现问题。",
-
-   "duplicateSortSheetTitle": "请选择结果排序方式",
+  "duplicateSortSheetTitle": "请选择结果排序方式",
   "duplicateSortSheetDescription": "重复照片组将按照您选择的顺序显示。",
   "duplicateSortMostTitle": "重复照片最多优先",
   "duplicateSortMostDescription": "优先显示照片数量较多的组",
@@ -546,24 +545,89 @@
   "duplicateSortOldestTitle": "最旧照片优先",
   "duplicateSortOldestDescription": "优先显示包含较早拍摄照片的组",
   "duplicateSortStartButton": "按此顺序开始扫描",
-
   "duplicateDeleteEntireTooltip": "删除整个分组",
-"duplicateDeleteEntireTitle": "要删除此分组中的所有照片吗？",
-"duplicateDeleteEntireDescription": "此分组中的全部 {photoCount} 张照片将移至 Apple 照片的“最近删除”中。",
-"@duplicateDeleteEntireDescription": {
-  "placeholders": {
-    "photoCount": {
-      "type": "int"
+  "duplicateDeleteEntireTitle": "要删除此分组中的所有照片吗？",
+  "duplicateDeleteEntireDescription": "此分组中的全部 {photoCount} 张照片将移至 Apple 照片的“最近删除”中。",
+  "@duplicateDeleteEntireDescription": {
+    "placeholders": {
+      "photoCount": {
+        "type": "int"
+      }
     }
-  }
-},
-"duplicateDeleteEntireWarning": "标记为“保留”的照片也会一起删除。\n此操作无法在 Pomu 中撤销。",
-"duplicateDeleteEntireButton": "删除全部 {photoCount} 张",
-"@duplicateDeleteEntireButton": {
-  "placeholders": {
-    "photoCount": {
-      "type": "int"
+  },
+  "duplicateDeleteEntireWarning": "标记为“保留”的照片也会一起删除。\n此操作无法在 Pomu 中撤销。",
+  "duplicateDeleteEntireButton": "删除全部 {photoCount} 张",
+  "@duplicateDeleteEntireButton": {
+    "placeholders": {
+      "photoCount": {
+        "type": "int"
+      }
     }
-  }
-}
+  },
+  "scanProcessedCount": "{completed} / {total}",
+  "@scanProcessedCount": {
+    "description": "AI照片分析完成数量和总数量",
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "scanProgressPercent": "{percent}%",
+  "@scanProgressPercent": {
+    "description": "AI照片分析进度百分比",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "scanRemainingPhotos": "剩余{count}张",
+  "@scanRemainingPhotos": {
+    "description": "尚未完成AI分析的照片数量",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanCalculatingRemainingTime": "正在计算剩余时间",
+  "scanAlmostDone": "即将完成",
+  "scanLessThanOneMinuteRemaining": "剩余不到1分钟",
+  "scanEstimatedMinutesRemaining": "预计还需{minutes}分钟",
+  "@scanEstimatedMinutesRemaining": {
+    "description": "以分钟显示预计剩余时间",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scanEstimatedHoursRemaining": "预计还需{hours}小时",
+  "@scanEstimatedHoursRemaining": {
+    "description": "以小时显示预计剩余时间",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scanEstimatedHoursMinutesRemaining": "预计还需{hours}小时{minutes}分钟",
+  "@scanEstimatedHoursMinutesRemaining": {
+    "description": "以小时和分钟显示预计剩余时间",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scanOrganizeFailedTitle": "无法整理照片",
+  "scanOrganizeFailedDescription": "整理照片时出现问题，请稍后重试。",
+  "scanRetry": "重试"
 }

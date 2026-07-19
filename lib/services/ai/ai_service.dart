@@ -7,15 +7,21 @@ import '../album_settings_service.dart';
 import 'category_mapper.dart';
 import 'vision_service.dart';
 
+typedef AIAnalysisProgressCallback = void Function(int completed, int total);
+
 class AIService {
   final VisionService _visionService = VisionService();
   final CategoryMapper _categoryMapper = CategoryMapper();
   final AlbumSettingsService _albumSettingsService = AlbumSettingsService();
 
   Future<List<AlbumDefinition>> analyzePhotosToAlbums(
-    List<AssetEntity> photos,
-  ) async {
-    final categorizedPhotos = await analyzePhotos(photos);
+    List<AssetEntity> photos, {
+    AIAnalysisProgressCallback? onProgress,
+  }) async {
+    final categorizedPhotos = await analyzePhotos(
+      photos,
+      onProgress: onProgress,
+    );
 
     final albums = <AlbumDefinition>[];
 
@@ -42,17 +48,22 @@ class AIService {
   }
 
   Future<Map<PhotoCategory, List<AssetEntity>>> analyzePhotos(
-    List<AssetEntity> photos,
-  ) async {
+    List<AssetEntity> photos, {
+    AIAnalysisProgressCallback? onProgress,
+  }) async {
     final Map<PhotoCategory, List<AssetEntity>> result = {
       for (final category in PhotoCategory.values) category: [],
     };
 
-    for (int i = 0; i < photos.length; i++) {
+    final total = photos.length;
+
+    onProgress?.call(0, total);
+
+    for (var i = 0; i < total; i++) {
       final photo = photos[i];
 
       try {
-        print('🔍 분석 시작 ${i + 1}/${photos.length}: ${photo.id}');
+        print('🔍 분석 시작 ${i + 1}/$total: ${photo.id}');
 
         final labels = await _visionService.analyzePhoto(photo);
 
@@ -62,7 +73,7 @@ class AIService {
         final tags = _categoryMapper.mapTags(labels);
 
         print(
-          '📁 최종 카테고리 ${i + 1}/${photos.length}: '
+          '📁 최종 카테고리 ${i + 1}/$total: '
           '${categories.map((category) => category.name).join(', ')}',
         );
 
@@ -71,15 +82,22 @@ class AIService {
         for (final category in categories) {
           result[category]!.add(photo);
         }
-      } catch (e) {
-        print('⚠️ Vision failed ${i + 1}/${photos.length} for ${photo.id}: $e');
+      } catch (error) {
+        print(
+          '⚠️ Vision failed ${i + 1}/$total '
+          'for ${photo.id}: $error',
+        );
+
         result[PhotoCategory.other]!.add(photo);
+      } finally {
+        onProgress?.call(i + 1, total);
       }
     }
 
     result.removeWhere((key, value) => value.isEmpty);
 
     print('✅ AI 분석 완료');
+
     for (final entry in result.entries) {
       print(' - ${entry.key.name}: ${entry.value.length}장');
     }

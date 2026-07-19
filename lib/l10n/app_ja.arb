@@ -536,7 +536,6 @@
   "purchaseErrorFailed": "購入を完了できませんでした。",
   "purchaseErrorRestoreFailed": "購入を復元できませんでした。",
   "purchaseErrorCompletionFailed": "購入完了処理中に問題が発生しました。",
-
   "duplicateSortSheetTitle": "結果の表示順を選択してください",
   "duplicateSortSheetDescription": "選択した順番で重複グループを整理して表示します。",
   "duplicateSortMostTitle": "重複写真が多い順",
@@ -546,24 +545,89 @@
   "duplicateSortOldestTitle": "古い写真から",
   "duplicateSortOldestDescription": "以前に撮影した写真を含むグループから表示",
   "duplicateSortStartButton": "この順番でスキャンを開始",
-
   "duplicateDeleteEntireTooltip": "このグループをすべて削除",
-"duplicateDeleteEntireTitle": "このグループの写真をすべて削除しますか？",
-"duplicateDeleteEntireDescription": "このグループの写真{photoCount}枚がすべて、Apple写真の「最近削除した項目」に移動します。",
-"@duplicateDeleteEntireDescription": {
-  "placeholders": {
-    "photoCount": {
-      "type": "int"
+  "duplicateDeleteEntireTitle": "このグループの写真をすべて削除しますか？",
+  "duplicateDeleteEntireDescription": "このグループの写真{photoCount}枚がすべて、Apple写真の「最近削除した項目」に移動します。",
+  "@duplicateDeleteEntireDescription": {
+    "placeholders": {
+      "photoCount": {
+        "type": "int"
+      }
     }
-  }
-},
-"duplicateDeleteEntireWarning": "「残す」に選択した写真も一緒に削除されます。\nこの操作はPomuでは取り消せません。",
-"duplicateDeleteEntireButton": "{photoCount}枚をすべて削除",
-"@duplicateDeleteEntireButton": {
-  "placeholders": {
-    "photoCount": {
-      "type": "int"
+  },
+  "duplicateDeleteEntireWarning": "「残す」に選択した写真も一緒に削除されます。\nこの操作はPomuでは取り消せません。",
+  "duplicateDeleteEntireButton": "{photoCount}枚をすべて削除",
+  "@duplicateDeleteEntireButton": {
+    "placeholders": {
+      "photoCount": {
+        "type": "int"
+      }
     }
-  }
-}
+  },
+  "scanProcessedCount": "{completed} / {total}",
+  "@scanProcessedCount": {
+    "description": "AI写真分析の完了数と合計数",
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "scanProgressPercent": "{percent}%",
+  "@scanProgressPercent": {
+    "description": "AI写真分析の進行率",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "scanRemainingPhotos": "残り{count}枚",
+  "@scanRemainingPhotos": {
+    "description": "AI分析が残っている写真の数",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scanCalculatingRemainingTime": "残り時間を計算中",
+  "scanAlmostDone": "まもなく完了",
+  "scanLessThanOneMinuteRemaining": "残り1分未満",
+  "scanEstimatedMinutesRemaining": "残り約{minutes}分",
+  "@scanEstimatedMinutesRemaining": {
+    "description": "分単位の推定残り時間",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scanEstimatedHoursRemaining": "残り約{hours}時間",
+  "@scanEstimatedHoursRemaining": {
+    "description": "時間単位の推定残り時間",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scanEstimatedHoursMinutesRemaining": "残り約{hours}時間{minutes}分",
+  "@scanEstimatedHoursMinutesRemaining": {
+    "description": "時間と分単位の推定残り時間",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scanOrganizeFailedTitle": "写真を整理できませんでした",
+  "scanOrganizeFailedDescription": "写真の整理中に問題が発生しました。しばらくしてからもう一度お試しください。",
+  "scanRetry": "もう一度試す"
 }

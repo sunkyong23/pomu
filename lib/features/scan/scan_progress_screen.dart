@@ -42,9 +42,15 @@ class ScanProgressScreen extends StatefulWidget {
 
 class _ScanProgressScreenState extends State<ScanProgressScreen> {
   final ScanService _scanService = ScanService();
+  final Stopwatch _analysisStopwatch = Stopwatch();
 
-  int _step = 0;
+  ScanStage _stage = ScanStage.loadingPhotos;
   ScanResult? _result;
+
+  int _completed = 0;
+  int _total = 0;
+
+  Object? _error;
 
   @override
   void initState() {
@@ -52,24 +58,164 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
     _startProgress();
   }
 
+  @override
+  void dispose() {
+    _analysisStopwatch.stop();
+    super.dispose();
+  }
+
   Future<void> _startProgress() async {
-    setState(() => _step = 0);
-    await Future.delayed(const Duration(milliseconds: 700));
+    _analysisStopwatch
+      ..stop()
+      ..reset();
 
-    if (!mounted) return;
-    setState(() => _step = 1);
-    await Future.delayed(const Duration(milliseconds: 700));
-
-    if (!mounted) return;
-    setState(() => _step = 2);
-
-    final result = await _scanService.startOrganizing();
-
-    if (!mounted) return;
     setState(() {
-      _result = result;
-      _step = 3;
+      _stage = ScanStage.loadingPhotos;
+      _result = null;
+      _completed = 0;
+      _total = 0;
+      _error = null;
     });
+
+    try {
+      final result = await _scanService.startOrganizing(
+        onProgress: _handleProgress,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _result = result;
+        _stage = ScanStage.complete;
+        _completed = result.totalCount;
+        _total = result.totalCount;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('❌ 사진 자동 분류 실패: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
+      _analysisStopwatch.stop();
+
+      setState(() {
+        _error = error;
+      });
+    }
+  }
+
+  void _handleProgress(ScanProgress progress) {
+    if (!mounted) return;
+
+    if (progress.stage == ScanStage.analyzingPhotos &&
+        !_analysisStopwatch.isRunning) {
+      _analysisStopwatch.start();
+    }
+
+    if (progress.stage != ScanStage.analyzingPhotos &&
+        _analysisStopwatch.isRunning) {
+      _analysisStopwatch.stop();
+    }
+
+    setState(() {
+      _stage = progress.stage;
+      _completed = progress.completed;
+      _total = progress.total;
+    });
+  }
+
+  Duration? get _estimatedRemaining {
+    if (_stage != ScanStage.analyzingPhotos ||
+        _completed < 3 ||
+        _total <= 0 ||
+        !_analysisStopwatch.isRunning) {
+      return null;
+    }
+
+    final remaining = (_total - _completed).clamp(0, _total);
+
+    if (remaining == 0) {
+      return Duration.zero;
+    }
+
+    final elapsedMilliseconds = _analysisStopwatch.elapsedMilliseconds;
+
+    if (elapsedMilliseconds <= 0) {
+      return null;
+    }
+
+    final averageMilliseconds = elapsedMilliseconds / _completed;
+
+    final estimatedMilliseconds = (averageMilliseconds * remaining).round();
+
+    return Duration(milliseconds: estimatedMilliseconds);
+  }
+
+  int get _remainingCount {
+    final value = _total - _completed;
+    return value < 0 ? 0 : value;
+  }
+
+  double? get _progressFraction {
+    if (_total <= 0) return null;
+    return (_completed / _total).clamp(0.0, 1.0);
+  }
+
+  int get _currentStep {
+    switch (_stage) {
+      case ScanStage.loadingPhotos:
+        return 0;
+      case ScanStage.analyzingPhotos:
+        return 1;
+      case ScanStage.creatingAlbums:
+        return 2;
+      case ScanStage.complete:
+        return 3;
+    }
+  }
+
+  String _stageMessage(BuildContext context) {
+    switch (_stage) {
+      case ScanStage.loadingPhotos:
+        return context.l10n.scanCheckingNewPhotos;
+      case ScanStage.analyzingPhotos:
+        return context.l10n.scanAnalyzingPhotos;
+      case ScanStage.creatingAlbums:
+        return context.l10n.scanPreparingAlbums;
+      case ScanStage.complete:
+        return context.l10n.scanCompleteTitle;
+    }
+  }
+
+  String _etaText(BuildContext context) {
+    final duration = _estimatedRemaining;
+
+    if (duration == null) {
+      return context.l10n.scanCalculatingRemainingTime;
+    }
+
+    if (duration <= Duration.zero) {
+      return context.l10n.scanAlmostDone;
+    }
+
+    final totalMinutes = duration.inMinutes;
+
+    if (totalMinutes < 1) {
+      return context.l10n.scanLessThanOneMinuteRemaining;
+    }
+
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return context.l10n.scanEstimatedHoursMinutesRemaining(hours, minutes);
+    }
+
+    if (hours > 0) {
+      return context.l10n.scanEstimatedHoursRemaining(hours);
+    }
+
+    return context.l10n.scanEstimatedMinutesRemaining(minutes);
   }
 
   void _goHome() {
@@ -80,13 +226,7 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isComplete = _step == 3 && _result != null;
-    final messages = [
-      context.l10n.scanCheckingNewPhotos,
-      context.l10n.scanAnalyzingPhotos,
-      context.l10n.scanPreparingAlbums,
-      context.l10n.scanCompleteTitle,
-    ];
+    final isComplete = _stage == ScanStage.complete && _result != null;
 
     return Scaffold(
       backgroundColor: PomuColors.background,
@@ -105,6 +245,8 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
               Text(
                 isComplete
                     ? context.l10n.scanCompleteTitle
+                    : _error != null
+                    ? context.l10n.scanOrganizeFailedTitle
                     : context.l10n.scanWorkingTitle,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
@@ -115,12 +257,12 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
                 ),
               ),
               const SizedBox(height: PomuSpacing.md),
-              if (!isComplete)
+              if (!isComplete && _error == null)
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   child: Text(
-                    messages[_step],
-                    key: ValueKey(messages[_step]),
+                    _stageMessage(context),
+                    key: ValueKey(_stage),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 16,
@@ -129,10 +271,31 @@ class _ScanProgressScreenState extends State<ScanProgressScreen> {
                   ),
                 ),
               const SizedBox(height: PomuSpacing.xl),
-              if (isComplete)
+              if (_error != null)
+                _ErrorView(
+                  message: context.l10n.scanOrganizeFailedDescription,
+                  retryText: context.l10n.scanRetry,
+                  onRetry: _startProgress,
+                )
+              else if (isComplete)
                 _CompleteSummary(result: _result!)
               else
-                _StepIndicator(currentStep: _step),
+                Column(
+                  children: [
+                    _StepIndicator(currentStep: _currentStep),
+                    const SizedBox(height: PomuSpacing.md),
+                    _LiveProgressCard(
+                      stage: _stage,
+                      completed: _completed,
+                      total: _total,
+                      progress: _progressFraction,
+                      remainingText: context.l10n.scanRemainingPhotos(
+                        _remainingCount,
+                      ),
+                      etaText: _etaText(context),
+                    ),
+                  ],
+                ),
               const Spacer(),
               if (isComplete)
                 SizedBox(
@@ -211,6 +374,171 @@ class _StepIndicator extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+class _LiveProgressCard extends StatelessWidget {
+  final ScanStage stage;
+  final int completed;
+  final int total;
+  final double? progress;
+  final String remainingText;
+  final String etaText;
+
+  const _LiveProgressCard({
+    required this.stage,
+    required this.completed,
+    required this.total,
+    required this.progress,
+    required this.remainingText,
+    required this.etaText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isAnalyzing = stage == ScanStage.analyzingPhotos;
+    final hasTotal = total > 0;
+    final percent = ((progress ?? 0) * 100).round().clamp(0, 100);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(PomuSpacing.lg),
+      decoration: BoxDecoration(
+        color: PomuColors.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: PomuColors.divider),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.035),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  isAnalyzing && hasTotal
+                      ? context.l10n.scanProcessedCount(completed, total)
+                      : _stageLabel(context, stage),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: PomuColors.textPrimary,
+                  ),
+                ),
+              ),
+              if (isAnalyzing && hasTotal)
+                Text(
+                  context.l10n.scanProgressPercent(percent),
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: PomuColors.primary,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: PomuSpacing.md),
+          LinearProgressIndicator(
+            value: isAnalyzing ? progress : null,
+            minHeight: 9,
+            borderRadius: BorderRadius.circular(999),
+            color: PomuColors.primary,
+            backgroundColor: PomuColors.primaryLight,
+          ),
+          if (isAnalyzing && hasTotal) ...[
+            const SizedBox(height: PomuSpacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    remainingText,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: PomuColors.textSecondary,
+                    ),
+                  ),
+                ),
+                Text(
+                  etaText,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: PomuColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _stageLabel(BuildContext context, ScanStage stage) {
+    switch (stage) {
+      case ScanStage.loadingPhotos:
+        return context.l10n.scanCheckingNewPhotos;
+      case ScanStage.analyzingPhotos:
+        return context.l10n.scanAnalyzingPhotos;
+      case ScanStage.creatingAlbums:
+        return context.l10n.scanPreparingAlbums;
+      case ScanStage.complete:
+        return context.l10n.scanCompleteTitle;
+    }
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final String retryText;
+  final VoidCallback onRetry;
+
+  const _ErrorView({
+    required this.message,
+    required this.retryText,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(PomuSpacing.lg),
+      decoration: BoxDecoration(
+        color: PomuColors.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: PomuColors.divider),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.error_outline_rounded,
+            color: PomuColors.primary,
+            size: 42,
+          ),
+          const SizedBox(height: PomuSpacing.md),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              height: 1.45,
+              color: PomuColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: PomuSpacing.lg),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(onPressed: onRetry, child: Text(retryText)),
+          ),
+        ],
+      ),
     );
   }
 }
