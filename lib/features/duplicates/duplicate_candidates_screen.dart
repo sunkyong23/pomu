@@ -40,6 +40,7 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
       DuplicateResultCacheService();
 
   static const int _cachePageSize = 100;
+  static const Duration _progressUiThrottle = Duration(milliseconds: 120);
 
   static const String _sortOptionPreferenceKey = 'duplicate_group_sort_option';
 
@@ -52,6 +53,8 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
   int _progressTotal = 0;
   int _cachedGroupOffset = 0;
   int _totalCachedGroupCount = 0;
+
+  DateTime _lastProgressUiUpdate = DateTime.fromMillisecondsSinceEpoch(0);
 
   List<DuplicatePhotoGroup> _groups = [];
   DuplicateSummary _savedSummary = const DuplicateSummary.empty();
@@ -69,9 +72,17 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
       return DateTime.fromMillisecondsSinceEpoch(0);
     }
 
-    return group.assets
-        .map((asset) => asset.createDateTime)
-        .reduce((a, b) => a.isAfter(b) ? a : b);
+    var newest = group.assets.first.createDateTime;
+
+    for (var index = 1; index < group.assets.length; index++) {
+      final date = group.assets[index].createDateTime;
+
+      if (date.isAfter(newest)) {
+        newest = date;
+      }
+    }
+
+    return newest;
   }
 
   DateTime _getOldestGroupDate(DuplicatePhotoGroup group) {
@@ -79,25 +90,48 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
       return DateTime.fromMillisecondsSinceEpoch(0);
     }
 
-    return group.assets
-        .map((asset) => asset.createDateTime)
-        .reduce((a, b) => a.isBefore(b) ? a : b);
+    var oldest = group.assets.first.createDateTime;
+
+    for (var index = 1; index < group.assets.length; index++) {
+      final date = group.assets[index].createDateTime;
+
+      if (date.isBefore(oldest)) {
+        oldest = date;
+      }
+    }
+
+    return oldest;
   }
 
   void _sortGroups(
     List<DuplicatePhotoGroup> groups,
     _DuplicateGroupSortOption sortOption,
   ) {
+    if (groups.length < 2) return;
+
+    // sort comparator 안에서 같은 그룹의 날짜를 반복 계산하지 않도록
+    // 정렬 직전에 한 번만 캐시해 둬요.
+    final newestDates = <String, DateTime>{};
+    final oldestDates = <String, DateTime>{};
+
+    for (final group in groups) {
+      newestDates[group.id] = _getNewestGroupDate(group);
+
+      if (sortOption == _DuplicateGroupSortOption.oldest) {
+        oldestDates[group.id] = _getOldestGroupDate(group);
+      }
+    }
+
     switch (sortOption) {
       case _DuplicateGroupSortOption.newest:
         groups.sort((a, b) {
-          return _getNewestGroupDate(b).compareTo(_getNewestGroupDate(a));
+          return newestDates[b.id]!.compareTo(newestDates[a.id]!);
         });
         break;
 
       case _DuplicateGroupSortOption.oldest:
         groups.sort((a, b) {
-          return _getOldestGroupDate(a).compareTo(_getOldestGroupDate(b));
+          return oldestDates[a.id]!.compareTo(oldestDates[b.id]!);
         });
         break;
 
@@ -109,8 +143,10 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
             return countCompare;
           }
 
-          // 중복 개수가 같으면 최신 그룹을 먼저 표시해요.
-          return _getNewestGroupDate(b).compareTo(_getNewestGroupDate(a));
+          final newestA = newestDates[a.id] ?? _getNewestGroupDate(a);
+          final newestB = newestDates[b.id] ?? _getNewestGroupDate(b);
+
+          return newestB.compareTo(newestA);
         });
         break;
     }
@@ -164,15 +200,20 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
 
   Future<void> _loadInitialData() async {
     try {
-      final resolvedGroups = await _historyService.loadResolvedGroups();
-      final summary = await _summaryService.loadSummary();
-      final totalCachedGroupCount = await _resultCacheService
+      // 서로 의존하지 않는 초기 데이터는 동시에 읽어서 첫 진입 시간을 줄여요.
+      final resolvedGroupsFuture = _historyService.loadResolvedGroups();
+      final summaryFuture = _summaryService.loadSummary();
+      final totalCachedGroupCountFuture = _resultCacheService
           .getSavedGroupCount();
-
-      final cachedGroups = await _resultCacheService.loadGroups(
+      final cachedGroupsFuture = _resultCacheService.loadGroups(
         offset: 0,
         limit: _cachePageSize,
       );
+
+      final resolvedGroups = await resolvedGroupsFuture;
+      final summary = await summaryFuture;
+      final totalCachedGroupCount = await totalCachedGroupCountFuture;
+      final cachedGroups = await cachedGroupsFuture;
 
       final filteredGroups = cachedGroups.where((group) {
         final key = _buildGroupKeyFromIds(
@@ -376,6 +417,25 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
     await _scan(result);
   }
 
+  void _updateScanProgress(int current, int total) {
+    if (!mounted) return;
+
+    final now = DateTime.now();
+    final isFinished = total > 0 && current >= total;
+    final shouldUpdate =
+        isFinished ||
+        now.difference(_lastProgressUiUpdate) >= _progressUiThrottle;
+
+    if (!shouldUpdate) return;
+
+    _lastProgressUiUpdate = now;
+
+    setState(() {
+      _progressCurrent = current;
+      _progressTotal = total;
+    });
+  }
+
   Future<void> _scan(_DuplicateGroupSortOption sortOption) async {
     if (_isBusy || _isInitializing) return;
 
@@ -384,18 +444,12 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
       _isSavingResult = false;
       _progressCurrent = 0;
       _progressTotal = 0;
+      _lastProgressUiUpdate = DateTime.fromMillisecondsSinceEpoch(0);
     });
 
     try {
       final groups = await _service.findDuplicateCandidates(
-        onProgress: (current, total) {
-          if (!mounted) return;
-
-          setState(() {
-            _progressCurrent = current;
-            _progressTotal = total;
-          });
-        },
+        onProgress: _updateScanProgress,
       );
 
       if (!mounted) return;
@@ -421,8 +475,10 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
         _isSavingResult = true;
       });
 
-      await _resultCacheService.saveGroups(filteredGroups);
-      await _saveCurrentSummary(filteredGroups);
+      await Future.wait<void>([
+        _resultCacheService.saveGroups(filteredGroups),
+        _saveCurrentSummary(filteredGroups),
+      ]);
 
       final updatedSummary = await _summaryService.loadSummary();
 
@@ -569,12 +625,6 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    final l10n = AppLocalizations.of(context);
-
-    debugPrint('🌍 Flutter locale: $locale');
-    debugPrint('🌍 Localized title: ${l10n.duplicateCleanupTitle}');
-    debugPrint('🌍 Flutter locale: ${Localizations.localeOf(context)}');
     return PopScope(
       canPop: !_isBusy,
       onPopInvokedWithResult: (didPop, result) {
@@ -589,120 +639,151 @@ class _DuplicateCandidatesScreenState extends State<DuplicateCandidatesScreen> {
           elevation: 0,
           title: Text(
             context.l10n.duplicateCleanupTitle,
-            style: TextStyle(
+            style: const TextStyle(
               color: PomuColors.textPrimary,
               fontWeight: FontWeight.w800,
             ),
           ),
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(PomuSpacing.lg),
-          children: [
-            Text(
-              context.l10n.duplicateIntroTitle,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: PomuColors.textPrimary,
-                height: 1.15,
-                letterSpacing: -0.6,
+        body: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                PomuSpacing.lg,
+                PomuSpacing.lg,
+                PomuSpacing.lg,
+                0,
               ),
-            ),
-            const SizedBox(height: PomuSpacing.md),
-            Text(
-              context.l10n.duplicateIntroDescription,
-              style: TextStyle(
-                fontSize: 15,
-                color: PomuColors.textSecondary,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: PomuSpacing.xl),
-
-            PomuPrimaryButton(
-              text: _isSavingResult
-                  ? context.l10n.duplicateSavingShort
-                  : _isLoading
-                  ? context.l10n.duplicateAnalyzingShort
-                  : _savedSummary.hasScanned
-                  ? context.l10n.duplicateScanAgain
-                  : context.l10n.duplicateFindCandidates,
-              icon: _isSavingResult
-                  ? Icons.save_rounded
-                  : Icons.cleaning_services_rounded,
-              onPressed: _isBusy || _isInitializing ? null : _showScanSortSheet,
-            ),
-
-            const SizedBox(height: PomuSpacing.xl),
-
-            if (_isInitializing) ...[
-              const _RestoreLoadingCard(),
-              const SizedBox(height: PomuSpacing.lg),
-            ],
-
-            if (_isLoading || _isSavingResult) ...[
-              _ProgressCard(
-                current: _progressCurrent,
-                total: _progressTotal,
-                isSavingResult: _isSavingResult,
-              ),
-              const SizedBox(height: PomuSpacing.lg),
-            ],
-
-            if (_groups.isNotEmpty) ...[
-              _SummaryCard(
-                visibleGroupCount: _groups.length,
-                totalGroupCount: _savedSummary.groupCount,
-                deleteCandidateCount: _savedSummary.deleteCandidateCount,
-              ),
-
-              const SizedBox(height: PomuSpacing.lg),
-
-              ..._groups.map(
-                (group) => _DuplicateGroupCard(
-                  key: ValueKey(group.id),
-                  group: group,
-                  isBusy: _isSavingResult,
-                  onDeleted: (remainingAssetIds, deletedCount, deletedBytes) {
-                    return _resolveGroup(
-                      group,
-                      remainingAssetIds,
-                      deletedCount,
-                      deletedBytes,
-                    );
-                  },
-                ),
-              ),
-
-              if (_hasMoreCachedGroups) ...[
-                const SizedBox(height: PomuSpacing.sm),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _isLoadingMore ? null : _loadMoreCachedGroups,
-                    icon: _isLoadingMore
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.2,
-                              color: PomuColors.primary,
-                            ),
-                          )
-                        : const Icon(Icons.expand_more_rounded),
-                    label: Text(
-                      _isLoadingMore
-                          ? context.l10n.loading
-                          : context.l10n.duplicateLoadMore,
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  Text(
+                    context.l10n.duplicateIntroTitle,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: PomuColors.textPrimary,
+                      height: 1.15,
+                      letterSpacing: -0.6,
                     ),
                   ),
-                ),
-                const SizedBox(height: PomuSpacing.md),
-              ],
-            ],
+                  const SizedBox(height: PomuSpacing.md),
+                  Text(
+                    context.l10n.duplicateIntroDescription,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: PomuColors.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: PomuSpacing.xl),
+                  PomuPrimaryButton(
+                    text: _isSavingResult
+                        ? context.l10n.duplicateSavingShort
+                        : _isLoading
+                        ? context.l10n.duplicateAnalyzingShort
+                        : _savedSummary.hasScanned
+                        ? context.l10n.duplicateScanAgain
+                        : context.l10n.duplicateFindCandidates,
+                    icon: _isSavingResult
+                        ? Icons.save_rounded
+                        : Icons.cleaning_services_rounded,
+                    onPressed: _isBusy || _isInitializing
+                        ? null
+                        : _showScanSortSheet,
+                  ),
+                  const SizedBox(height: PomuSpacing.xl),
+                  if (_isInitializing) ...[
+                    const _RestoreLoadingCard(),
+                    const SizedBox(height: PomuSpacing.lg),
+                  ],
+                  if (_isLoading || _isSavingResult) ...[
+                    _ProgressCard(
+                      current: _progressCurrent,
+                      total: _progressTotal,
+                      isSavingResult: _isSavingResult,
+                    ),
+                    const SizedBox(height: PomuSpacing.lg),
+                  ],
+                  if (_groups.isNotEmpty) ...[
+                    _SummaryCard(
+                      visibleGroupCount: _groups.length,
+                      totalGroupCount: _savedSummary.groupCount,
+                      deleteCandidateCount: _savedSummary.deleteCandidateCount,
+                    ),
+                    const SizedBox(height: PomuSpacing.lg),
+                  ],
+                ]),
+              ),
+            ),
 
-            if (!_isBusy && !_isInitializing && _groups.isEmpty)
-              _EmptyCard(hasScanned: _savedSummary.hasScanned),
+            // 기존 ListView + ..._groups.map 은 100개 카드까지 한 번에 build했어요.
+            // SliverList의 builder delegate로 현재 화면 근처 카드만 만들어요.
+            if (_groups.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: PomuSpacing.lg),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final group = _groups[index];
+
+                    return _DuplicateGroupCard(
+                      key: ValueKey(group.id),
+                      group: group,
+                      isBusy: _isSavingResult,
+                      onDeleted:
+                          (remainingAssetIds, deletedCount, deletedBytes) {
+                            return _resolveGroup(
+                              group,
+                              remainingAssetIds,
+                              deletedCount,
+                              deletedBytes,
+                            );
+                          },
+                    );
+                  }, childCount: _groups.length),
+                ),
+              ),
+
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                PomuSpacing.lg,
+                0,
+                PomuSpacing.lg,
+                PomuSpacing.lg,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  if (_groups.isNotEmpty && _hasMoreCachedGroups) ...[
+                    const SizedBox(height: PomuSpacing.sm),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _isLoadingMore
+                            ? null
+                            : _loadMoreCachedGroups,
+                        icon: _isLoadingMore
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.2,
+                                  color: PomuColors.primary,
+                                ),
+                              )
+                            : const Icon(Icons.expand_more_rounded),
+                        label: Text(
+                          _isLoadingMore
+                              ? context.l10n.loading
+                              : context.l10n.duplicateLoadMore,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: PomuSpacing.md),
+                  ],
+                  if (!_isBusy && !_isInitializing && _groups.isEmpty)
+                    _EmptyCard(hasScanned: _savedSummary.hasScanned),
+                ]),
+              ),
+            ),
           ],
         ),
       ),
@@ -1004,7 +1085,16 @@ class _DuplicateGroupCard extends StatefulWidget {
 }
 
 class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
+  static const int _fileSizeConcurrency = 4;
+
   late Set<String> _keeperAssetIds;
+
+  // 선택 상태가 바뀔 때 카드가 rebuild되어도 썸네일 요청을 다시 만들지 않아요.
+  final Map<String, Future<Uint8List?>> _thumbnailFutures = {};
+
+  // 삭제 미리보기와 실제 삭제에서 같은 파일 크기를 두 번 읽지 않도록 캐시해요.
+  final Map<String, int> _assetFileSizeCache = {};
+  final Map<String, Future<int>> _assetFileSizeFutures = {};
 
   @override
   void initState() {
@@ -1017,7 +1107,71 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.group.id != widget.group.id) {
+      _thumbnailFutures.clear();
+      _assetFileSizeCache.clear();
+      _assetFileSizeFutures.clear();
       _resetKeeperSelection();
+    }
+  }
+
+  Future<Uint8List?> _getThumbnailFuture(AssetEntity asset) {
+    return _thumbnailFutures.putIfAbsent(
+      asset.id,
+      () => asset.thumbnailDataWithSize(
+        const ThumbnailSize(220, 220),
+        quality: 82,
+      ),
+    );
+  }
+
+  Future<int> _getAssetFileSize(AssetEntity asset) {
+    final cached = _assetFileSizeCache[asset.id];
+
+    if (cached != null) {
+      return Future<int>.value(cached);
+    }
+
+    final inFlight = _assetFileSizeFutures[asset.id];
+
+    if (inFlight != null) {
+      return inFlight;
+    }
+
+    final future = _readAssetFileSize(asset);
+    _assetFileSizeFutures[asset.id] = future;
+
+    future
+        .then((size) {
+          if (size > 0) {
+            _assetFileSizeCache[asset.id] = size;
+          }
+
+          _assetFileSizeFutures.remove(asset.id);
+        })
+        .catchError((_) {
+          _assetFileSizeFutures.remove(asset.id);
+        });
+
+    return future;
+  }
+
+  Future<int> _readAssetFileSize(AssetEntity asset) async {
+    try {
+      // iCloud 사진은 로컬 파일보다 오래 걸릴 수 있어요.
+      final file = await asset.file.timeout(const Duration(seconds: 8));
+
+      if (file == null) {
+        debugPrint('⚠️ 파일을 가져오지 못함: ${asset.id}');
+        return 0;
+      }
+
+      return await file.length().timeout(const Duration(seconds: 3));
+    } on TimeoutException {
+      debugPrint('⏱️ 파일 크기 확인 시간 초과: ${asset.id}');
+      return 0;
+    } catch (error) {
+      debugPrint('❌ 파일 크기 확인 실패: ${asset.id} / $error');
+      return 0;
     }
   }
 
@@ -1047,6 +1201,60 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
   Future<void> _showGroupPhotoViewer({required int initialIndex}) async {
     if (widget.isBusy) return;
 
+    // 비교 화면에서 저화질→고화질 교체나 검은 프레임이 보이지 않도록
+    // 화면을 열기 전에 이 그룹의 사진을 '화면 표시용 해상도'로 준비해요.
+    //
+    // 1400px은 일반적인 iPhone 전체 화면 비교에는 충분히 선명하면서
+    // 2200px 여러 장을 동시에 디코딩하는 것보다 메모리/프레임 부담이 낮아요.
+    const viewerSize = ThumbnailSize(1400, 1400);
+    const preloadConcurrency = 3;
+
+    final preparedImages = <String, Uint8List>{};
+
+    try {
+      for (
+        var start = 0;
+        start < widget.group.assets.length;
+        start += preloadConcurrency
+      ) {
+        final end = math.min(
+          start + preloadConcurrency,
+          widget.group.assets.length,
+        );
+
+        final batch = widget.group.assets.sublist(start, end);
+
+        final batchBytes = await Future.wait(
+          batch.map(
+            (asset) => asset.thumbnailDataWithSize(viewerSize, quality: 90),
+          ),
+        );
+
+        if (!mounted) return;
+
+        for (var i = 0; i < batch.length; i++) {
+          final bytes = batchBytes[i];
+
+          if (bytes != null) {
+            preparedImages[batch[i].id] = bytes;
+          }
+        }
+      }
+
+      // 바이트만 받아놓고 PageView에서 처음 디코딩하면 첫 스와이프 때도
+      // 순간 프레임 드랍이 날 수 있어요.
+      // 실제 Flutter 이미지 캐시까지 미리 올린 뒤 뷰어를 엽니다.
+      for (final bytes in preparedImages.values) {
+        if (!mounted) return;
+
+        await precacheImage(MemoryImage(bytes), context);
+      }
+    } catch (error) {
+      debugPrint('⚠️ 비교 화면 이미지 준비 실패: $error');
+    }
+
+    if (!mounted) return;
+
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
         fullscreenDialog: true,
@@ -1055,6 +1263,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
             assets: widget.group.assets,
             initialIndex: initialIndex,
             initialKeeperAssetIds: _keeperAssetIds,
+            preparedImages: preparedImages,
             onKeeperSelectionChanged: (updatedKeeperAssetIds) {
               if (!mounted) return;
 
@@ -1265,7 +1474,10 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
     await _showDeletePreviewSheet(deleteAssets);
   }
 
-  Future<void> _deleteAssets(List<AssetEntity> deleteAssets) async {
+  Future<void> _deleteAssets(
+    List<AssetEntity> deleteAssets, {
+    Future<int>? totalBytesFuture,
+  }) async {
     if (widget.isBusy) return;
 
     final ids = deleteAssets.map((asset) => asset.id).toList();
@@ -1281,7 +1493,9 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
     }
 
     final wasFreeDelete = accessService.isNextDeleteFree;
-    final deletedBytes = await _calculateTotalFileSize(deleteAssets);
+    final deletedBytes = totalBytesFuture != null
+        ? await totalBytesFuture
+        : await _calculateTotalFileSize(deleteAssets);
 
     final deletedIds = await PhotoManager.editor.deleteWithIds(ids);
 
@@ -1338,6 +1552,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
 
   Future<void> _showDeletePreviewSheet(List<AssetEntity> deleteAssets) async {
     final totalBytesFuture = _calculateTotalFileSize(deleteAssets);
+    final previewAssets = deleteAssets.take(30).toList(growable: false);
 
     if (!mounted) return;
 
@@ -1429,19 +1644,17 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                   height: 88,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemCount: deleteAssets.length,
+                    itemCount: previewAssets.length,
                     separatorBuilder: (context, index) {
                       return const SizedBox(width: 8);
                     },
                     itemBuilder: (context, index) {
-                      final asset = deleteAssets[index];
+                      final asset = previewAssets[index];
 
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(14),
                         child: FutureBuilder(
-                          future: asset.thumbnailDataWithSize(
-                            const ThumbnailSize(180, 180),
-                          ),
+                          future: _getThumbnailFuture(asset),
                           builder: (context, snapshot) {
                             if (!snapshot.hasData || snapshot.data == null) {
                               return Container(
@@ -1487,7 +1700,10 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                       child: ElevatedButton.icon(
                         onPressed: () async {
                           Navigator.of(sheetContext).pop();
-                          await _deleteAssets(deleteAssets);
+                          await _deleteAssets(
+                            deleteAssets,
+                            totalBytesFuture: totalBytesFuture,
+                          );
                         },
                         icon: const Icon(Icons.delete_outline_rounded),
                         label: Text(
@@ -1506,38 +1722,25 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
   }
 
   Future<int> _calculateTotalFileSize(List<AssetEntity> assets) async {
+    if (assets.isEmpty) return 0;
+
     var totalBytes = 0;
 
-    for (final asset in assets) {
-      totalBytes += await _tryGetAssetFileSizeForGroup(asset);
+    // 파일을 한 장씩 직렬로 읽지 않고, 최대 4개씩 제한 병렬 처리해요.
+    for (var start = 0; start < assets.length; start += _fileSizeConcurrency) {
+      final end = math.min(start + _fileSizeConcurrency, assets.length);
+      final batch = assets.sublist(start, end);
+
+      final sizes = await Future.wait(batch.map(_getAssetFileSize));
+
+      for (final size in sizes) {
+        totalBytes += size;
+      }
+
+      await Future<void>.delayed(Duration.zero);
     }
 
     return totalBytes;
-  }
-
-  Future<int> _tryGetAssetFileSizeForGroup(AssetEntity asset) async {
-    try {
-      // iCloud 사진은 불러오는 데 시간이 걸릴 수 있으므로
-      // 기존 1초보다 넉넉하게 기다려요.
-      final file = await asset.file.timeout(const Duration(seconds: 8));
-
-      if (file == null) {
-        debugPrint('⚠️ 파일을 가져오지 못함: ${asset.id}');
-        return 0;
-      }
-
-      final size = await file.length().timeout(const Duration(seconds: 3));
-
-      debugPrint('📦 파일 크기: ${asset.id} / $size bytes');
-
-      return size;
-    } on TimeoutException {
-      debugPrint('⏱️ 파일 크기 확인 시간 초과: ${asset.id}');
-      return 0;
-    } catch (error) {
-      debugPrint('❌ 파일 크기 확인 실패: ${asset.id} / $error');
-      return 0;
-    }
   }
 
   String _formatBytes(BuildContext context, int bytes) {
@@ -1650,6 +1853,7 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                       : () => _showGroupPhotoViewer(initialIndex: index),
                   child: _SelectableThumbnailTile(
                     asset: asset,
+                    thumbnailFuture: _getThumbnailFuture(asset),
                     isKeeper: isKeeper,
                   ),
                 );
@@ -1720,12 +1924,14 @@ class _DuplicateGroupViewerScreen extends StatefulWidget {
   final List<AssetEntity> assets;
   final int initialIndex;
   final Set<String> initialKeeperAssetIds;
+  final Map<String, Uint8List> preparedImages;
   final ValueChanged<Set<String>> onKeeperSelectionChanged;
 
   const _DuplicateGroupViewerScreen({
     required this.assets,
     required this.initialIndex,
     required this.initialKeeperAssetIds,
+    required this.preparedImages,
     required this.onKeeperSelectionChanged,
   });
 
@@ -1740,8 +1946,6 @@ class _DuplicateGroupViewerScreenState
   late Set<String> _keeperAssetIds;
   late List<TransformationController> _transformationControllers;
 
-  final Map<int, Future<Uint8List?>> _imageFutures = {};
-
   int _currentIndex = 0;
   bool _isCurrentPageZoomed = false;
 
@@ -1751,9 +1955,12 @@ class _DuplicateGroupViewerScreenState
   @override
   void initState() {
     super.initState();
+
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
+
     _keeperAssetIds = {...widget.initialKeeperAssetIds};
+
     _transformationControllers = List.generate(
       widget.assets.length,
       (_) => TransformationController(),
@@ -1762,36 +1969,13 @@ class _DuplicateGroupViewerScreenState
     for (var i = 0; i < _transformationControllers.length; i++) {
       _transformationControllers[i].addListener(() => _handleTransform(i));
     }
-
-    _preloadNearbyImages(_currentIndex);
-  }
-
-  Future<Uint8List?> _loadImage(int index) {
-    return _imageFutures.putIfAbsent(
-      index,
-      () => widget.assets[index].thumbnailDataWithSize(
-        const ThumbnailSize(2200, 2200),
-        quality: 95,
-      ),
-    );
-  }
-
-  void _preloadNearbyImages(int index) {
-    _loadImage(index);
-
-    if (index > 0) {
-      _loadImage(index - 1);
-    }
-
-    if (index < widget.assets.length - 1) {
-      _loadImage(index + 1);
-    }
   }
 
   void _handleTransform(int index) {
     if (index != _currentIndex || !mounted) return;
 
     final scale = _transformationControllers[index].value.getMaxScaleOnAxis();
+
     final nextZoomed = scale > 1.01;
 
     if (_isCurrentPageZoomed != nextZoomed) {
@@ -1826,12 +2010,67 @@ class _DuplicateGroupViewerScreenState
     widget.onKeeperSelectionChanged({...updated});
   }
 
+  Widget _buildPreparedImage(int index) {
+    final asset = widget.assets[index];
+    final imageBytes = widget.preparedImages[asset.id];
+
+    if (imageBytes == null) {
+      // 정상적인 경우에는 진입 전에 모두 준비돼 있어요.
+      // 특정 iCloud 파일 준비가 실패한 경우에만 이 fallback을 사용합니다.
+      return FutureBuilder<Uint8List?>(
+        future: asset.thumbnailDataWithSize(
+          const ThumbnailSize(1400, 1400),
+          quality: 90,
+        ),
+        builder: (context, snapshot) {
+          final fallbackBytes = snapshot.data;
+
+          if (fallbackBytes == null) {
+            return const Center(
+              child: SizedBox(
+                width: 26,
+                height: 26,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.3,
+                ),
+              ),
+            );
+          }
+
+          return Image.memory(
+            fallbackBytes,
+            fit: BoxFit.contain,
+            width: double.infinity,
+            height: double.infinity,
+            gaplessPlayback: true,
+            filterQuality: FilterQuality.medium,
+          );
+        },
+      );
+    }
+
+    // 준비된 동일 Uint8List 객체를 사용하므로 precacheImage의 디코딩 결과를
+    // 그대로 재사용할 수 있어요. 스와이프 중 새 이미지 교체가 없습니다.
+    return Image.memory(
+      imageBytes,
+      key: ValueKey<String>('prepared-${asset.id}'),
+      fit: BoxFit.contain,
+      width: double.infinity,
+      height: double.infinity,
+      gaplessPlayback: true,
+      filterQuality: FilterQuality.medium,
+    );
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
+
     for (final controller in _transformationControllers) {
       controller.dispose();
     }
+
     super.dispose();
   }
 
@@ -1915,78 +2154,73 @@ class _DuplicateGroupViewerScreenState
                 ],
               ),
             ),
+
             Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                physics: _isCurrentPageZoomed
-                    ? const NeverScrollableScrollPhysics()
-                    : const PageScrollPhysics(),
-                itemCount: widget.assets.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                    _isCurrentPageZoomed =
-                        _transformationControllers[index].value
-                            .getMaxScaleOnAxis() >
-                        1.01;
-                  });
+              child: ClipRect(
+                child: PageView.builder(
+                  controller: _pageController,
+                  allowImplicitScrolling: true,
+                  clipBehavior: Clip.hardEdge,
 
-                  _preloadNearbyImages(index);
-                },
-                itemBuilder: (context, index) {
-                  final asset = widget.assets[index];
+                  // 확대 상태가 아닐 때는 PageView만 드래그를 처리해
+                  // InteractiveViewer와 제스처 경쟁이 생기지 않게 해요.
+                  physics: _isCurrentPageZoomed
+                      ? const NeverScrollableScrollPhysics()
+                      : const PageScrollPhysics(),
 
-                  return RepaintBoundary(
-                    key: PageStorageKey<String>('duplicate-viewer-${asset.id}'),
-                    child: Center(
-                      child: FutureBuilder<Uint8List?>(
-                        future: _loadImage(index),
-                        builder: (context, snapshot) {
-                          final imageBytes = snapshot.data;
+                  itemCount: widget.assets.length,
 
-                          if (imageBytes == null) {
-                            return const SizedBox(
-                              width: 28,
-                              height: 28,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            );
-                          }
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentIndex = index;
 
-                          return InteractiveViewer(
-                            key: ValueKey<String>('interactive-${asset.id}'),
-                            transformationController:
-                                _transformationControllers[index],
-                            minScale: 1,
-                            maxScale: 5,
-                            panEnabled: true,
-                            clipBehavior: Clip.none,
-                            boundaryMargin: const EdgeInsets.all(48),
-                            child: Image.memory(
-                              imageBytes,
-                              key: ValueKey<String>('image-${asset.id}'),
-                              fit: BoxFit.contain,
-                              width: double.infinity,
-                              height: double.infinity,
-                              gaplessPlayback: true,
-                              filterQuality: FilterQuality.medium,
-                            ),
-                          );
-                        },
+                      _isCurrentPageZoomed =
+                          _transformationControllers[index].value
+                              .getMaxScaleOnAxis() >
+                          1.01;
+                    });
+                  },
+
+                  itemBuilder: (context, index) {
+                    final asset = widget.assets[index];
+                    final isCurrentPage = index == _currentIndex;
+
+                    return RepaintBoundary(
+                      key: PageStorageKey<String>(
+                        'duplicate-viewer-${asset.id}',
                       ),
-                    ),
-                  );
-                },
+                      child: ClipRect(
+                        child: InteractiveViewer(
+                          key: ValueKey<String>('interactive-${asset.id}'),
+                          transformationController:
+                              _transformationControllers[index],
+                          minScale: 1,
+                          maxScale: 5,
+
+                          panEnabled: isCurrentPage && _isCurrentPageZoomed,
+                          scaleEnabled: isCurrentPage,
+
+                          clipBehavior: Clip.hardEdge,
+                          boundaryMargin: EdgeInsets.zero,
+
+                          child: SizedBox.expand(
+                            child: _buildPreparedImage(index),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(widget.assets.length, (index) {
                   final selected = index == _currentIndex;
+
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 160),
                     margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -2000,6 +2234,7 @@ class _DuplicateGroupViewerScreenState
                 }),
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
               child: Row(
@@ -2098,9 +2333,14 @@ class _DuplicateGroupViewerScreenState
 
 class _SelectableThumbnailTile extends StatelessWidget {
   final AssetEntity asset;
+  final Future<Uint8List?> thumbnailFuture;
   final bool isKeeper;
 
-  const _SelectableThumbnailTile({required this.asset, required this.isKeeper});
+  const _SelectableThumbnailTile({
+    required this.asset,
+    required this.thumbnailFuture,
+    required this.isKeeper,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -2113,10 +2353,8 @@ class _SelectableThumbnailTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: FutureBuilder(
-              future: asset.thumbnailDataWithSize(
-                const ThumbnailSize(220, 220),
-              ),
+            child: FutureBuilder<Uint8List?>(
+              future: thumbnailFuture,
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
                   return Container(

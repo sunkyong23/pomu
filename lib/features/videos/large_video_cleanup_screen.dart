@@ -1,14 +1,15 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
 import '../../l10n/app_localizations.dart';
-
-import 'package:video_player/video_player.dart';
 
 extension _LargeVideoCleanupL10n on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
@@ -25,16 +26,45 @@ class LargeVideoCleanupScreen extends StatefulWidget {
 class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
   static const int _pageSize = 100;
 
+  // 파일 용량은 한 번에 너무 많이 열면 오히려 I/O가 몰릴 수 있어서
+  // 4개씩만 제한적으로 병렬 처리한다.
+  static const int _fileSizeConcurrency = 4;
+
+  // 진행률 UI는 영상 하나마다 갱신하지 않고 일정 간격으로만 갱신한다.
+  static const int _progressUpdateInterval = 20;
+
+  // 화면을 오래 스크롤해도 썸네일 Future를 무한정 잡고 있지 않도록 제한한다.
+  static const int _maxThumbnailCacheEntries = 48;
+
+  static const String _sizeCacheKey = 'pomu_large_video_size_cache_v1';
+
   final List<_VideoEntry> _videos = [];
+
+  // 일반 선택 모드에서 실제 선택한 ID만 보관한다.
   final Set<String> _selectedIds = {};
+
+  // 전체 선택 모드에서는 전체 ID를 저장하지 않고,
+  // 사용자가 선택 해제한 ID만 보관한다.
+  final Set<String> _deselectedIds = {};
+
+  // asset.id -> file size
+  final Map<String, int> _sizeCache = {};
+
+  // 썸네일 Future 간단 LRU 캐시
   final Map<String, Future<Uint8List?>> _thumbnailFutures = {};
 
   bool _isLoading = true;
   bool _isDeleting = false;
   bool _permissionDenied = false;
+  bool _selectAllMode = false;
 
   int _loadedFileSizeCount = 0;
   int _totalVideoCount = 0;
+
+  // build마다 전체 리스트를 fold하지 않도록 합계를 상태로 유지한다.
+  int _totalVideoBytesValue = 0;
+  int _selectedBytes = 0;
+  int _deselectedBytes = 0;
 
   @override
   void initState() {
@@ -43,13 +73,96 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
   }
 
   Future<Uint8List?> _getThumbnailFuture(AssetEntity asset) {
-    return _thumbnailFutures.putIfAbsent(
-      asset.id,
-      () => asset.thumbnailDataWithSize(
-        const ThumbnailSize(320, 260),
-        quality: 85,
-      ),
+    final cached = _thumbnailFutures.remove(asset.id);
+
+    if (cached != null) {
+      // 최근 사용 항목을 뒤로 보내 간단한 LRU처럼 동작시킨다.
+      _thumbnailFutures[asset.id] = cached;
+      return cached;
+    }
+
+    final future = asset.thumbnailDataWithSize(
+      const ThumbnailSize(300, 244),
+      quality: 80,
     );
+
+    _thumbnailFutures[asset.id] = future;
+
+    while (_thumbnailFutures.length > _maxThumbnailCacheEntries) {
+      _thumbnailFutures.remove(_thumbnailFutures.keys.first);
+    }
+
+    return future;
+  }
+
+  Future<void> _loadSizeCache() async {
+    _sizeCache.clear();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_sizeCacheKey);
+
+      if (raw == null || raw.isEmpty) {
+        return;
+      }
+
+      final decoded = jsonDecode(raw);
+
+      if (decoded is! Map<String, dynamic>) {
+        return;
+      }
+
+      for (final entry in decoded.entries) {
+        final value = entry.value;
+
+        if (value is num) {
+          final size = value.toInt();
+
+          if (size > 0) {
+            _sizeCache[entry.key] = size;
+          }
+        }
+      }
+    } catch (error) {
+      debugPrint('⚠️ 동영상 용량 캐시 불러오기 실패: $error');
+      _sizeCache.clear();
+    }
+  }
+
+  Future<void> _saveSizeCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_sizeCacheKey, jsonEncode(_sizeCache));
+    } catch (error) {
+      debugPrint('⚠️ 동영상 용량 캐시 저장 실패: $error');
+    }
+  }
+
+  Future<int> _resolveVideoSize(AssetEntity asset) async {
+    final cachedSize = _sizeCache[asset.id];
+
+    if (cachedSize != null && cachedSize > 0) {
+      return cachedSize;
+    }
+
+    try {
+      final file = await asset.file;
+
+      if (file == null) {
+        return 0;
+      }
+
+      final size = await file.length();
+
+      if (size > 0) {
+        _sizeCache[asset.id] = size;
+      }
+
+      return size;
+    } catch (error) {
+      debugPrint('⚠️ 동영상 용량 확인 실패: ${asset.id} / $error');
+      return 0;
+    }
   }
 
   Future<void> _loadVideos() async {
@@ -93,6 +206,13 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
           _videos.clear();
           _thumbnailFutures.clear();
           _selectedIds.clear();
+          _deselectedIds.clear();
+
+          _selectAllMode = false;
+          _selectedBytes = 0;
+          _deselectedBytes = 0;
+          _totalVideoBytesValue = 0;
+          _totalVideoCount = 0;
           _isLoading = false;
         });
 
@@ -109,6 +229,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
         });
       }
 
+      // 메타데이터 목록은 빠르게 페이지 단위로 가져온다.
       var page = 0;
 
       while (assets.length < totalCount) {
@@ -117,7 +238,9 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
           size: _pageSize,
         );
 
-        if (pageAssets.isEmpty) break;
+        if (pageAssets.isEmpty) {
+          break;
+        }
 
         assets.addAll(pageAssets);
         page++;
@@ -128,50 +251,113 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
         );
       }
 
+      await _loadSizeCache();
+
+      final currentAssetIds = assets.map((asset) => asset.id).toSet();
+
+      // 사진 앱에서 이미 삭제된 영상의 오래된 캐시는 제거한다.
+      _sizeCache.removeWhere((id, _) => !currentAssetIds.contains(id));
+
       final entries = <_VideoEntry>[];
+      var processedCount = 0;
 
-      for (var index = 0; index < assets.length; index++) {
-        final asset = assets[index];
-        var sizeBytes = 0;
+      // 캐시가 없는 영상만 실제 파일을 확인한다.
+      // 첫 실행에서도 4개씩 제한적으로 병렬 처리해서 기존 직렬 처리보다 빠르다.
+      for (
+        var start = 0;
+        start < assets.length;
+        start += _fileSizeConcurrency
+      ) {
+        final end = (start + _fileSizeConcurrency < assets.length)
+            ? start + _fileSizeConcurrency
+            : assets.length;
 
-        try {
-          final file = await asset.file;
+        final batch = assets.sublist(start, end);
 
-          if (file != null) {
-            sizeBytes = await file.length();
-          }
-        } catch (error) {
-          debugPrint('⚠️ 동영상 용량 확인 실패: ${asset.id} / $error');
+        final sizes = await Future.wait(
+          batch.map((asset) => _resolveVideoSize(asset)),
+        );
+
+        for (var index = 0; index < batch.length; index++) {
+          entries.add(
+            _VideoEntry(asset: batch[index], sizeBytes: sizes[index]),
+          );
         }
 
-        entries.add(_VideoEntry(asset: asset, sizeBytes: sizeBytes));
+        processedCount += batch.length;
 
         if (!mounted) return;
 
-        setState(() {
-          _loadedFileSizeCount = index + 1;
-        });
+        final shouldUpdateProgress =
+            processedCount == assets.length ||
+            processedCount % _progressUpdateInterval == 0;
+
+        if (shouldUpdateProgress) {
+          setState(() {
+            _loadedFileSizeCount = processedCount;
+          });
+        }
+
+        // 메인 isolate에 잠깐 양보해서 긴 분석 중에도 UI 응답성을 유지한다.
+        await Future<void>.delayed(Duration.zero);
       }
 
       entries.sort((a, b) => b.sizeBytes.compareTo(a.sizeBytes));
 
       if (!mounted) return;
 
-      final loadedAssetIds = entries.map((entry) => entry.asset.id).toSet();
+      final sizeById = <String, int>{
+        for (final entry in entries) entry.asset.id: entry.sizeBytes,
+      };
+
+      _selectedIds.removeWhere((id) => !currentAssetIds.contains(id));
+      _deselectedIds.removeWhere((id) => !currentAssetIds.contains(id));
+
+      _selectedBytes = 0;
+
+      for (final id in _selectedIds) {
+        _selectedBytes += sizeById[id] ?? 0;
+      }
+
+      _deselectedBytes = 0;
+
+      for (final id in _deselectedIds) {
+        _deselectedBytes += sizeById[id] ?? 0;
+      }
+
+      final totalBytes = entries.fold<int>(
+        0,
+        (sum, entry) => sum + entry.sizeBytes,
+      );
 
       setState(() {
         _videos
           ..clear()
           ..addAll(entries);
 
-        _thumbnailFutures.removeWhere((id, _) => !loadedAssetIds.contains(id));
+        _totalVideoBytesValue = totalBytes;
+        _totalVideoCount = entries.length;
+        _loadedFileSizeCount = entries.length;
 
-        _selectedIds.removeWhere((id) => !loadedAssetIds.contains(id));
+        _thumbnailFutures.removeWhere((id, _) => !currentAssetIds.contains(id));
+
+        if (_videos.isEmpty) {
+          _selectAllMode = false;
+          _selectedIds.clear();
+          _deselectedIds.clear();
+          _selectedBytes = 0;
+          _deselectedBytes = 0;
+        }
 
         _isLoading = false;
       });
 
-      debugPrint('✅ 큰 동영상 ${_videos.length}개 불러오기 완료');
+      await _saveSizeCache();
+
+      debugPrint(
+        '✅ 큰 동영상 ${_videos.length}개 불러오기 완료 '
+        '/ 캐시 ${_sizeCache.length}개',
+      );
     } catch (error, stackTrace) {
       debugPrint('❌ 동영상 불러오기 실패: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -186,16 +372,69 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
     }
   }
 
+  bool _isEntrySelected(_VideoEntry entry) {
+    if (_selectAllMode) {
+      return !_deselectedIds.contains(entry.asset.id);
+    }
+
+    return _selectedIds.contains(entry.asset.id);
+  }
+
+  int get _selectedCount {
+    if (_selectAllMode) {
+      final count = _videos.length - _deselectedIds.length;
+      return count < 0 ? 0 : count;
+    }
+
+    return _selectedIds.length;
+  }
+
+  int get _selectedTotalBytes {
+    if (_selectAllMode) {
+      final bytes = _totalVideoBytesValue - _deselectedBytes;
+      return bytes < 0 ? 0 : bytes;
+    }
+
+    return _selectedBytes;
+  }
+
+  int get _totalVideoBytes => _totalVideoBytesValue;
+
+  bool get _isAllSelected {
+    return _videos.isNotEmpty && _selectedCount == _videos.length;
+  }
+
   void _toggleSelection(_VideoEntry entry) {
     if (_isDeleting) return;
 
     setState(() {
       final id = entry.asset.id;
+      final size = entry.sizeBytes;
 
-      if (_selectedIds.contains(id)) {
-        _selectedIds.remove(id);
+      if (_selectAllMode) {
+        if (_deselectedIds.remove(id)) {
+          _deselectedBytes -= size;
+
+          if (_deselectedBytes < 0) {
+            _deselectedBytes = 0;
+          }
+        } else {
+          _deselectedIds.add(id);
+          _deselectedBytes += size;
+        }
+
+        return;
+      }
+
+      if (_selectedIds.remove(id)) {
+        _selectedBytes -= size;
+
+        if (_selectedBytes < 0) {
+          _selectedBytes = 0;
+        }
       } else {
         _selectedIds.add(id);
+        _selectedBytes += size;
       }
     });
   }
@@ -205,37 +444,30 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
 
     setState(() {
       if (_isAllSelected) {
-        _selectedIds.clear();
+        _selectAllMode = false;
       } else {
-        _selectedIds
-          ..clear()
-          ..addAll(_videos.map((entry) => entry.asset.id));
+        _selectAllMode = true;
       }
+
+      _selectedIds.clear();
+      _deselectedIds.clear();
+      _selectedBytes = 0;
+      _deselectedBytes = 0;
     });
   }
 
-  bool get _isAllSelected {
-    return _videos.isNotEmpty && _selectedIds.length == _videos.length;
-  }
-
   List<_VideoEntry> get _selectedEntries {
-    return _videos
-        .where((entry) => _selectedIds.contains(entry.asset.id))
-        .toList();
-  }
-
-  int get _selectedTotalBytes {
-    return _selectedEntries.fold<int>(0, (sum, entry) => sum + entry.sizeBytes);
-  }
-
-  int get _totalVideoBytes {
-    return _videos.fold<int>(0, (sum, entry) => sum + entry.sizeBytes);
+    return _videos.where(_isEntrySelected).toList(growable: false);
   }
 
   Future<void> _showDeletePreview() async {
     final selectedEntries = _selectedEntries;
 
     if (selectedEntries.isEmpty || _isDeleting) return;
+
+    final previewEntries = selectedEntries.take(30).toList(growable: false);
+
+    final selectedBytes = _selectedTotalBytes;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -272,7 +504,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                 const SizedBox(height: PomuSpacing.lg),
                 Text(
                   sheetContext.l10n.videoDeletePreparationTitle,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: PomuColors.textPrimary,
@@ -305,7 +537,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                       Expanded(
                         child: Text(
                           sheetContext.l10n.estimatedSpace(
-                            _formatBytes(sheetContext, _selectedTotalBytes),
+                            _formatBytes(sheetContext, selectedBytes),
                           ),
                           style: const TextStyle(
                             fontSize: 15,
@@ -322,12 +554,12 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                   height: 94,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemCount: selectedEntries.length,
+                    itemCount: previewEntries.length,
                     separatorBuilder: (_, _) =>
                         const SizedBox(width: PomuSpacing.sm),
                     itemBuilder: (context, index) {
                       return _DeletePreviewTile(
-                        entry: selectedEntries[index],
+                        entry: previewEntries[index],
                         formatDuration: _formatDuration,
                       );
                     },
@@ -336,7 +568,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                 const SizedBox(height: PomuSpacing.lg),
                 Text(
                   sheetContext.l10n.videoMoveToRecentlyDeleted,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     height: 1.4,
                     color: PomuColors.textSecondary,
@@ -387,7 +619,9 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
     });
 
     try {
-      final ids = selectedEntries.map((entry) => entry.asset.id).toList();
+      final ids = selectedEntries
+          .map((entry) => entry.asset.id)
+          .toList(growable: false);
 
       final deletedIds = await PhotoManager.editor.deleteWithIds(ids);
 
@@ -409,11 +643,27 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
 
         for (final id in deletedIdSet) {
           _thumbnailFutures.remove(id);
+          _sizeCache.remove(id);
         }
 
-        _selectedIds.removeAll(deletedIdSet);
+        _selectedIds.clear();
+        _deselectedIds.clear();
+        _selectAllMode = false;
+        _selectedBytes = 0;
+        _deselectedBytes = 0;
+
+        _totalVideoBytesValue = _videos.fold<int>(
+          0,
+          (sum, entry) => sum + entry.sizeBytes,
+        );
+
+        _totalVideoCount = _videos.length;
         _isDeleting = false;
       });
+
+      await _saveSizeCache();
+
+      if (!mounted) return;
 
       _showSnackBar(context.l10n.videoDeletedSuccess(deletedIds.length));
     } catch (error, stackTrace) {
@@ -433,9 +683,6 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
   Future<void> _showVideoPreview(_VideoEntry entry) async {
     _showSnackBar(context.l10n.videoLoadingOriginal);
 
-    final sizeText = _formatBytes(context, entry.sizeBytes);
-    final dateText = _formatDate(entry.asset.createDateTime);
-
     final file = await entry.asset.originFile;
 
     if (!mounted) return;
@@ -447,22 +694,19 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
       return;
     }
 
-    final exists = await file.exists();
-    final length = await file.length();
+    debugPrint('🎬 동영상 경로: ${file.path}');
+    debugPrint('🎬 파일 존재: ${await file.exists()}');
+    debugPrint('🎬 파일 크기: ${await file.length()}');
 
     if (!mounted) return;
-
-    debugPrint('🎬 동영상 경로: ${file.path}');
-    debugPrint('🎬 파일 존재: $exists');
-    debugPrint('🎬 파일 크기: $length');
 
     await Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => _VideoPreviewScreen(
           file: file,
-          sizeText: sizeText,
-          dateText: dateText,
+          sizeText: _formatBytes(context, entry.sizeBytes),
+          dateText: _formatDate(entry.asset.createDateTime),
         ),
       ),
     );
@@ -495,7 +739,9 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
   }
 
   String _formatBytes(BuildContext context, int bytes) {
-    if (bytes <= 0) return context.l10n.unableToCheckSize;
+    if (bytes <= 0) {
+      return context.l10n.unableToCheckSize;
+    }
 
     final kb = bytes / 1024;
 
@@ -540,7 +786,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
         elevation: 0,
         title: Text(
           context.l10n.homeLargeVideoCleanupTitle,
-          style: TextStyle(
+          style: const TextStyle(
             color: PomuColors.textPrimary,
             fontWeight: FontWeight.w800,
           ),
@@ -595,7 +841,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
               child: _VideoSummaryCard(
                 videoCount: _videos.length,
                 totalBytes: _totalVideoBytes,
-                selectedCount: _selectedIds.length,
+                selectedCount: _selectedCount,
                 selectedBytes: _selectedTotalBytes,
                 formatBytes: (bytes) => _formatBytes(context, bytes),
               ),
@@ -624,7 +870,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                   return _VideoListTile(
                     entry: entry,
                     thumbnailFuture: _getThumbnailFuture(entry.asset),
-                    isSelected: _selectedIds.contains(entry.asset.id),
+                    isSelected: _isEntrySelected(entry),
                     formatBytes: (bytes) => _formatBytes(context, bytes),
                     formatDuration: _formatDuration,
                     formatDate: _formatDate,
@@ -644,7 +890,7 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
       return null;
     }
 
-    final selectedCount = _selectedIds.length;
+    final selectedCount = _selectedCount;
 
     return SafeArea(
       top: false,
@@ -1218,7 +1464,6 @@ class _VideoPreviewScreenState extends State<_VideoPreviewScreen> {
     } catch (error, stackTrace) {
       debugPrint('❌ 동영상 초기화 실패: $error');
       debugPrintStack(stackTrace: stackTrace);
-
       if (!mounted) return;
 
       setState(() {

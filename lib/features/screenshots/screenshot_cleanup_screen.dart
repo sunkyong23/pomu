@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/theme/pomu_colors.dart';
@@ -21,36 +22,93 @@ class ScreenshotCleanupScreen extends StatefulWidget {
 
 class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
   static const int _pageSize = 300;
+  static const int _selectionResolvePageSize = 500;
+  static const int _maxThumbnailCacheEntries = 72;
+  static const int _maxExactSizeCalculationCount = 100;
+  static const int _maxDeletePreviewThumbnails = 30;
+  static const double _loadMoreThreshold = 900;
 
+  final ScrollController _scrollController = ScrollController();
   final List<AssetEntity> _screenshots = [];
+  final Set<String> _loadedAssetIds = {};
   final Set<String> _selectedAssetIds = {};
+  final Set<String> _deselectedAssetIds = {};
   final Map<String, Future<Uint8List?>> _thumbnailFutures = {};
 
+  AssetPathEntity? _screenshotAlbum;
+
+  int _totalScreenshotCount = 0;
+  int _nextPage = 0;
+
+  bool _selectAllMode = false;
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _isPreparingDelete = false;
   bool _isDeleting = false;
   bool _permissionDenied = false;
   bool _limitedAccess = false;
+  bool _hasMore = false;
+
+  bool get _isBusy => _isDeleting || _isPreparingDelete;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _loadScreenshots();
   }
 
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    _thumbnailFutures.clear();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients ||
+        _isLoading ||
+        _isLoadingMore ||
+        !_hasMore) {
+      return;
+    }
+
+    if (_scrollController.position.extentAfter < _loadMoreThreshold) {
+      _loadMoreScreenshots();
+    }
+  }
+
   Future<Uint8List?> _getThumbnailFuture(AssetEntity asset) {
-    return _thumbnailFutures.putIfAbsent(
-      asset.id,
-      () => asset.thumbnailDataWithSize(
-        const ThumbnailSize(360, 360),
-        quality: 88,
-      ),
+    final cached = _thumbnailFutures.remove(asset.id);
+
+    if (cached != null) {
+      _thumbnailFutures[asset.id] = cached;
+      return cached;
+    }
+
+    final future = asset.thumbnailDataWithSize(
+      const ThumbnailSize(300, 300),
+      quality: 80,
     );
+
+    _thumbnailFutures[asset.id] = future;
+
+    while (_thumbnailFutures.length > _maxThumbnailCacheEntries) {
+      _thumbnailFutures.remove(_thumbnailFutures.keys.first);
+    }
+
+    return future;
   }
 
   Future<void> _loadScreenshots() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _permissionDenied = false;
+      _isLoadingMore = false;
     });
 
     final permissionState = await PhotoManager.requestPermissionExtend();
@@ -62,7 +120,6 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
         _permissionDenied = true;
         _isLoading = false;
       });
-
       return;
     }
 
@@ -90,54 +147,51 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
         if (!mounted) return;
 
         setState(() {
+          _screenshotAlbum = null;
+          _totalScreenshotCount = 0;
+          _nextPage = 0;
+          _hasMore = false;
           _screenshots.clear();
+          _loadedAssetIds.clear();
           _thumbnailFutures.clear();
-          _selectedAssetIds.clear();
+          _clearSelection();
           _isLoading = false;
         });
-
         return;
       }
 
       final screenshotAlbum = paths.first;
       final totalCount = await screenshotAlbum.assetCountAsync;
-
-      final loadedScreenshots = <AssetEntity>[];
-      var page = 0;
-
-      while (loadedScreenshots.length < totalCount) {
-        final pageAssets = await screenshotAlbum.getAssetListPaged(
-          page: page,
-          size: _pageSize,
-        );
-
-        if (pageAssets.isEmpty) {
-          break;
-        }
-
-        loadedScreenshots.addAll(pageAssets);
-        page++;
-      }
+      final firstPage = totalCount == 0
+          ? <AssetEntity>[]
+          : await screenshotAlbum.getAssetListPaged(page: 0, size: _pageSize);
 
       if (!mounted) return;
 
       setState(() {
+        _screenshotAlbum = screenshotAlbum;
+        _totalScreenshotCount = totalCount;
+        _nextPage = 1;
+
         _screenshots
           ..clear()
-          ..addAll(loadedScreenshots);
+          ..addAll(firstPage);
 
-        _thumbnailFutures.removeWhere(
-          (id, _) => !loadedScreenshots.any((asset) => asset.id == id),
-        );
+        _loadedAssetIds
+          ..clear()
+          ..addAll(firstPage.map((asset) => asset.id));
 
-        _selectedAssetIds.removeWhere(
-          (id) => !_screenshots.any((asset) => asset.id == id),
-        );
+        _thumbnailFutures.clear();
+        _clearSelection();
 
+        _hasMore = _screenshots.length < _totalScreenshotCount;
         _isLoading = false;
       });
 
-      debugPrint('📸 스크린샷 ${_screenshots.length}장 불러오기 완료');
+      debugPrint(
+        '📸 스크린샷 $_totalScreenshotCount장 중 '
+        '${_screenshots.length}장 첫 페이지 로딩 완료',
+      );
     } catch (error, stackTrace) {
       debugPrint('❌ 스크린샷 불러오기 실패: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -147,15 +201,88 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
       setState(() {
         _isLoading = false;
       });
-
       _showSnackBar(context.l10n.screenshotLoadFailed);
     }
   }
 
-  void _toggleSelection(AssetEntity asset) {
-    if (_isDeleting) return;
+  Future<void> _loadMoreScreenshots() async {
+    final album = _screenshotAlbum;
+
+    if (album == null || _isLoadingMore || !_hasMore) return;
 
     setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final pageAssets = await album.getAssetListPaged(
+        page: _nextPage,
+        size: _pageSize,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        for (final asset in pageAssets) {
+          if (_loadedAssetIds.add(asset.id)) {
+            _screenshots.add(asset);
+          }
+        }
+
+        _nextPage++;
+        _hasMore =
+            pageAssets.isNotEmpty &&
+            _screenshots.length < _totalScreenshotCount;
+        _isLoadingMore = false;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('❌ 스크린샷 추가 로딩 실패: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
+
+  void _clearSelection() {
+    _selectedAssetIds.clear();
+    _deselectedAssetIds.clear();
+    _selectAllMode = false;
+  }
+
+  int get _selectedCount {
+    if (_selectAllMode) {
+      final count = _totalScreenshotCount - _deselectedAssetIds.length;
+      return count < 0 ? 0 : count;
+    }
+
+    return _selectedAssetIds.length;
+  }
+
+  bool _isAssetSelected(AssetEntity asset) {
+    if (_selectAllMode) {
+      return !_deselectedAssetIds.contains(asset.id);
+    }
+
+    return _selectedAssetIds.contains(asset.id);
+  }
+
+  void _toggleSelection(AssetEntity asset) {
+    if (_isBusy) return;
+
+    setState(() {
+      if (_selectAllMode) {
+        if (_deselectedAssetIds.contains(asset.id)) {
+          _deselectedAssetIds.remove(asset.id);
+        } else {
+          _deselectedAssetIds.add(asset.id);
+        }
+        return;
+      }
+
       if (_selectedAssetIds.contains(asset.id)) {
         _selectedAssetIds.remove(asset.id);
       } else {
@@ -165,35 +292,28 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
   }
 
   void _toggleSelectAll() {
-    if (_screenshots.isEmpty || _isDeleting) return;
+    if (_totalScreenshotCount == 0 || _isBusy) return;
 
     setState(() {
-      if (_selectedAssetIds.length == _screenshots.length) {
-        _selectedAssetIds.clear();
+      if (_isAllSelected) {
+        _clearSelection();
       } else {
-        _selectedAssetIds
-          ..clear()
-          ..addAll(_screenshots.map((asset) => asset.id));
+        _selectAllMode = true;
+        _selectedAssetIds.clear();
+        _deselectedAssetIds.clear();
       }
     });
   }
 
-  List<AssetEntity> get _selectedAssets {
-    return _screenshots
-        .where((asset) => _selectedAssetIds.contains(asset.id))
-        .toList();
-  }
-
   bool get _isAllSelected {
-    return _screenshots.isNotEmpty &&
-        _selectedAssetIds.length == _screenshots.length;
+    return _totalScreenshotCount > 0 &&
+        _selectAllMode &&
+        _deselectedAssetIds.isEmpty;
   }
 
   Future<void> _openLimitedPhotoPicker() async {
     await PhotoManager.presentLimited(type: RequestType.image);
-
     if (!mounted) return;
-
     await _loadScreenshots();
   }
 
@@ -201,195 +321,295 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
     await PhotoManager.openSetting();
   }
 
+  Future<_ScreenshotSelectionSnapshot> _resolveSelectionSnapshot() async {
+    final selectedCount = _selectedCount;
+
+    if (selectedCount <= 0) {
+      return const _ScreenshotSelectionSnapshot.empty();
+    }
+
+    final shouldCalculateExactSize =
+        selectedCount <= _maxExactSizeCalculationCount;
+    final ids = <String>[];
+    final previewAssets = <AssetEntity>[];
+    final sizeAssets = <AssetEntity>[];
+
+    void addAsset(AssetEntity asset) {
+      ids.add(asset.id);
+
+      if (previewAssets.length < _maxDeletePreviewThumbnails) {
+        previewAssets.add(asset);
+      }
+
+      if (shouldCalculateExactSize) {
+        sizeAssets.add(asset);
+      }
+    }
+
+    if (!_selectAllMode) {
+      for (final asset in _screenshots) {
+        if (_selectedAssetIds.contains(asset.id)) {
+          addAsset(asset);
+        }
+      }
+
+      return _ScreenshotSelectionSnapshot(
+        ids: ids,
+        previewAssets: previewAssets,
+        sizeAssets: sizeAssets,
+      );
+    }
+
+    final album = _screenshotAlbum;
+    if (album == null) {
+      return const _ScreenshotSelectionSnapshot.empty();
+    }
+
+    var page = 0;
+    var scannedCount = 0;
+
+    while (scannedCount < _totalScreenshotCount) {
+      final pageAssets = await album.getAssetListPaged(
+        page: page,
+        size: _selectionResolvePageSize,
+      );
+
+      if (pageAssets.isEmpty) break;
+
+      scannedCount += pageAssets.length;
+      page++;
+
+      for (final asset in pageAssets) {
+        if (!_deselectedAssetIds.contains(asset.id)) {
+          addAsset(asset);
+        }
+      }
+    }
+
+    return _ScreenshotSelectionSnapshot(
+      ids: ids,
+      previewAssets: previewAssets,
+      sizeAssets: sizeAssets,
+    );
+  }
+
   Future<void> _showDeletePreview() async {
-    final selectedAssets = _selectedAssets;
+    if (_selectedCount == 0 || _isBusy) return;
 
-    if (selectedAssets.isEmpty || _isDeleting) return;
+    setState(() {
+      _isPreparingDelete = true;
+    });
 
-    final totalBytes = await _calculateTotalFileSize(selectedAssets);
+    try {
+      final snapshot = await _resolveSelectionSnapshot();
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    final readableSize = _formatBytes(context, totalBytes);
+      if (snapshot.ids.isEmpty) {
+        setState(() {
+          _isPreparingDelete = false;
+          _clearSelection();
+        });
+        return;
+      }
 
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return Container(
-          padding: const EdgeInsets.fromLTRB(
-            PomuSpacing.lg,
-            PomuSpacing.md,
-            PomuSpacing.lg,
-            PomuSpacing.lg,
-          ),
-          decoration: const BoxDecoration(
-            color: PomuColors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 42,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: PomuColors.divider,
-                      borderRadius: BorderRadius.circular(999),
+      final totalBytes = snapshot.sizeAssets.isEmpty
+          ? 0
+          : await _calculateTotalFileSize(snapshot.sizeAssets);
+
+      if (!mounted) return;
+
+      setState(() {
+        _isPreparingDelete = false;
+      });
+
+      final readableSize = _formatBytes(context, totalBytes);
+      final hiddenPreviewCount =
+          snapshot.ids.length - snapshot.previewAssets.length;
+
+      await showModalBottomSheet<void>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (sheetContext) {
+          return Container(
+            padding: const EdgeInsets.fromLTRB(
+              PomuSpacing.lg,
+              PomuSpacing.md,
+              PomuSpacing.lg,
+              PomuSpacing.lg,
+            ),
+            decoration: const BoxDecoration(
+              color: PomuColors.surface,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: PomuColors.divider,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: PomuSpacing.lg),
-                Text(
-                  sheetContext.l10n.screenshotDeletePreparationTitle,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: PomuColors.textPrimary,
-                    letterSpacing: -0.4,
+                  const SizedBox(height: PomuSpacing.lg),
+                  Text(
+                    sheetContext.l10n.screenshotDeletePreparationTitle,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: PomuColors.textPrimary,
+                      letterSpacing: -0.4,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  sheetContext.l10n.screenshotDeleteReview(
-                    selectedAssets.length,
+                  const SizedBox(height: 6),
+                  Text(
+                    sheetContext.l10n.screenshotDeleteReview(
+                      snapshot.ids.length,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: PomuColors.textSecondary,
+                    ),
                   ),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: PomuColors.textSecondary,
+                  const SizedBox(height: PomuSpacing.md),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(PomuSpacing.md),
+                    decoration: BoxDecoration(
+                      color: PomuColors.primaryLight,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.storage_rounded,
+                          color: PomuColors.primary,
+                        ),
+                        const SizedBox(width: PomuSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            sheetContext.l10n.estimatedSpace(readableSize),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: PomuColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: PomuSpacing.md),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(PomuSpacing.md),
-                  decoration: BoxDecoration(
-                    color: PomuColors.primaryLight,
-                    borderRadius: BorderRadius.circular(18),
+                  const SizedBox(height: PomuSpacing.md),
+                  SizedBox(
+                    height: 88,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount:
+                          snapshot.previewAssets.length +
+                          (hiddenPreviewCount > 0 ? 1 : 0),
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(width: PomuSpacing.sm),
+                      itemBuilder: (context, index) {
+                        if (index < snapshot.previewAssets.length) {
+                          return _DeletePreviewThumbnail(
+                            asset: snapshot.previewAssets[index],
+                          );
+                        }
+
+                        return _MorePreviewCount(count: hiddenPreviewCount);
+                      },
+                    ),
                   ),
-                  child: Row(
+                  const SizedBox(height: PomuSpacing.lg),
+                  Text(
+                    sheetContext.l10n.screenshotMoveToRecentlyDeleted,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      height: 1.4,
+                      color: PomuColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: PomuSpacing.md),
+                  Row(
                     children: [
-                      const Icon(
-                        Icons.storage_rounded,
-                        color: PomuColors.primary,
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop();
+                          },
+                          child: Text(sheetContext.l10n.cancel),
+                        ),
                       ),
                       const SizedBox(width: PomuSpacing.sm),
                       Expanded(
-                        child: Text(
-                          sheetContext.l10n.estimatedSpace(readableSize),
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: PomuColors.textPrimary,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            Navigator.of(sheetContext).pop();
+                            await _deleteSelectedIds(snapshot.ids);
+                          },
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          label: Text(
+                            sheetContext.l10n.deleteCount(snapshot.ids.length),
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: PomuSpacing.md),
-                SizedBox(
-                  height: 88,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: selectedAssets.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(width: PomuSpacing.sm),
-                    itemBuilder: (context, index) {
-                      return _DeletePreviewThumbnail(
-                        asset: selectedAssets[index],
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: PomuSpacing.lg),
-                Text(
-                  sheetContext.l10n.screenshotMoveToRecentlyDeleted,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.4,
-                    color: PomuColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: PomuSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop();
-                        },
-                        child: Text(sheetContext.l10n.cancel),
-                      ),
-                    ),
-                    const SizedBox(width: PomuSpacing.sm),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          Navigator.of(sheetContext).pop();
-
-                          await _deleteSelectedAssets(selectedAssets);
-                        },
-                        icon: const Icon(Icons.delete_outline_rounded),
-                        label: Text(
-                          sheetContext.l10n.deleteCount(selectedAssets.length),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    } catch (error, stackTrace) {
+      debugPrint('❌ 삭제 대상 준비 실패: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
+      setState(() {
+        _isPreparingDelete = false;
+      });
+      _showSnackBar(context.l10n.screenshotDeleteFailed);
+    }
   }
 
-  Future<void> _deleteSelectedAssets(List<AssetEntity> selectedAssets) async {
-    if (selectedAssets.isEmpty || _isDeleting) return;
+  Future<void> _deleteSelectedIds(List<String> requestedIds) async {
+    if (requestedIds.isEmpty || _isBusy) return;
 
     setState(() {
       _isDeleting = true;
     });
 
     try {
-      final requestedIds = selectedAssets.map((asset) => asset.id).toList();
-
       final deletedIds = await PhotoManager.editor.deleteWithIds(requestedIds);
 
       if (!mounted) return;
 
       if (deletedIds.isEmpty) {
         _showSnackBar(context.l10n.deleteCanceledOrFailed);
-
         setState(() {
           _isDeleting = false;
         });
-
         return;
       }
 
-      final deletedIdSet = deletedIds.toSet();
-
       setState(() {
-        _screenshots.removeWhere((asset) => deletedIdSet.contains(asset.id));
-
-        for (final id in deletedIdSet) {
-          _thumbnailFutures.remove(id);
-        }
-
-        _selectedAssetIds.removeAll(deletedIdSet);
-
         _isDeleting = false;
+        _clearSelection();
       });
 
       _showSnackBar(context.l10n.screenshotDeletedSuccess(deletedIds.length));
+
+      await _loadScreenshots();
     } catch (error, stackTrace) {
       debugPrint('❌ 스크린샷 삭제 실패: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -399,7 +619,6 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
       setState(() {
         _isDeleting = false;
       });
-
       _showSnackBar(context.l10n.screenshotDeleteFailed);
     }
   }
@@ -410,9 +629,7 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
     for (final asset in assets) {
       try {
         final file = await asset.file;
-
         if (file == null) continue;
-
         totalBytes += await file.length();
       } catch (error) {
         debugPrint('⚠️ 파일 크기 확인 실패: ${asset.id} / $error');
@@ -428,19 +645,16 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
     }
 
     final kb = bytes / 1024;
-
     if (kb < 1024) {
       return '${kb.toStringAsFixed(1)}KB';
     }
 
     final mb = kb / 1024;
-
     if (mb < 1024) {
       return '${mb.toStringAsFixed(1)}MB';
     }
 
     final gb = mb / 1024;
-
     return '${gb.toStringAsFixed(2)}GB';
   }
 
@@ -526,15 +740,15 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
         elevation: 0,
         title: Text(
           context.l10n.homeScreenshotCleanupTitle,
-          style: TextStyle(
+          style: const TextStyle(
             color: PomuColors.textPrimary,
             fontWeight: FontWeight.w800,
           ),
         ),
         actions: [
-          if (!_isLoading && _screenshots.isNotEmpty)
+          if (!_isLoading && _totalScreenshotCount > 0)
             TextButton(
-              onPressed: _isDeleting ? null : _toggleSelectAll,
+              onPressed: _isBusy ? null : _toggleSelectAll,
               child: Text(
                 _isAllSelected
                     ? context.l10n.screenshotDeselectAll
@@ -567,6 +781,8 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
       color: PomuColors.primary,
       onRefresh: _loadScreenshots,
       child: CustomScrollView(
+        controller: _scrollController,
+        scrollCacheExtent: const ScrollCacheExtent.pixels(700),
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverPadding(
@@ -578,12 +794,11 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
             ),
             sliver: SliverToBoxAdapter(
               child: _ScreenshotHeaderCard(
-                totalCount: _screenshots.length,
-                selectedCount: _selectedAssetIds.length,
+                totalCount: _totalScreenshotCount,
+                selectedCount: _selectedCount,
               ),
             ),
           ),
-
           if (_limitedAccess)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
@@ -596,24 +811,23 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
                 child: _LimitedAccessCard(onTap: _openLimitedPhotoPicker),
               ),
             ),
-
-          if (_screenshots.isEmpty)
+          if (_totalScreenshotCount == 0 || _screenshots.isEmpty)
             const SliverFillRemaining(
               hasScrollBody: false,
               child: _EmptyScreenshotView(),
             )
-          else
+          else ...[
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
                 PomuSpacing.lg,
                 0,
                 PomuSpacing.lg,
-                130,
+                0,
               ),
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final asset = _screenshots[index];
-                  final isSelected = _selectedAssetIds.contains(asset.id);
+                  final isSelected = _isAssetSelected(asset);
 
                   return _ScreenshotTile(
                     asset: asset,
@@ -631,17 +845,35 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
                 ),
               ),
             ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: _hasMore || _isLoadingMore ? 78 : 130,
+                child: Center(
+                  child: _isLoadingMore
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.2,
+                            color: PomuColors.primary,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Widget? _buildBottomBar(BuildContext context) {
-    if (_isLoading || _permissionDenied || _screenshots.isEmpty) {
+    if (_isLoading || _permissionDenied || _totalScreenshotCount == 0) {
       return null;
     }
 
-    final selectedCount = _selectedAssetIds.length;
+    final selectedCount = _selectedCount;
 
     return SafeArea(
       top: false,
@@ -657,10 +889,8 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
           border: Border(top: BorderSide(color: PomuColors.divider)),
         ),
         child: ElevatedButton.icon(
-          onPressed: selectedCount == 0 || _isDeleting
-              ? null
-              : _showDeletePreview,
-          icon: _isDeleting
+          onPressed: selectedCount == 0 || _isBusy ? null : _showDeletePreview,
+          icon: _isBusy
               ? const SizedBox(
                   width: 18,
                   height: 18,
@@ -693,15 +923,30 @@ class _ScreenshotCleanupScreenState extends State<ScreenshotCleanupScreen> {
   }
 }
 
+class _ScreenshotSelectionSnapshot {
+  final List<String> ids;
+  final List<AssetEntity> previewAssets;
+  final List<AssetEntity> sizeAssets;
+
+  const _ScreenshotSelectionSnapshot({
+    required this.ids,
+    required this.previewAssets,
+    required this.sizeAssets,
+  });
+
+  const _ScreenshotSelectionSnapshot.empty()
+    : ids = const [],
+      previewAssets = const [],
+      sizeAssets = const [];
+}
+
 class _ScreenshotHeaderCard extends StatelessWidget {
   final int totalCount;
   final int selectedCount;
-
   const _ScreenshotHeaderCard({
     required this.totalCount,
     required this.selectedCount,
   });
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -759,9 +1004,7 @@ class _ScreenshotHeaderCard extends StatelessWidget {
 
 class _LimitedAccessCard extends StatelessWidget {
   final VoidCallback onTap;
-
   const _LimitedAccessCard({required this.onTap});
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -797,7 +1040,6 @@ class _ScreenshotTile extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
-
   const _ScreenshotTile({
     required this.asset,
     required this.thumbnailFuture,
@@ -805,7 +1047,6 @@ class _ScreenshotTile extends StatelessWidget {
     required this.onTap,
     required this.onLongPress,
   });
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -822,7 +1063,6 @@ class _ScreenshotTile extends StatelessWidget {
                 if (!snapshot.hasData || snapshot.data == null) {
                   return Container(color: PomuColors.primaryLight);
                 }
-
                 return Image.memory(
                   snapshot.data!,
                   fit: BoxFit.cover,
@@ -832,7 +1072,6 @@ class _ScreenshotTile extends StatelessWidget {
               },
             ),
           ),
-
           AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             decoration: BoxDecoration(
@@ -846,7 +1085,6 @@ class _ScreenshotTile extends StatelessWidget {
               ),
             ),
           ),
-
           Positioned(
             right: 7,
             top: 7,
@@ -878,9 +1116,7 @@ class _ScreenshotTile extends StatelessWidget {
 
 class _DeletePreviewThumbnail extends StatelessWidget {
   final AssetEntity asset;
-
   const _DeletePreviewThumbnail({required this.asset});
-
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -895,7 +1131,6 @@ class _DeletePreviewThumbnail extends StatelessWidget {
               color: PomuColors.primaryLight,
             );
           }
-
           return Image.memory(
             snapshot.data!,
             width: 88,
@@ -908,9 +1143,35 @@ class _DeletePreviewThumbnail extends StatelessWidget {
   }
 }
 
+class _MorePreviewCount extends StatelessWidget {
+  final int count;
+
+  const _MorePreviewCount({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 88,
+      height: 88,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: PomuColors.primaryLight,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(
+        '+$count',
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          color: PomuColors.primary,
+        ),
+      ),
+    );
+  }
+}
+
 class _EmptyScreenshotView extends StatelessWidget {
   const _EmptyScreenshotView();
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -960,9 +1221,7 @@ class _EmptyScreenshotView extends StatelessWidget {
 
 class _PermissionDeniedView extends StatelessWidget {
   final VoidCallback onOpenSettings;
-
   const _PermissionDeniedView({required this.onOpenSettings});
-
   @override
   Widget build(BuildContext context) {
     return Center(
