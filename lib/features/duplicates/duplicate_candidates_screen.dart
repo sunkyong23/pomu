@@ -18,6 +18,8 @@ import '../../services/duplicate_summary_service.dart';
 import '../../services/purchase_access_service.dart';
 import '../purchase/duplicate_cleanup_purchase_sheet.dart';
 
+import '../../core/widgets/buttons/pomu_delete_action_row.dart';
+
 extension _DuplicateCandidatesL10n on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 }
@@ -1387,54 +1389,17 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
 
                 const SizedBox(height: PomuSpacing.lg),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop(false);
-                        },
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(52),
-                          foregroundColor: PomuColors.textPrimary,
-                          side: const BorderSide(color: PomuColors.divider),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: Text(sheetContext.l10n.cancel),
-                      ),
-                    ),
-
-                    const SizedBox(width: PomuSpacing.sm),
-
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop(true);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(52),
-                          backgroundColor: PomuColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        icon: const Icon(
-                          Icons.delete_outline_rounded,
-                          size: 20,
-                        ),
-                        label: Text(
-                          sheetContext.l10n.duplicateDeleteEntireButton(
-                            photoCount,
-                          ),
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                    ),
-                  ],
+                PomuDeleteActionRow(
+                  cancelLabel: sheetContext.l10n.cancel,
+                  deleteLabel: sheetContext.l10n.duplicateDeleteEntireButton(
+                    photoCount,
+                  ),
+                  onCancel: () {
+                    Navigator.of(sheetContext).pop(false);
+                  },
+                  onDelete: () {
+                    Navigator.of(sheetContext).pop(true);
+                  },
                 ),
               ],
             ),
@@ -1685,33 +1650,22 @@ class _DuplicateGroupCardState extends State<_DuplicateGroupCard> {
                   ),
                 ),
                 const SizedBox(height: PomuSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop();
-                        },
-                        child: Text(sheetContext.l10n.cancel),
-                      ),
-                    ),
-                    const SizedBox(width: PomuSpacing.sm),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          Navigator.of(sheetContext).pop();
-                          await _deleteAssets(
-                            deleteAssets,
-                            totalBytesFuture: totalBytesFuture,
-                          );
-                        },
-                        icon: const Icon(Icons.delete_outline_rounded),
-                        label: Text(
-                          sheetContext.l10n.deleteCount(deleteAssets.length),
-                        ),
-                      ),
-                    ),
-                  ],
+                PomuDeleteActionRow(
+                  cancelLabel: sheetContext.l10n.cancel,
+                  deleteLabel: sheetContext.l10n.deleteCount(
+                    deleteAssets.length,
+                  ),
+                  onCancel: () {
+                    Navigator.of(sheetContext).pop();
+                  },
+                  onDelete: () async {
+                    Navigator.of(sheetContext).pop();
+
+                    await _deleteAssets(
+                      deleteAssets,
+                      totalBytesFuture: totalBytesFuture,
+                    );
+                  },
                 ),
               ],
             ),

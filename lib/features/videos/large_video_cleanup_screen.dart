@@ -11,6 +11,8 @@ import '../../core/theme/pomu_colors.dart';
 import '../../core/theme/pomu_spacing.dart';
 import '../../l10n/app_localizations.dart';
 
+import '../../core/widgets/buttons/pomu_delete_action_row.dart';
+
 extension _LargeVideoCleanupL10n on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
 }
@@ -575,33 +577,18 @@ class _LargeVideoCleanupScreenState extends State<LargeVideoCleanupScreen> {
                   ),
                 ),
                 const SizedBox(height: PomuSpacing.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop();
-                        },
-                        child: Text(sheetContext.l10n.cancel),
-                      ),
-                    ),
-                    const SizedBox(width: PomuSpacing.sm),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          Navigator.of(sheetContext).pop();
-
-                          await _deleteVideos(selectedEntries);
-                        },
-                        icon: const Icon(Icons.delete_outline_rounded),
-                        label: Text(
-                          sheetContext.l10n.videoDeleteCount(
-                            selectedEntries.length,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                PomuDeleteActionRow(
+                  cancelLabel: sheetContext.l10n.cancel,
+                  deleteLabel: sheetContext.l10n.videoDeleteCount(
+                    selectedEntries.length,
+                  ),
+                  onCancel: () {
+                    Navigator.of(sheetContext).pop();
+                  },
+                  onDelete: () async {
+                    Navigator.of(sheetContext).pop();
+                    await _deleteVideos(selectedEntries);
+                  },
                 ),
               ],
             ),
